@@ -54,6 +54,16 @@ gboolean rest_proxy_call_raw_async (RestProxy *proxy,
     const gchar *first_field_name,
     ...);
 
+gboolean rest_proxy_call_raw_async_valist (RestProxy *proxy,
+    const gchar *function,
+    const gchar *method,
+    RestProxyCallRawCallback callback,
+    GObject *weak_object,
+    gpointer userdata,
+    GError **error,
+    const gchar *first_field_name,
+    va_list params);
+
 G_END_DECLS
 
 #endif /* _REST_PROXY */

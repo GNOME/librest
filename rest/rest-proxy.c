@@ -242,18 +242,17 @@ _call_raw_async_weak_notify_cb (gpointer *data,
 }
 
 gboolean
-rest_proxy_call_raw_async (RestProxy *proxy,
-                           const gchar *function,
-                           const gchar *method,
-                           RestProxyCallRawCallback callback,
-                           GObject *weak_object,
-                           gpointer userdata,
-                           GError **error,
-                           const gchar *first_field_name,
-                           ...)
+rest_proxy_call_raw_async_valist (RestProxy *proxy,
+                                  const gchar *function,
+                                  const gchar *method,
+                                  RestProxyCallRawCallback callback,
+                                  GObject *weak_object,
+                                  gpointer userdata,
+                                  GError **error,
+                                  const gchar *first_field_name,
+                                  va_list params)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
-  va_list params;
   SoupMessage *message = NULL;
   gchar *url = NULL;
   RestProxyCallRawAsyncClosure *closure;
@@ -295,9 +294,7 @@ rest_proxy_call_raw_async (RestProxy *proxy,
       return FALSE;
     }
 
-    va_start (params, first_field_name);
     formdata = soup_form_encode_valist (first_field_name, params);
-    va_end (params);
 
     /* In the GET case we must encode into the URI */
     if (g_str_equal (method, "GET"))
@@ -360,4 +357,31 @@ rest_proxy_call_raw_async (RestProxy *proxy,
       NULL);
 
   return TRUE;
+}
+
+gboolean
+rest_proxy_call_raw_async (RestProxy *proxy,
+                           const gchar *function,
+                           const gchar *method,
+                           RestProxyCallRawCallback callback,
+                           GObject *weak_object,
+                           gpointer userdata,
+                           GError **error,
+                           const gchar *first_field_name,
+                           ...)
+
+{
+  va_list params;
+
+  va_start (params, first_field_name);
+  rest_proxy_call_raw_async_valist (proxy,
+      function,
+      method,
+      callback,
+      weak_object,
+      userdata,
+      error,
+      first_field_name,
+      params);
+  va_end (params);
 }
