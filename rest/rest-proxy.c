@@ -1,4 +1,5 @@
 #include <libsoup/soup.h>
+#include <string.h>
 
 #include "rest-proxy.h"
 
@@ -256,6 +257,8 @@ rest_proxy_call_raw_async (RestProxy *proxy,
   SoupMessage *message = NULL;
   gchar *url = NULL;
   RestProxyCallRawAsyncClosure *closure;
+  SoupURI *uri;
+  gchar *formdata;
 
   if (priv->binding_required && !priv->url)
   {
@@ -284,10 +287,47 @@ rest_proxy_call_raw_async (RestProxy *proxy,
 
   if (first_field_name)
   {
-    message = soup_form_request_new (method,
-        url,
-        first_field_name,
-        params);
+    uri = soup_uri_new (url);
+
+    if (!uri)
+    {
+      g_warning (G_STRLOC ": Unable to parse URI: %s", url);
+      return FALSE;
+    }
+
+    va_start (params, first_field_name);
+    formdata = soup_form_encode_valist (first_field_name, params);
+    va_end (params);
+
+    /* In the GET case we must encode into the URI */
+    if (g_str_equal (method, "GET"))
+    {
+      soup_uri_set_query (uri, formdata);
+      g_free (formdata);
+      formdata = NULL;
+    }
+
+    message = soup_message_new_from_uri (method, uri);
+    soup_uri_free (uri);
+
+    /* In the POST case we must encode into the request */
+    if (g_str_equal (method, "POST"))
+    {
+      /* This function takes over the memory so no need to free */
+      soup_message_set_request (message,
+          "application/x-www-form-urlencoded",
+          SOUP_MEMORY_TAKE,
+          formdata,
+          strlen (formdata));
+      formdata = NULL;
+    }
+
+    if (formdata)
+    {
+      g_warning (G_STRLOC ": Unexpected method: %s", method);
+      g_free (formdata);
+      return FALSE;
+    }
   } else {
     message = soup_message_new (method, url);
   }
