@@ -75,8 +75,16 @@ rest_proxy_set_property (GObject *object,
 static void
 rest_proxy_dispose (GObject *object)
 {
+  RestProxyPrivate *priv = GET_PRIVATE (object);
+
   if (G_OBJECT_CLASS (rest_proxy_parent_class)->dispose)
     G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
+
+  if (priv->session)
+  {
+    g_object_unref (priv->session);
+    priv->session = NULL;
+  }
 }
 
 static void
