@@ -24,8 +24,10 @@ enum
 };
 
 static void
-rest_proxy_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+rest_proxy_get_property (GObject *object,
+                         guint property_id,
+                         GValue *value,
+                         GParamSpec *pspec)
 {
   RestProxyPrivate *priv = GET_PRIVATE (object);
 
@@ -42,8 +44,10 @@ rest_proxy_get_property (GObject *object, guint property_id,
 }
 
 static void
-rest_proxy_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+rest_proxy_set_property (GObject *object,
+                         guint property_id,
+                         const GValue *value,
+                         GParamSpec *pspec)
 {
   RestProxyPrivate *priv = GET_PRIVATE (object);
 
