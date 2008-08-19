@@ -50,7 +50,7 @@ gboolean rest_proxy_call_raw_async (RestProxy *proxy,
     RestProxyCallRawCallback callback,
     GObject *weak_object,
     gpointer userdata,
-    GError *error,
+    GError **error,
     const gchar *first_field_name,
     ...);
 
