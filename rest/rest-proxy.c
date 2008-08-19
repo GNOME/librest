@@ -188,19 +188,22 @@ _call_raw_async_finished_cb (SoupMessage *message,
       g_free,
       g_free);
 
+  /* Convert the soup headers in to hash */
+  /* FIXME: Eeek..are you allowed duplicate headers? ... */
   soup_message_headers_foreach (message->response_headers,
       (SoupMessageHeadersForeachFunc)_populate_headers_hash_table,
       headers);
 
-  closure->callback (closure->proxy,
-      message->status_code,
-      message->reason_phrase,
-      headers,
-      message->response_body->data,
-      message->response_body->length,
+  closure->callback (closure->proxy,  /* proxy */
+      message->status_code,           /* status code */
+      message->reason_phrase,         /* status message */
+      headers,                        /* hash of headers */
+      message->response_body->data,   /* payload */
+      message->response_body->length, /* payload length */
       closure->weak_object,
       closure->userdata);
 
+  /* Success. We don't need the weak reference any more */
   if (closure->weak_object)
   {
     g_object_weak_unref (closure->weak_object, 
@@ -220,9 +223,11 @@ _call_raw_async_weak_notify_cb (gpointer *data,
 
   closure = (RestProxyCallRawAsyncClosure *)data;
 
+  /* Remove the "finished" signal handler on the message */
   g_signal_handlers_disconnect_by_func (closure->message,
       _call_raw_async_finished_cb,
       closure);
+
   g_object_unref (closure->proxy);
   g_free (closure);
 }
@@ -256,6 +261,7 @@ rest_proxy_call_raw_async (RestProxy *proxy,
     priv->url = g_strdup (priv->url_format);
   }
 
+  /* FIXME: Perhaps excessive memory duplication */
   if (function)
   {
     if (g_str_has_suffix (priv->url, "/"))
@@ -278,12 +284,15 @@ rest_proxy_call_raw_async (RestProxy *proxy,
     message = soup_message_new (method, url);
   }
 
+  /* Set up the closure. */
+  /* FIXME: For cancellation perhaps we should return an opaque like dbus */
   closure = g_new0 (RestProxyCallRawAsyncClosure, 1);
   closure->proxy = g_object_ref (proxy);
   closure->callback = callback;
   closure->weak_object = weak_object;
   closure->message = message;
 
+  /* Weakly reference this object. We remove our callback if it goes away. */
   if (closure->weak_object)
   {
     g_object_weak_ref (closure->weak_object, 
