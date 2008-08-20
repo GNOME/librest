@@ -212,6 +212,9 @@ _call_raw_async_finished_cb (SoupMessage *message,
       closure->weak_object,
       closure->userdata);
 
+  /* Finished with the headers. */
+  g_hash_table_unref (headers);
+
   /* Success. We don't need the weak reference any more */
   if (closure->weak_object)
   {
