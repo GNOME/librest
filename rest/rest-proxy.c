@@ -336,6 +336,7 @@ rest_proxy_call_raw_async_valist (RestProxy *proxy,
   closure->callback = callback;
   closure->weak_object = weak_object;
   closure->message = message;
+  closure->userdata = userdata;
 
   /* Weakly reference this object. We remove our callback if it goes away. */
   if (closure->weak_object)
