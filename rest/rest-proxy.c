@@ -386,3 +386,93 @@ rest_proxy_call_raw_async (RestProxy *proxy,
       params);
   va_end (params);
 }
+
+typedef struct 
+{
+  GMainLoop *loop;
+  guint *status_code;
+  gchar **response_message;
+  GHashTable **headers;
+  gchar **payload;
+  gssize *len;
+} RestProxyRunRawClosure;
+
+static void
+_call_raw_async_cb (RestProxy *proxy,
+                    guint status_code,
+                    const gchar *response_message,
+                    GHashTable *headers,
+                    const gchar *payload,
+                    gssize len,
+                    GObject *weak_object,
+                    gpointer userdata)
+{
+  RestProxyRunRawClosure *closure;
+
+  closure = (RestProxyRunRawClosure *)userdata;
+
+  if (closure->status_code)
+    *(closure->status_code) = status_code;
+
+  if (closure->response_message)
+    *(closure->response_message) = g_strdup (response_message);
+
+  if (closure->headers)
+    *(closure->headers) = g_hash_table_ref (headers);
+
+  if (closure->payload)
+    *(closure->payload) = g_memdup (payload, len);
+
+  if (closure->len)
+    *(closure->len) = len;
+
+  g_main_loop_quit (closure->loop);
+}
+
+gboolean
+rest_proxy_run_raw (RestProxy *proxy,
+                    const gchar *function,
+                    const gchar *method,
+                    guint *status_code,
+                    gchar **response_message,
+                    GHashTable **headers,
+                    gchar **payload,
+                    gssize *len,
+                    GError **error,
+                    const gchar *first_field_name,
+                    ...)
+{
+  RestProxyRunRawClosure *closure;
+  va_list params;
+
+  gboolean res = TRUE;
+
+  closure = g_new0 (RestProxyRunRawClosure, 1);
+  closure->loop = g_main_loop_new (NULL, FALSE);
+  closure->payload = payload;
+  closure->len = len;
+
+  va_start (params, first_field_name);
+  res = rest_proxy_call_raw_async_valist (proxy,
+      function,
+      method,
+      _call_raw_async_cb,
+      NULL,
+      closure,
+      error,
+      first_field_name,
+      params);
+  va_end (params);
+
+  if (!res)
+    goto error;
+
+  g_main_loop_run (closure->loop);
+
+error:
+  g_main_loop_unref (closure->loop);
+  g_free (closure);
+  return res;
+}
+
+
