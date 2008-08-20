@@ -398,14 +398,14 @@ typedef struct
 } RestProxyRunRawClosure;
 
 static void
-_call_raw_async_cb (RestProxy *proxy,
-                    guint status_code,
-                    const gchar *response_message,
-                    GHashTable *headers,
-                    const gchar *payload,
-                    gssize len,
-                    GObject *weak_object,
-                    gpointer userdata)
+_call_raw_async_for_run_raw_cb (RestProxy *proxy,
+                                guint status_code,
+                                const gchar *response_message,
+                                GHashTable *headers,
+                                const gchar *payload,
+                                gssize len,
+                                GObject *weak_object,
+                                gpointer userdata)
 {
   RestProxyRunRawClosure *closure;
 
@@ -456,7 +456,7 @@ rest_proxy_run_raw (RestProxy *proxy,
   res = rest_proxy_call_raw_async_valist (proxy,
       function,
       method,
-      _call_raw_async_cb,
+      _call_raw_async_for_run_raw_cb,
       NULL,
       closure,
       error,
