@@ -1,4 +1,6 @@
 #include <libxml/xmlreader.h>
+
+#include "rest-private.h"
 #include "rest-xml-parser.h"
 
 G_DEFINE_TYPE (RestXmlParser, rest_xml_parser, G_TYPE_OBJECT)
@@ -169,6 +171,8 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   GQueue *nodes = NULL;
   gint res = 0;
 
+  _rest_setup_debugging ();
+
   priv->reader = xmlReaderForMemory (data,
                                      len,
                                      NULL, /* URL? */
@@ -183,7 +187,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
       case XML_READER_TYPE_ELEMENT:
         /* Lookup the "name" for the tag */
         name = xmlTextReaderConstLocalName (priv->reader);
-        g_debug (G_STRLOC ": Opening tag: %s", name);
+        REST_DEBUG (XML_PARSER, "Opening tag: %s", name);
 
         /* Create our new node for this tag */
 
@@ -205,13 +209,13 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
 
           if (tmp_node)
           {
-            g_debug (G_STRLOC ": Existing node found for this name. "
+            REST_DEBUG (XML_PARSER, "Existing node found for this name. "
                               "Prepending to the list.");
             g_hash_table_insert (cur_node->children, 
                                  (gchar *)new_node->name,
                                  rest_xml_node_prepend (tmp_node, new_node));
           } else {
-            g_debug (G_STRLOC ": Unseen name. Adding to the children table.");
+            REST_DEBUG (XML_PARSER, "Unseen name. Adding to the children table.");
             g_hash_table_insert (cur_node->children,
                                  (gchar *)new_node->name,
                                  new_node);
@@ -224,9 +228,9 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
          */
         if (xmlTextReaderIsEmptyElement (priv->reader)) 
         {
-          g_debug (G_STRLOC ": We have an empty element. No children or text.");
+          REST_DEBUG (XML_PARSER, "We have an empty element. No children or text.");
         } else {
-          g_debug (G_STRLOC ": Non-empty element found."
+          REST_DEBUG (XML_PARSER, "Non-empty element found."
                             "  Pushing to stack and updating current state.");
           g_queue_push_head (nodes, new_node);
           cur_node = new_node;
@@ -247,7 +251,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                  g_strdup (attr_name),
                                  g_strdup (attr_value));
 
-            g_debug (G_STRLOC ": Attribute found: %s = %s",
+            REST_DEBUG (XML_PARSER, "Attribute found: %s = %s",
                      attr_name, 
                      attr_value);
 
@@ -256,26 +260,26 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
 
         break;
       case XML_READER_TYPE_END_ELEMENT:
-        g_debug (G_STRLOC ": Closing tag: %s", 
+        REST_DEBUG (XML_PARSER, "Closing tag: %s", 
                  xmlTextReaderConstLocalName (priv->reader));
 
-        g_debug (G_STRLOC ": Popping from stack and updating state.");
+        REST_DEBUG (XML_PARSER, "Popping from stack and updating state.");
         g_queue_pop_head (nodes);
         cur_node = (RestXmlNode *)g_queue_peek_head (nodes);
 
         if (cur_node)
         {
-          g_debug (G_STRLOC ": Head is now %s", cur_node->name);
+          REST_DEBUG (XML_PARSER, "Head is now %s", cur_node->name);
         } else {
-          g_debug (G_STRLOC ": At the top level");
+          REST_DEBUG (XML_PARSER, "At the top level");
         }
         break;
       case XML_READER_TYPE_TEXT:
         cur_node->content = g_strdup (xmlTextReaderConstValue (priv->reader));
-        g_debug (G_STRLOC ": Text content found: %s",
+        REST_DEBUG (XML_PARSER, "Text content found: %s",
                  cur_node->content);
       default:
-        g_debug (G_STRLOC ": Found unknown content with type: 0x%x", 
+        REST_DEBUG (XML_PARSER, "Found unknown content with type: 0x%x", 
                  xmlTextReaderNodeType (priv->reader));
         break;
     }
