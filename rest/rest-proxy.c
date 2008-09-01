@@ -66,7 +66,7 @@ rest_proxy_set_property (GObject *object,
 
       /* Clear cached url */
       g_free (priv->url);
-      priv->url;
+      priv->url = NULL;
       break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -147,7 +147,8 @@ rest_proxy_new (const gchar *url_format,
 }
 
 gboolean
-rest_proxy_bind (RestProxy *proxy, ...)
+rest_proxy_bind (RestProxy *proxy, 
+                const gchar *first_param, ...)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
   va_list params;
@@ -157,7 +158,11 @@ rest_proxy_bind (RestProxy *proxy, ...)
   g_return_val_if_fail (priv->binding_required != TRUE, FALSE);
 
   g_free (priv->url);
+  va_start (params, first_param);
   priv->url = g_strdup_vprintf (priv->url_format, params);
+  va_end (params);
+
+  return TRUE;
 }
 
 typedef struct {
@@ -181,6 +186,8 @@ _populate_headers_hash_table (const gchar *name,
   GHashTable *headers = (GHashTable *)userdata;
 
   g_hash_table_insert (headers, g_strdup (name), g_strdup (value));
+
+  return headers;
 }
 
 static void
@@ -375,10 +382,11 @@ rest_proxy_call_raw_async (RestProxy *proxy,
                            ...)
 
 {
+  gboolean res;
   va_list params;
 
   va_start (params, first_field_name);
-  rest_proxy_call_raw_async_valist (proxy,
+  res = rest_proxy_call_raw_async_valist (proxy,
       function,
       method,
       callback,
@@ -388,6 +396,8 @@ rest_proxy_call_raw_async (RestProxy *proxy,
       first_field_name,
       params);
   va_end (params);
+
+  return res;
 }
 
 typedef struct 
@@ -571,10 +581,11 @@ rest_proxy_call_json_async (RestProxy *proxy,
                             ...)
 
 {
+  gboolean res;
   va_list params;
 
   va_start (params, first_field_name);
-  rest_proxy_call_json_async_valist (proxy,
+  res = rest_proxy_call_json_async_valist (proxy,
       function,
       method,
       callback,
@@ -584,4 +595,6 @@ rest_proxy_call_json_async (RestProxy *proxy,
       first_field_name,
       params);
   va_end (params);
+
+  return res;
 }
