@@ -109,6 +109,44 @@ rest_xml_node_free (RestXmlNode *node)
   g_slice_free (RestXmlNode, node);
 }
 
+const gchar *
+rest_xml_node_get_attr (RestXmlNode *node, 
+                        const gchar *attr_name)
+{
+  return g_hash_table_lookup (node->attrs, attr_name);
+}
+
+RestXmlNode *
+rest_xml_node_find (RestXmlNode *start,
+                    const gchar *tag)
+{
+  RestXmlNode *node;
+  RestXmlNode *tmp;
+  GQueue *stack;
+  GList *children, *l;
+
+  stack = g_queue_new ();
+  g_queue_push_head (stack, start);
+
+  while ((node = g_queue_pop_head (stack)) != NULL)
+  {
+    if ((tmp = g_hash_table_lookup (node->children, tag)) != NULL)
+    {
+      g_queue_free (stack);
+      return tmp;
+    }
+
+    children = g_hash_table_get_values (node->children);
+    for (l = children; l; l = l->next)
+    {
+      g_queue_push_head (stack, l->data);
+    }
+    g_list_free (children);
+  }
+
+  return NULL;
+}
+
 RestXmlParser *
 rest_xml_parser_new (void)
 {

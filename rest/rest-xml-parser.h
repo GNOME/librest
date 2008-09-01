@@ -45,9 +45,14 @@ RestXmlNode *rest_xml_node_new (void);
 void rest_xml_node_free (RestXmlNode *node);
 
 RestXmlParser *rest_xml_parser_new (void);
-RestXmlNode *rest_xml_parser_parse_from_data (RestXmlParser *parser, 
+RestXmlNode *rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                               const gchar   *data,
                                               gssize         len);
+
+const gchar *rest_xml_node_get_attr (RestXmlNode *node,
+                                     const gchar *attr_name);
+RestXmlNode *rest_xml_node_find (RestXmlNode *node,
+                                 const gchar *tag);
 
 G_END_DECLS
 
