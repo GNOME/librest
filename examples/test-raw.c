@@ -1,4 +1,5 @@
 #include <rest/rest-proxy.h>
+#include <unistd.h>
 
 static void
 proxy_call_raw_async_cb (RestProxy *proxy,
