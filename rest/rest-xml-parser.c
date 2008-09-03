@@ -8,6 +8,8 @@ G_DEFINE_TYPE (RestXmlParser, rest_xml_parser, G_TYPE_OBJECT)
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_XML_PARSER, RestXmlParserPrivate))
 
+#define G(x) (gchar *)x
+
 typedef struct _RestXmlParserPrivate RestXmlParserPrivate;
 
 struct _RestXmlParserPrivate {
@@ -186,7 +188,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
     {
       case XML_READER_TYPE_ELEMENT:
         /* Lookup the "name" for the tag */
-        name = (char*)xmlTextReaderConstLocalName (priv->reader);
+        name = G(xmlTextReaderConstLocalName (priv->reader));
         REST_DEBUG (XML_PARSER, "Opening tag: %s", name);
 
         /* Create our new node for this tag */
@@ -212,12 +214,12 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
             REST_DEBUG (XML_PARSER, "Existing node found for this name. "
                               "Prepending to the list.");
             g_hash_table_insert (cur_node->children, 
-                                 (gchar *)new_node->name,
+                                 G(new_node->name),
                                  rest_xml_node_prepend (tmp_node, new_node));
           } else {
             REST_DEBUG (XML_PARSER, "Unseen name. Adding to the children table.");
             g_hash_table_insert (cur_node->children,
-                                 (gchar *)new_node->name,
+                                 G(new_node->name),
                                  new_node);
           }
         }
@@ -245,8 +247,8 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
           xmlTextReaderMoveToFirstAttribute (priv->reader);
 
           do {
-            attr_name = (char*)xmlTextReaderConstLocalName (priv->reader);
-            attr_value = (char*)xmlTextReaderConstValue (priv->reader);
+            attr_name = G(xmlTextReaderConstLocalName (priv->reader));
+            attr_value = G(xmlTextReaderConstValue (priv->reader));
             g_hash_table_insert (new_node->attrs,
                                  g_strdup (attr_name),
                                  g_strdup (attr_value));
@@ -275,7 +277,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         }
         break;
       case XML_READER_TYPE_TEXT:
-        cur_node->content = g_strdup ((char*)xmlTextReaderConstValue (priv->reader));
+        cur_node->content = g_strdup (G(xmlTextReaderConstValue (priv->reader)));
         REST_DEBUG (XML_PARSER, "Text content found: %s",
                  cur_node->content);
       default:
