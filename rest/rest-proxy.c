@@ -178,7 +178,7 @@ static void _call_raw_async_weak_notify_cb (gpointer *data,
 static void _call_raw_async_finished_cb (SoupMessage *message,
                                          gpointer userdata);
 
-static GHashTable *
+static void
 _populate_headers_hash_table (const gchar *name,
                               const gchar *value,
                               gpointer userdata)
@@ -186,8 +186,6 @@ _populate_headers_hash_table (const gchar *name,
   GHashTable *headers = (GHashTable *)userdata;
 
   g_hash_table_insert (headers, g_strdup (name), g_strdup (value));
-
-  return headers;
 }
 
 static void

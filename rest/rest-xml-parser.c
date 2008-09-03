@@ -186,7 +186,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
     {
       case XML_READER_TYPE_ELEMENT:
         /* Lookup the "name" for the tag */
-        name = xmlTextReaderConstLocalName (priv->reader);
+        name = (char*)xmlTextReaderConstLocalName (priv->reader);
         REST_DEBUG (XML_PARSER, "Opening tag: %s", name);
 
         /* Create our new node for this tag */
@@ -245,8 +245,8 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
           xmlTextReaderMoveToFirstAttribute (priv->reader);
 
           do {
-            attr_name = xmlTextReaderConstLocalName (priv->reader);
-            attr_value = xmlTextReaderConstValue (priv->reader);
+            attr_name = (char*)xmlTextReaderConstLocalName (priv->reader);
+            attr_value = (char*)xmlTextReaderConstValue (priv->reader);
             g_hash_table_insert (new_node->attrs,
                                  g_strdup (attr_name),
                                  g_strdup (attr_value));
@@ -275,7 +275,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         }
         break;
       case XML_READER_TYPE_TEXT:
-        cur_node->content = g_strdup (xmlTextReaderConstValue (priv->reader));
+        cur_node->content = g_strdup ((char*)xmlTextReaderConstValue (priv->reader));
         REST_DEBUG (XML_PARSER, "Text content found: %s",
                  cur_node->content);
       default:
