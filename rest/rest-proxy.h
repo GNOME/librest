@@ -5,6 +5,7 @@
 
 #include <json-glib/json-glib.h>
 
+#include <rest/rest-proxy-call.h>
 G_BEGIN_DECLS
 
 #define REST_TYPE_PROXY rest_proxy_get_type()
@@ -98,8 +99,7 @@ gboolean rest_proxy_call_json_async (RestProxy *proxy,
     const gchar *first_field_name,
     ...);
 
-gboolean
-rest_proxy_call_json_async_valist (RestProxy *proxy,
+gboolean rest_proxy_call_json_async_valist (RestProxy *proxy,
     const gchar *function,
     const gchar *method,
     RestProxyCallJsonCallback callback,
@@ -108,6 +108,8 @@ rest_proxy_call_json_async_valist (RestProxy *proxy,
     GError **error,
     const gchar *first_field_name,
     va_list params);
+
+RestProxyCall *rest_proxy_new_call (RestProxy *proxy);
 
 G_END_DECLS
 
