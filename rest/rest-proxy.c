@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "rest-proxy.h"
+#include "rest-private.h"
 
 G_DEFINE_TYPE (RestProxy, rest_proxy, G_TYPE_OBJECT)
 
