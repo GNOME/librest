@@ -227,12 +227,11 @@ rest_proxy_call_add_param (RestProxyCall *call,
 
 void
 rest_proxy_call_add_params (RestProxyCall *call,
-                            const char *first_param_name,
                             ...)
 {
   va_list params;
 
-  va_start (params, first_param_name);
+  va_start (params, call);
   rest_proxy_call_add_params_from_valist (call, params);
   va_end (params);
 }

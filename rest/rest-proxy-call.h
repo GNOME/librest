@@ -61,7 +61,6 @@ void rest_proxy_call_add_param (RestProxyCall *call,
                                 const gchar   *value);
 
 void rest_proxy_call_add_params (RestProxyCall *call,
-                                 const char *first_param_name,
                                  ...);
 
 void rest_proxy_call_add_params_from_valist (RestProxyCall *call,
