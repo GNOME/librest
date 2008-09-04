@@ -54,7 +54,7 @@ GType rest_proxy_get_type (void);
 RestProxy *rest_proxy_new (const gchar *url_format, 
     gboolean binding_required);
 
-gboolean rest_proxy_bind (RestProxy *proxy,  const gchar *first_param, ...);
+gboolean rest_proxy_bind (RestProxy *proxy, ...);
 
 gboolean rest_proxy_call_raw_async (RestProxy *proxy,
     const gchar *function,

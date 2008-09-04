@@ -147,18 +147,17 @@ rest_proxy_new (const gchar *url_format,
 }
 
 gboolean
-rest_proxy_bind (RestProxy *proxy, 
-                const gchar *first_param, ...)
+rest_proxy_bind (RestProxy *proxy, ...)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
   va_list params;
 
   g_return_val_if_fail (proxy != NULL, FALSE);
   g_return_val_if_fail (priv->url_format != NULL, FALSE);
-  g_return_val_if_fail (priv->binding_required != TRUE, FALSE);
+  g_return_val_if_fail (priv->binding_required == TRUE, FALSE);
 
   g_free (priv->url);
-  va_start (params, first_param);
+  va_start (params, proxy);
   priv->url = g_strdup_vprintf (priv->url_format, params);
   va_end (params);
 
