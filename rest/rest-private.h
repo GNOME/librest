@@ -3,6 +3,7 @@
 
 #include <glib.h>
 #include <rest/rest-proxy.h>
+#include <rest/rest-proxy-call.h>
 #include <libsoup/soup.h>
 
 G_BEGIN_DECLS
@@ -27,5 +28,8 @@ gboolean _rest_proxy_get_binding_required (RestProxy *proxy);
 const gchar *_rest_proxy_get_bound_url (RestProxy *proxy);
 void _rest_proxy_queue_message (RestProxy   *proxy,
                                 SoupMessage *message);
+
+void _rest_proxy_call_set_proxy (RestProxyCall *call,
+                                 RestProxy     *proxy);
 G_END_DECLS
 #endif /* _REST_PRIVATE */
