@@ -160,7 +160,7 @@ rest_xml_parser_new (void)
 RestXmlNode *
 rest_xml_parser_parse_from_data (RestXmlParser *parser, 
                                  const gchar   *data,
-                                 gssize         len)
+                                 goffset        len)
 {
   RestXmlParserPrivate *priv = GET_PRIVATE (parser);
   RestXmlNode *cur_node = NULL;

@@ -37,7 +37,7 @@ typedef void (*RestProxyCallRawCallback)(RestProxy *proxy,
     const gchar *response_message,
     GHashTable *headers,
     const gchar *payload,
-    gssize len,
+    goffset len,
     GObject *weak_object,
     gpointer userdata);
 
@@ -83,7 +83,7 @@ gboolean rest_proxy_run_raw (RestProxy *proxy,
     gchar **response_message,
     GHashTable **headers,
     gchar **payload,
-    gssize *len,
+    goffset *len,
     GError **error,
     const gchar *first_field_name,
     ...);

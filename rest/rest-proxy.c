@@ -405,7 +405,7 @@ typedef struct
   gchar **response_message;
   GHashTable **headers;
   gchar **payload;
-  gssize *len;
+  goffset *len;
 } RestProxyRunRawClosure;
 
 static void
@@ -414,7 +414,7 @@ _call_raw_async_for_run_raw_cb (RestProxy *proxy,
                                 const gchar *response_message,
                                 GHashTable *headers,
                                 const gchar *payload,
-                                gssize len,
+                                goffset len,
                                 GObject *weak_object,
                                 gpointer userdata)
 {
@@ -448,7 +448,7 @@ rest_proxy_run_raw (RestProxy *proxy,
                     gchar **response_message,
                     GHashTable **headers,
                     gchar **payload,
-                    gssize *len,
+                    goffset *len,
                     GError **error,
                     const gchar *first_field_name,
                     ...)
@@ -499,7 +499,7 @@ _call_raw_async_for_json_async_cb (RestProxy *proxy,
                                    const gchar *response_message,
                                    GHashTable *headers,
                                    const gchar *payload,
-                                   gssize len,
+                                   goffset len,
                                    GObject *weak_object,
                                    gpointer userdata)
 {

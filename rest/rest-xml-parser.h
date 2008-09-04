@@ -47,7 +47,7 @@ void rest_xml_node_free (RestXmlNode *node);
 RestXmlParser *rest_xml_parser_new (void);
 RestXmlNode *rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                               const gchar   *data,
-                                              gssize         len);
+                                              goffset        len);
 
 const gchar *rest_xml_node_get_attr (RestXmlNode *node,
                                      const gchar *attr_name);
