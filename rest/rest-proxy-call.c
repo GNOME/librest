@@ -414,12 +414,47 @@ rest_proxy_call_async (RestProxyCall                *call,
   return TRUE;
 }
 
+static void
+_rest_proxy_call_async_cb (RestProxyCall *call,
+                           GObject       *weak_object,
+                           gpointer       userdata)
+{
+  GMainLoop *loop = (GMainLoop *)userdata;
+
+  g_main_loop_quit (loop);
+}
+
 gboolean
 rest_proxy_call_run (RestProxyCall *call,
-                     GMainLoop    **loop,
-                     GError       **error)
+                     GMainLoop    **loop_out,
+                     GError       **error_out)
 {
-  return FALSE;
+  GMainLoop *loop;
+  gboolean res = TRUE;
+  GError *error = NULL;
+
+  loop = g_main_loop_new (NULL, FALSE);
+
+  if (loop_out)
+    *loop_out = loop;
+
+  res = rest_proxy_call_async (call, 
+      _rest_proxy_call_async_cb,
+      NULL,
+      loop,
+      &error);
+
+  if (!res)
+  {
+    g_propagate_error (error_out, error);
+    goto error;
+  }
+
+  g_main_loop_run (loop);
+
+error:
+  g_main_loop_unref (loop);
+  return res;
 }
 
 void
