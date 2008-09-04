@@ -460,6 +460,34 @@ error:
   return res;
 }
 
+goffset
+rest_proxy_call_get_payload_length (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  return priv->length;
+}
+
+const gchar *
+rest_proxy_call_get_payload (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  return priv->payload;
+}
+
+guint
+rest_proxy_call_get_status_code (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  return priv->status_code;  
+}
+
+const gchar *
+rest_proxy_call_get_response_message (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  return priv->response_message;
+}
+
 void
 _rest_proxy_call_set_proxy (RestProxyCall *call, 
                             RestProxy     *proxy)
