@@ -9,34 +9,17 @@ guint rest_debug_flags = 0;
 void
 _rest_setup_debugging (void)
 {
-  const gchar *tmp;
-  gchar **parts;
-  gint i = 0;
   static gboolean setup_done = FALSE;
+  static const GDebugKey keys[] = {
+    { "xml-parser", REST_DEBUG_XML_PARSER },
+    { "proxy", REST_DEBUG_PROXY }
+  };
 
-  if (setup_done)
+  if (G_LIKELY (setup_done))
     return;
 
-  tmp = g_getenv ("REST_DEBUG");
-
-  if (tmp)
-  {
-    parts = g_strsplit (tmp, ",", -1);
-
-    for (i = 0; parts[i] != NULL; i++)
-    {
-      if (g_str_equal (tmp, "xml-parser"))
-      {
-        rest_debug_flags |= REST_DEBUG_XML_PARSER;
-      } else if (g_str_equal (tmp, "proxy")) {
-        rest_debug_flags |= REST_DEBUG_PROXY;
-      } else if (g_str_equal (tmp, "all")) {
-        rest_debug_flags |= REST_DEBUG_ALL;
-      }
-    }
-
-    g_strfreev (parts);
-  }
-
+  rest_debug_flags = g_parse_debug_string (g_getenv ("REST_DEBUG"),
+                                           keys, G_N_ELEMENTS (keys));
+  
   setup_done = TRUE;
 }
