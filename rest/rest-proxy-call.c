@@ -122,6 +122,10 @@ rest_proxy_call_init (RestProxyCall *self)
                                          g_str_equal,
                                          g_free,
                                          g_free);
+  priv->response_headers = g_hash_table_new_full (g_str_hash,
+                                                  g_str_equal,
+                                                  g_free,
+                                                  g_free);
 }
 
 RestProxyCall*
