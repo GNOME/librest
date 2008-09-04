@@ -334,7 +334,7 @@ _call_async_finished_cb (SoupMessage *message,
   }
 
   g_object_unref (closure->call);
-  g_free (closure);
+  g_slice_free (RestProxyCallAsyncClosure, closure);
 }
 
 static void 
@@ -351,7 +351,7 @@ _call_async_weak_notify_cb (gpointer *data,
       closure);
 
   g_object_unref (closure->call);
-  g_free (closure);
+  g_slice_free (RestProxyCallAsyncClosure, closure);
 }
 
 gboolean
