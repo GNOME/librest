@@ -188,7 +188,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
     {
       case XML_READER_TYPE_ELEMENT:
         /* Lookup the "name" for the tag */
-        name = G(xmlTextReaderConstLocalName (priv->reader));
+        name = G(xmlTextReaderConstName (priv->reader));
         REST_DEBUG (XML_PARSER, "Opening tag: %s", name);
 
         /* Create our new node for this tag */
