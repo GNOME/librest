@@ -80,25 +80,27 @@ gboolean rest_proxy_call_run (RestProxyCall *call,
                               GMainLoop **loop,
                               GError **error);
 
-typedef void (*RestProxyCallRunAsyncCallback)(RestProxyCall *call,
-    gssize len,
-    GObject *weak_object,
-    gpointer userdata);
+typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
+                                           GObject       *weak_object,
+                                           gpointer       userdata);
 
-void rest_proxy_call_run_async (RestProxyCall *call,
-                                RestProxyCallRunAsyncCallback callback,
-                                GObject *weak_object,
-                                gpointer userdata,
-                                GError **error);
+gboolean rest_proxy_call_async (RestProxyCall                *call,
+                                RestProxyCallAsyncCallback    callback,
+                                GObject                      *weak_object,
+                                gpointer                      userdata,
+                                GError                      **error);
 
 /* Functions for dealing with responses */
 
 const gchar *rest_proxy_call_lookup_response_header (RestProxyCall *call,
                                                      const gchar   *header);
 
-gssize rest_proxy_call_get_payload_length (RestProxyCall *call);
+GHashTable *rest_proxy_call_get_response_headers (RestProxyCall *call);
+
+goffset rest_proxy_call_get_payload_length (RestProxyCall *call);
 const gchar *rest_proxy_call_get_payload (RestProxyCall *call);
 guint rest_proxy_call_get_status_code (RestProxyCall *call);
+const gchar *rest_proxy_call_get_response_message (RestProxyCall *call);
 
 G_END_DECLS
 

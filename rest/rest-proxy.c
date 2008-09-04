@@ -595,3 +595,48 @@ rest_proxy_call_json_async (RestProxy *proxy,
 
   return res;
 }
+
+RestProxyCall *
+rest_proxy_new_call (RestProxy *proxy)
+{
+  RestProxyCall *call;
+
+  call = g_object_new (REST_TYPE_PROXY_CALL, NULL);
+  _rest_proxy_call_set_proxy (call, proxy);
+
+  return call;
+}
+
+
+gboolean
+_rest_proxy_get_binding_required (RestProxy *proxy)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+
+  return priv->binding_required;
+}
+
+const gchar *
+_rest_proxy_get_bound_url (RestProxy *proxy)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+
+  if (!priv->url && !priv->binding_required)
+  {
+    priv->url = g_strdup (priv->url_format);
+  }
+
+  return priv->url;
+}
+
+void
+_rest_proxy_queue_message (RestProxy   *proxy,
+                           SoupMessage *message)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+
+  soup_session_queue_message (priv->session,
+      message,
+      NULL,
+      NULL);
+}
