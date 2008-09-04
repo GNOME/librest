@@ -269,14 +269,6 @@ rest_proxy_call_remove_param (RestProxyCall *call,
   g_hash_table_remove (priv->params, param);
 }
 
-gboolean
-rest_proxy_call_run (RestProxyCall *call,
-                     GMainLoop    **loop,
-                     GError       **error)
-{
-  return FALSE;
-}
-
 typedef struct {
   RestProxyCall *call;
   RestProxyCallAsyncCallback callback;
@@ -319,6 +311,12 @@ _call_async_finished_cb (SoupMessage *message,
   soup_message_headers_foreach (message->response_headers,
       (SoupMessageHeadersForeachFunc)_populate_headers_hash_table,
       priv->response_headers);
+
+  priv->payload = g_strdup (message->response_body->data);
+  priv->length = message->response_body->length;
+
+  priv->status_code = message->status_code;
+  priv->response_message = g_strdup (message->reason_phrase);
 
   closure->callback (closure->call,
       closure->weak_object,
@@ -414,6 +412,14 @@ rest_proxy_call_async (RestProxyCall                *call,
   _rest_proxy_queue_message (priv->proxy, message);
   g_free (url);
   return TRUE;
+}
+
+gboolean
+rest_proxy_call_run (RestProxyCall *call,
+                     GMainLoop    **loop,
+                     GError       **error)
+{
+  return FALSE;
 }
 
 void
