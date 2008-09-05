@@ -47,6 +47,7 @@ RestProxy *rest_proxy_new (const gchar *url_format,
 
 gboolean rest_proxy_bind (RestProxy *proxy, ...);
 
+G_GNUC_DEPRECATED
 gboolean rest_proxy_call_raw_async (RestProxy *proxy,
     const gchar *function,
     const gchar *method,
@@ -57,6 +58,7 @@ gboolean rest_proxy_call_raw_async (RestProxy *proxy,
     const gchar *first_field_name,
     ...);
 
+G_GNUC_DEPRECATED
 gboolean rest_proxy_call_raw_async_valist (RestProxy *proxy,
     const gchar *function,
     const gchar *method,
@@ -67,6 +69,7 @@ gboolean rest_proxy_call_raw_async_valist (RestProxy *proxy,
     const gchar *first_field_name,
     va_list params);
 
+G_GNUC_DEPRECATED
 gboolean rest_proxy_run_raw (RestProxy *proxy,
     const gchar *function,
     const gchar *method,
