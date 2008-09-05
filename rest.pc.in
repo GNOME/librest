@@ -8,5 +8,5 @@ Description: RESTful web api query library
 Version: @VERSION@
 Libs: -L${libdir} -lrest
 Cflags: -I${includedir}
-Requires: glib-2.0 libsoup-2.4 libxml-2.0 json-glib-1.0
+Requires: glib-2.0 libsoup-2.4 libxml-2.0
 

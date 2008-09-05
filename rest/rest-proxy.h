@@ -2,10 +2,8 @@
 #define _REST_PROXY
 
 #include <glib-object.h>
-
-#include <json-glib/json-glib.h>
-
 #include <rest/rest-proxy-call.h>
+
 G_BEGIN_DECLS
 
 #define REST_TYPE_PROXY rest_proxy_get_type()
@@ -39,14 +37,6 @@ typedef void (*RestProxyCallRawCallback)(RestProxy *proxy,
     GHashTable *headers,
     const gchar *payload,
     goffset len,
-    GObject *weak_object,
-    gpointer userdata);
-
-typedef void (*RestProxyCallJsonCallback)(RestProxy *proxy, 
-    guint status_code, 
-    const gchar *response_message,
-    GHashTable *headers,
-    JsonNode *root,
     GObject *weak_object,
     gpointer userdata);
 
@@ -88,26 +78,6 @@ gboolean rest_proxy_run_raw (RestProxy *proxy,
     GError **error,
     const gchar *first_field_name,
     ...);
-
-gboolean rest_proxy_call_json_async (RestProxy *proxy,
-    const gchar *function,
-    const gchar *method,
-    RestProxyCallJsonCallback callback,
-    GObject *weak_object,
-    gpointer userdata,
-    GError **error,
-    const gchar *first_field_name,
-    ...);
-
-gboolean rest_proxy_call_json_async_valist (RestProxy *proxy,
-    const gchar *function,
-    const gchar *method,
-    RestProxyCallJsonCallback callback,
-    GObject *weak_object,
-    gpointer userdata,
-    GError **error,
-    const gchar *first_field_name,
-    va_list params);
 
 RestProxyCall *rest_proxy_new_call (RestProxy *proxy);
 
