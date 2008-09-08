@@ -39,6 +39,9 @@ AC_OUTPUT([
         Makefile
         rest/Makefile
         examples/Makefile
+        docs/Makefile
+        docs/reference/Makefile
+        docs/reference/rest/Makefile
         rest.pc
 ])
 
