@@ -277,7 +277,7 @@ rest_proxy_call_get_params (RestProxyCall *call)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
 
-  return priv->params;
+  return g_hash_table_ref (priv->params);
 }
 
 
