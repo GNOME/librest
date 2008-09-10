@@ -272,6 +272,15 @@ rest_proxy_call_remove_param (RestProxyCall *call,
   g_hash_table_remove (priv->params, param);
 }
 
+GHashTable *
+rest_proxy_call_get_params (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+
+  return priv->params;
+}
+
+
 typedef struct {
   RestProxyCall *call;
   RestProxyCallAsyncCallback callback;

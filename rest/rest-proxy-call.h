@@ -75,6 +75,8 @@ const gchar *rest_proxy_call_lookup_param (RestProxyCall *call,
 void rest_proxy_call_remove_param (RestProxyCall *call,
                                    const gchar   *param);
 
+GHashTable *rest_proxy_call_get_params (RestProxyCall *call);
+
 gboolean rest_proxy_call_run (RestProxyCall *call,
                               GMainLoop **loop,
                               GError **error);
