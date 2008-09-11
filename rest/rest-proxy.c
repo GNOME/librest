@@ -25,6 +25,17 @@ enum
   PROP_BINDING_REQUIRED
 };
 
+static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
+                                               char     **payload, 
+                                               goffset   *len,
+                                               GError   **error,
+                                               va_list    params);
+
+static RestProxyCall *_rest_proxy_new_call (RestProxy *proxy);
+
+static gboolean _rest_proxy_bind_valist (RestProxy *proxy,
+                                         va_list    params);
+
 static void
 rest_proxy_get_property (GObject *object,
                          guint property_id,
@@ -101,6 +112,7 @@ rest_proxy_class_init (RestProxyClass *klass)
 {
   GParamSpec *pspec;
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  RestProxyClass *proxy_class = REST_PROXY_CLASS (klass);
 
   g_type_class_add_private (klass, sizeof (RestProxyPrivate));
 
@@ -108,6 +120,10 @@ rest_proxy_class_init (RestProxyClass *klass)
   object_class->set_property = rest_proxy_set_property;
   object_class->dispose = rest_proxy_dispose;
   object_class->finalize = rest_proxy_finalize;
+
+  proxy_class->simple_run_valist = _rest_proxy_simple_run_valist;
+  proxy_class->new_call = _rest_proxy_new_call;
+  proxy_class->bind_valist = _rest_proxy_bind_valist;
 
   pspec = g_param_spec_string ("url-format", 
       "url-format",
@@ -147,9 +163,9 @@ rest_proxy_new (const gchar *url_format,
       NULL);
 }
 
-gboolean
-rest_proxy_bind_valist (RestProxy *proxy,
-                        va_list params)
+static gboolean
+_rest_proxy_bind_valist (RestProxy *proxy,
+                         va_list    params)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
@@ -162,6 +178,15 @@ rest_proxy_bind_valist (RestProxy *proxy,
   priv->url = g_strdup_vprintf (priv->url_format, params);
 
   return TRUE;
+}
+
+
+gboolean
+rest_proxy_bind_valist (RestProxy *proxy,
+                        va_list    params)
+{
+  RestProxyClass *proxy_class = REST_PROXY_GET_CLASS (proxy);
+  return proxy_class->bind_valist (proxy, params);
 }
 
 gboolean
@@ -498,8 +523,8 @@ error:
   return res;
 }
 
-RestProxyCall *
-rest_proxy_new_call (RestProxy *proxy)
+static RestProxyCall *
+_rest_proxy_new_call (RestProxy *proxy)
 {
   RestProxyCall *call;
 
@@ -509,6 +534,12 @@ rest_proxy_new_call (RestProxy *proxy)
   return call;
 }
 
+RestProxyCall *
+rest_proxy_new_call (RestProxy *proxy)
+{
+  RestProxyClass *proxy_class = REST_PROXY_GET_CLASS (proxy);
+  return proxy_class->new_call (proxy);
+}
 
 gboolean
 _rest_proxy_get_binding_required (RestProxy *proxy)
@@ -531,12 +562,12 @@ _rest_proxy_get_bound_url (RestProxy *proxy)
   return priv->url;
 }
 
-gboolean
-rest_proxy_simple_run_valist(RestProxy *proxy, 
-                             char     **payload, 
-                             goffset   *len,
-                             GError   **error,
-                             va_list    params)
+static gboolean
+_rest_proxy_simple_run_valist (RestProxy *proxy, 
+                               gchar     **payload, 
+                               goffset   *len,
+                               GError   **error,
+                               va_list    params)
 {
   RestProxyCall *call;
   gboolean ret;
@@ -560,6 +591,17 @@ rest_proxy_simple_run_valist(RestProxy *proxy,
   g_object_unref (call);
 
   return ret;
+}
+
+gboolean
+rest_proxy_simple_run_valist (RestProxy *proxy, 
+                              char     **payload, 
+                              goffset   *len,
+                              GError   **error,
+                              va_list    params)
+{
+  RestProxyClass *proxy_class = REST_PROXY_GET_CLASS (proxy);
+  return proxy_class->simple_run_valist (proxy, payload, len, error, params);
 }
 
 gboolean

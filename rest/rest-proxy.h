@@ -29,6 +29,10 @@ typedef struct {
 
 typedef struct {
   GObjectClass parent_class;
+  gboolean (*bind_valist)(RestProxy *proxy, va_list params);
+  RestProxyCall *(*new_call)(RestProxy *proxy);
+  gboolean (*simple_run_valist)(RestProxy *proxy, gchar **payload, 
+      goffset *len, GError **error, va_list params);
 } RestProxyClass;
 
 typedef void (*RestProxyCallRawCallback)(RestProxy *proxy, 
