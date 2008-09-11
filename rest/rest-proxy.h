@@ -87,10 +87,15 @@ RestProxyCall *rest_proxy_new_call (RestProxy *proxy);
 
 G_GNUC_NULL_TERMINATED
 gboolean rest_proxy_simple_run (RestProxy *proxy, 
-                                char **payload, goffset *len,
-                                GError **error,
+                                gchar    **payload, 
+                                goffset   *len,
+                                GError   **error,
                                 ...);
-
+gboolean rest_proxy_simple_run_valist (RestProxy *proxy, 
+                                       gchar    **payload, 
+                                       goffset   *len,
+                                       GError   **error,
+                                       va_list    params);
 G_END_DECLS
 
 #endif /* _REST_PROXY */

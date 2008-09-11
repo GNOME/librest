@@ -532,13 +532,13 @@ _rest_proxy_get_bound_url (RestProxy *proxy)
 }
 
 gboolean
-rest_proxy_simple_run (RestProxy *proxy, 
-                       char **payload, goffset *len,
-                       GError **error,
-                       ...)
+rest_proxy_simple_run_valist(RestProxy *proxy, 
+                             char     **payload, 
+                             goffset   *len,
+                             GError   **error,
+                             va_list    params)
 {
   RestProxyCall *call;
-  va_list params;
   gboolean ret;
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
@@ -546,9 +546,7 @@ rest_proxy_simple_run (RestProxy *proxy,
 
   call = rest_proxy_new_call (proxy);
 
-  va_start (params, error);
   rest_proxy_call_add_params_from_valist (call, params);
-  va_end (params);
 
   ret = rest_proxy_call_run (call, NULL, error);
   if (ret) {
@@ -558,8 +556,31 @@ rest_proxy_simple_run (RestProxy *proxy,
     *payload = NULL;
     if (len) *len = 0;
   }
-  
+ 
   g_object_unref (call);
+
+  return ret;
+}
+
+gboolean
+rest_proxy_simple_run (RestProxy *proxy, 
+                       char **payload, goffset *len,
+                       GError **error,
+                       ...)
+{
+  va_list params;
+  gboolean ret;
+
+  g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
+  g_return_val_if_fail (payload, FALSE);
+
+  va_start (params, error);
+  ret = rest_proxy_simple_run_valist (proxy,
+                                      payload,
+                                      len,
+                                      error,
+                                      params);
+  va_end (params);
 
   return ret;
 }
