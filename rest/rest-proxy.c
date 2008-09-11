@@ -148,21 +148,33 @@ rest_proxy_new (const gchar *url_format,
 }
 
 gboolean
-rest_proxy_bind (RestProxy *proxy, ...)
+rest_proxy_bind_valist (RestProxy *proxy,
+                        va_list params)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
-  va_list params;
 
   g_return_val_if_fail (proxy != NULL, FALSE);
   g_return_val_if_fail (priv->url_format != NULL, FALSE);
   g_return_val_if_fail (priv->binding_required == TRUE, FALSE);
 
   g_free (priv->url);
-  va_start (params, proxy);
+
   priv->url = g_strdup_vprintf (priv->url_format, params);
-  va_end (params);
 
   return TRUE;
+}
+
+gboolean
+rest_proxy_bind (RestProxy *proxy, ...)
+{
+  gboolean res;
+  va_list params;
+
+  va_start (params, proxy);
+  res = rest_proxy_bind_valist (proxy, params);
+  va_end (params);
+
+  return res;
 }
 
 typedef struct {
