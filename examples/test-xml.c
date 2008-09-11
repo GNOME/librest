@@ -54,7 +54,7 @@ proxy_call_raw_async_cb (RestProxy *proxy,
                          const gchar *response_message,
                          GHashTable *headers,
                          const gchar *payload,
-                         gssize len,
+                         goffset len,
                          GObject *weak_object,
                          gpointer userdata)
 {
