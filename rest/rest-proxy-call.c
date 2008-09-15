@@ -128,12 +128,6 @@ rest_proxy_call_init (RestProxyCall *self)
                                                   g_free);
 }
 
-RestProxyCall*
-rest_proxy_call_new (void)
-{
-  return g_object_new (REST_TYPE_PROXY_CALL, NULL);
-}
-
 void 
 rest_proxy_call_set_method (RestProxyCall *call,
                             const gchar   *method)
