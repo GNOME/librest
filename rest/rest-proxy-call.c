@@ -33,8 +33,10 @@ enum
 };
 
 static void
-rest_proxy_call_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+rest_proxy_call_get_property (GObject    *object,
+                              guint       property_id,
+                              GValue     *value,
+                              GParamSpec *pspec)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (object);
 
@@ -48,8 +50,10 @@ rest_proxy_call_get_property (GObject *object, guint property_id,
 }
 
 static void
-rest_proxy_call_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+rest_proxy_call_set_property (GObject      *object,
+                              guint         property_id,
+                              const GValue *value,
+                              GParamSpec   *pspec)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (object);
 
@@ -192,7 +196,7 @@ rest_proxy_call_add_header (RestProxyCall *call,
 
 void
 rest_proxy_call_add_headers (RestProxyCall *call,
-                             const char *first_header_name,
+                             const char    *first_header_name,
                              ...)
 {
   va_list headers;
@@ -204,7 +208,7 @@ rest_proxy_call_add_headers (RestProxyCall *call,
 
 void 
 rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
-                                         va_list headers)
+                                         va_list        headers)
 {
   const gchar *header = NULL;
   const gchar *value = NULL;
@@ -260,7 +264,7 @@ rest_proxy_call_add_params (RestProxyCall *call,
 
 void 
 rest_proxy_call_add_params_from_valist (RestProxyCall *call,
-                                        va_list params)
+                                        va_list        params)
 {
   const gchar *param = NULL;
   const gchar *value = NULL;
@@ -316,7 +320,7 @@ static void _call_async_finished_cb (SoupMessage *message,
 static void
 _populate_headers_hash_table (const gchar *name,
                               const gchar *value,
-                              gpointer userdata)
+                              gpointer     userdata)
 {
   GHashTable *headers = (GHashTable *)userdata;
 
