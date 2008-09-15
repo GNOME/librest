@@ -28,6 +28,7 @@ typedef struct {
 
 typedef struct {
   GObjectClass parent_class;
+  gboolean (*prepare)(RestProxyCall *call, GError **error);
 } RestProxyCallClass;
 
 GType rest_proxy_call_get_type (void);

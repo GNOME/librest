@@ -362,13 +362,15 @@ rest_proxy_call_async (RestProxyCall                *call,
                        RestProxyCallAsyncCallback    callback,
                        GObject                      *weak_object,
                        gpointer                      userdata,
-                       GError                      **error)
+                       GError                      **error_out)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallClass *call_class = REST_PROXY_CALL_GET_CLASS (call);
   const gchar *bound_url;
   gchar *url = NULL;
   SoupMessage *message;
   RestProxyCallAsyncClosure *closure;
+  GError *error = NULL;
 
   bound_url =_rest_proxy_get_bound_url (priv->proxy);
 
@@ -389,6 +391,18 @@ rest_proxy_call_async (RestProxyCall                *call,
     }
   } else {
     url = g_strdup (bound_url);
+  }
+
+  /* Allow an overrideable prepare function that is called before every
+   * invocation so subclasses can do magic
+   */
+  if (call_class->prepare)
+  {
+    if (!call_class->prepare (call, &error))
+    {
+      g_propagate_error (error_out, error);
+      goto error;
+    }
   }
 
   message = soup_form_request_new_from_hash (priv->method,
@@ -418,6 +432,10 @@ rest_proxy_call_async (RestProxyCall                *call,
   _rest_proxy_queue_message (priv->proxy, message);
   g_free (url);
   return TRUE;
+
+error:
+  g_free (url);
+  return FALSE;
 }
 
 static void
