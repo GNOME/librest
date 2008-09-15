@@ -528,8 +528,9 @@ _rest_proxy_new_call (RestProxy *proxy)
 {
   RestProxyCall *call;
 
-  call = g_object_new (REST_TYPE_PROXY_CALL, NULL);
-  _rest_proxy_call_set_proxy (call, proxy);
+  call = g_object_new (REST_TYPE_PROXY_CALL,
+                       "proxy", proxy,
+                       NULL);
 
   return call;
 }

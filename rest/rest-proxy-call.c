@@ -26,11 +26,22 @@ struct _RestProxyCallPrivate {
   RestProxy *proxy;
 };
 
+enum
+{
+  PROP_0 = 0,
+  PROP_PROXY
+};
+
 static void
 rest_proxy_call_get_property (GObject *object, guint property_id,
                               GValue *value, GParamSpec *pspec)
 {
+  RestProxyCallPrivate *priv = GET_PRIVATE (object);
+
   switch (property_id) {
+    case PROP_PROXY:
+      g_value_set_object (value, priv->proxy);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -40,7 +51,12 @@ static void
 rest_proxy_call_set_property (GObject *object, guint property_id,
                               const GValue *value, GParamSpec *pspec)
 {
+  RestProxyCallPrivate *priv = GET_PRIVATE (object);
+
   switch (property_id) {
+    case PROP_PROXY:
+      priv->proxy = g_value_dup_object (value);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -98,6 +114,7 @@ static void
 rest_proxy_call_class_init (RestProxyCallClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GParamSpec *pspec;
 
   g_type_class_add_private (klass, sizeof (RestProxyCallPrivate));
 
@@ -105,6 +122,13 @@ rest_proxy_call_class_init (RestProxyCallClass *klass)
   object_class->set_property = rest_proxy_call_set_property;
   object_class->dispose = rest_proxy_call_dispose;
   object_class->finalize = rest_proxy_call_finalize;
+
+  pspec = g_param_spec_object ("proxy",
+                               "proxy",
+                               "Proxy for this call",
+                               REST_TYPE_PROXY,
+                               G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  g_object_class_install_property (object_class, PROP_PROXY, pspec);
 }
 
 static void
@@ -364,13 +388,18 @@ rest_proxy_call_async (RestProxyCall                *call,
                        gpointer                      userdata,
                        GError                      **error_out)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  RestProxyCallClass *call_class = REST_PROXY_CALL_GET_CLASS (call);
+  RestProxyCallPrivate *priv;
+  RestProxyCallClass *call_class;
   const gchar *bound_url;
   gchar *url = NULL;
   SoupMessage *message;
   RestProxyCallAsyncClosure *closure;
   GError *error = NULL;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  priv = GET_PRIVATE (call);
+  g_assert (priv->proxy);
+  call_class = REST_PROXY_CALL_GET_CLASS (call);
 
   bound_url =_rest_proxy_get_bound_url (priv->proxy);
 
@@ -509,10 +538,3 @@ rest_proxy_call_get_response_message (RestProxyCall *call)
   return priv->response_message;
 }
 
-void
-_rest_proxy_call_set_proxy (RestProxyCall *call, 
-                            RestProxy     *proxy)
-{
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  priv->proxy = g_object_ref (proxy);
-}

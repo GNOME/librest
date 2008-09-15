@@ -29,7 +29,5 @@ const gchar *_rest_proxy_get_bound_url (RestProxy *proxy);
 void _rest_proxy_queue_message (RestProxy   *proxy,
                                 SoupMessage *message);
 
-void _rest_proxy_call_set_proxy (RestProxyCall *call,
-                                 RestProxy     *proxy);
 G_END_DECLS
 #endif /* _REST_PRIVATE */
