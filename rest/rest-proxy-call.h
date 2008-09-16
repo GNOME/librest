@@ -83,6 +83,7 @@ gboolean rest_proxy_call_run (RestProxyCall *call,
                               GError       **error);
 
 typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
+                                           GError        *error,
                                            GObject       *weak_object,
                                            gpointer       userdata);
 
