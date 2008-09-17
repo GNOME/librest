@@ -540,7 +540,9 @@ _rest_proxy_call_async_cb (RestProxyCall *call,
   RestProxyCallRunClosure *closure = (RestProxyCallRunClosure *)userdata;
 
   /* *duplicate* not propagate the error */
-  closure->error = g_error_copy (error);
+  if (error)
+    closure->error = g_error_copy (error);
+
   g_main_loop_quit (closure->loop);
 }
 
