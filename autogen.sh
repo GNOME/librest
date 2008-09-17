@@ -1,3 +1,3 @@
 #!/bin/sh
-gtkdocize || exit 1
+gtkdocize --flavour no-tmpl || exit 1
 autoreconf -v -i && ./configure $@

@@ -26,7 +26,7 @@ AC_SUBST(SOUP_LIBS)
 AC_SUBST(XML_CFLAGS)
 AC_SUBST(XML_LIBS)
 
-GTK_DOC_CHECK(1.4)
+GTK_DOC_CHECK(1.9)
 
 localedir=${datadir}/locale
 AC_SUBST(localedir)
@@ -35,6 +35,9 @@ AC_OUTPUT([
         Makefile
         rest/Makefile
         examples/Makefile
+        docs/Makefile
+        docs/reference/Makefile
+        docs/reference/rest/Makefile
         rest.pc
 ])
 

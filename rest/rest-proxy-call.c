@@ -33,8 +33,10 @@ enum
 };
 
 static void
-rest_proxy_call_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+rest_proxy_call_get_property (GObject    *object,
+                              guint       property_id,
+                              GValue     *value,
+                              GParamSpec *pspec)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (object);
 
@@ -48,8 +50,10 @@ rest_proxy_call_get_property (GObject *object, guint property_id,
 }
 
 static void
-rest_proxy_call_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+rest_proxy_call_set_property (GObject      *object,
+                              guint         property_id,
+                              const GValue *value,
+                              GParamSpec   *pspec)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (object);
 
@@ -192,7 +196,7 @@ rest_proxy_call_add_header (RestProxyCall *call,
 
 void
 rest_proxy_call_add_headers (RestProxyCall *call,
-                             const char *first_header_name,
+                             const char    *first_header_name,
                              ...)
 {
   va_list headers;
@@ -204,7 +208,7 @@ rest_proxy_call_add_headers (RestProxyCall *call,
 
 void 
 rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
-                                         va_list headers)
+                                         va_list        headers)
 {
   const gchar *header = NULL;
   const gchar *value = NULL;
@@ -260,7 +264,7 @@ rest_proxy_call_add_params (RestProxyCall *call,
 
 void 
 rest_proxy_call_add_params_from_valist (RestProxyCall *call,
-                                        va_list params)
+                                        va_list        params)
 {
   const gchar *param = NULL;
   const gchar *value = NULL;
@@ -316,11 +320,59 @@ static void _call_async_finished_cb (SoupMessage *message,
 static void
 _populate_headers_hash_table (const gchar *name,
                               const gchar *value,
-                              gpointer userdata)
+                              gpointer     userdata)
 {
   GHashTable *headers = (GHashTable *)userdata;
 
   g_hash_table_insert (headers, g_strdup (name), g_strdup (value));
+}
+
+/* I apologise for this macro, but it saves typing ;-) */
+#define error_helper(x) g_set_error(error, REST_PROXY_ERROR, x, message->reason_phrase)
+static gboolean
+_handle_error_from_message (SoupMessage *message, GError **error)
+{
+  if (message->status_code < 100)
+  {
+    switch (message->status_code)
+    {
+      case SOUP_STATUS_CANCELLED:
+        error_helper (REST_PROXY_ERROR_CANCELLED);
+        break;
+      case SOUP_STATUS_CANT_RESOLVE:
+      case SOUP_STATUS_CANT_RESOLVE_PROXY:
+        error_helper (REST_PROXY_ERROR_RESOLUTION);
+        break;
+      case SOUP_STATUS_CANT_CONNECT:
+      case SOUP_STATUS_CANT_CONNECT_PROXY:
+        error_helper (REST_PROXY_ERROR_CONNECTION);
+        break;
+      case SOUP_STATUS_SSL_FAILED:
+        error_helper (REST_PROXY_ERROR_SSL);
+        break;
+      case SOUP_STATUS_IO_ERROR:
+        error_helper (REST_PROXY_ERROR_IO);
+        break;
+      case SOUP_STATUS_MALFORMED:
+      case SOUP_STATUS_TRY_AGAIN:
+      default:
+        error_helper (REST_PROXY_ERROR_FAILED);
+        break;
+    }
+    return FALSE;
+  }
+
+  if (message->status_code >= 200 && message->status_code < 300)
+  {
+    return TRUE;
+  }
+
+  /* If we are here we must be in some kind of HTTP error, lets try */
+  g_set_error (error,
+               REST_PROXY_ERROR,
+               message->status_code,
+               message->reason_phrase);
+  return FALSE;
 }
 
 static void
@@ -330,6 +382,7 @@ _call_async_finished_cb (SoupMessage *message,
   RestProxyCallAsyncClosure *closure;
   RestProxyCall *call;
   RestProxyCallPrivate *priv;
+  GError *error = NULL;
 
   closure = (RestProxyCallAsyncClosure *)userdata;
   call = closure->call;
@@ -348,9 +401,14 @@ _call_async_finished_cb (SoupMessage *message,
   priv->status_code = message->status_code;
   priv->response_message = g_strdup (message->reason_phrase);
 
+  _handle_error_from_message (message, &error);
+
   closure->callback (closure->call,
-      closure->weak_object,
-      closure->userdata);
+                     error,
+                     closure->weak_object,
+                     closure->userdata);
+
+  g_clear_error (&error);
 
   /* Success. We don't need the weak reference any more */
   if (closure->weak_object)
@@ -467,14 +525,25 @@ error:
   return FALSE;
 }
 
+typedef struct
+{
+  GMainLoop *loop;
+  GError *error;
+} RestProxyCallRunClosure;
+
 static void
 _rest_proxy_call_async_cb (RestProxyCall *call,
+                           GError        *error,
                            GObject       *weak_object,
                            gpointer       userdata)
 {
-  GMainLoop *loop = (GMainLoop *)userdata;
+  RestProxyCallRunClosure *closure = (RestProxyCallRunClosure *)userdata;
 
-  g_main_loop_quit (loop);
+  /* *duplicate* not propagate the error */
+  if (error)
+    closure->error = g_error_copy (error);
+
+  g_main_loop_quit (closure->loop);
 }
 
 gboolean
@@ -482,19 +551,19 @@ rest_proxy_call_run (RestProxyCall *call,
                      GMainLoop    **loop_out,
                      GError       **error_out)
 {
-  GMainLoop *loop;
   gboolean res = TRUE;
   GError *error = NULL;
+  RestProxyCallRunClosure closure = { NULL, NULL};
 
-  loop = g_main_loop_new (NULL, FALSE);
+  closure.loop = g_main_loop_new (NULL, FALSE);
 
   if (loop_out)
-    *loop_out = loop;
+    *loop_out = closure.loop;
 
   res = rest_proxy_call_async (call, 
       _rest_proxy_call_async_cb,
       NULL,
-      loop,
+      &closure,
       &error);
 
   if (!res)
@@ -503,10 +572,22 @@ rest_proxy_call_run (RestProxyCall *call,
     goto error;
   }
 
-  g_main_loop_run (loop);
+  g_main_loop_run (closure.loop);
+
+  if (closure.error)
+  {
+    /* If the caller has asked for the error then propagate else free it */
+    if (error_out)
+    {
+      g_propagate_error (error_out, closure.error);
+    } else {
+      g_clear_error (&(closure.error));
+    }
+    res = FALSE;
+  }
 
 error:
-  g_main_loop_unref (loop);
+  g_main_loop_unref (closure.loop);
   return res;
 }
 

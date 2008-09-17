@@ -42,11 +42,11 @@ void rest_proxy_call_add_header (RestProxyCall *call,
                                  const gchar   *value);
 
 void rest_proxy_call_add_headers (RestProxyCall *call,
-                                  const char *first_header_name,
+                                  const char    *first_header_name,
                                   ...);
 
 void rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
-                                              va_list headers);
+                                              va_list        headers);
 
 void rest_proxy_call_add_headers_from_hash (RestProxyCall *call,
                                             GHashTable    *headers);
@@ -65,7 +65,7 @@ void rest_proxy_call_add_params (RestProxyCall *call,
                                  ...);
 
 void rest_proxy_call_add_params_from_valist (RestProxyCall *call,
-                                             va_list params);
+                                             va_list        params);
 
 void rest_proxy_call_add_params_from_hash (RestProxyCall *call,
                                            GHashTable    *params);
@@ -79,10 +79,11 @@ void rest_proxy_call_remove_param (RestProxyCall *call,
 GHashTable *rest_proxy_call_get_params (RestProxyCall *call);
 
 gboolean rest_proxy_call_run (RestProxyCall *call,
-                              GMainLoop **loop,
-                              GError **error);
+                              GMainLoop    **loop,
+                              GError       **error);
 
 typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
+                                           GError        *error,
                                            GObject       *weak_object,
                                            gpointer       userdata);
 

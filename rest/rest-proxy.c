@@ -36,10 +36,16 @@ static RestProxyCall *_rest_proxy_new_call (RestProxy *proxy);
 static gboolean _rest_proxy_bind_valist (RestProxy *proxy,
                                          va_list    params);
 
+GQuark
+rest_proxy_error_quark (void)
+{
+  return g_quark_from_static_string ("rest-proxy-error-quark");
+}
+
 static void
-rest_proxy_get_property (GObject *object,
-                         guint property_id,
-                         GValue *value,
+rest_proxy_get_property (GObject   *object,
+                         guint      property_id,
+                         GValue     *value,
                          GParamSpec *pspec)
 {
   RestProxyPrivate *priv = GET_PRIVATE (object);
@@ -57,10 +63,10 @@ rest_proxy_get_property (GObject *object,
 }
 
 static void
-rest_proxy_set_property (GObject *object,
-                         guint property_id,
+rest_proxy_set_property (GObject      *object,
+                         guint         property_id,
                          const GValue *value,
-                         GParamSpec *pspec)
+                         GParamSpec   *pspec)
 {
   RestProxyPrivate *priv = GET_PRIVATE (object);
 
@@ -131,22 +137,22 @@ rest_proxy_class_init (RestProxyClass *klass)
   proxy_class->bind_valist = _rest_proxy_bind_valist;
 
   pspec = g_param_spec_string ("url-format", 
-      "url-format",
-      "Format string for the RESTful url for this proxy",
-      NULL,
-      G_PARAM_READWRITE);
+                               "url-format",
+                               "Format string for the RESTful url",
+                               NULL,
+                               G_PARAM_READWRITE);
   g_object_class_install_property (object_class, 
-      PROP_URL_FORMAT,
-      pspec);
+                                   PROP_URL_FORMAT,
+                                   pspec);
 
   pspec = g_param_spec_boolean ("binding-required",
-      "binding-required",
-      "Whether the URL format string requires binding",
-      FALSE,
-      G_PARAM_READWRITE);
+                                "binding-required",
+                                "Whether the URL format requires binding",
+                                FALSE,
+                                G_PARAM_READWRITE);
   g_object_class_install_property (object_class,
-      PROP_BINDING_REQUIRED,
-      pspec);
+                                   PROP_BINDING_REQUIRED,
+                                   pspec);
 }
 
 static void
@@ -160,12 +166,12 @@ rest_proxy_init (RestProxy *self)
 
 RestProxy *
 rest_proxy_new (const gchar *url_format, 
-                gboolean binding_required)
+                gboolean     binding_required)
 {
   return g_object_new (REST_TYPE_PROXY, 
-      "url-format", url_format,
-      "binding-required", binding_required,
-      NULL);
+                       "url-format", url_format,
+                       "binding-required", binding_required,
+                       NULL);
 }
 
 static gboolean
@@ -216,14 +222,14 @@ typedef struct {
 } RestProxyCallRawAsyncClosure;
 
 static void _call_raw_async_weak_notify_cb (gpointer *data, 
-                                            GObject *dead_object);
+                                            GObject  *dead_object);
 static void _call_raw_async_finished_cb (SoupMessage *message,
-                                         gpointer userdata);
+                                         gpointer     userdata);
 
 static void
 _populate_headers_hash_table (const gchar *name,
                               const gchar *value,
-                              gpointer userdata)
+                              gpointer     userdata)
 {
   GHashTable *headers = (GHashTable *)userdata;
 
@@ -232,7 +238,7 @@ _populate_headers_hash_table (const gchar *name,
 
 static void
 _call_raw_async_finished_cb (SoupMessage *message,
-                             gpointer userdata)
+                             gpointer     userdata)
 {
   RestProxyCallRawAsyncClosure *closure;
   GHashTable *headers;
@@ -240,24 +246,25 @@ _call_raw_async_finished_cb (SoupMessage *message,
   closure = (RestProxyCallRawAsyncClosure *)userdata;
 
   headers = g_hash_table_new_full (g_str_hash, 
-      g_str_equal,
-      g_free,
-      g_free);
+                                   g_str_equal,
+                                   g_free,
+                                   g_free);
 
   /* Convert the soup headers in to hash */
   /* FIXME: Eeek..are you allowed duplicate headers? ... */
-  soup_message_headers_foreach (message->response_headers,
+  soup_message_headers_foreach (
+      message->response_headers,
       (SoupMessageHeadersForeachFunc)_populate_headers_hash_table,
       headers);
 
   closure->callback (closure->proxy,  /* proxy */
-      message->status_code,           /* status code */
-      message->reason_phrase,         /* status message */
-      headers,                        /* hash of headers */
-      message->response_body->data,   /* payload */
-      message->response_body->length, /* payload length */
-      closure->weak_object,
-      closure->userdata);
+                     message->status_code,           /* status code */
+                     message->reason_phrase,         /* status message */
+                     headers,                        /* hash of headers */
+                     message->response_body->data,   /* payload */
+                     message->response_body->length, /* payload length */
+                     closure->weak_object,
+                     closure->userdata);
 
   /* Finished with the headers. */
   g_hash_table_unref (headers);
@@ -266,8 +273,8 @@ _call_raw_async_finished_cb (SoupMessage *message,
   if (closure->weak_object)
   {
     g_object_weak_unref (closure->weak_object, 
-        (GWeakNotify)_call_raw_async_weak_notify_cb,
-        closure);
+                         (GWeakNotify)_call_raw_async_weak_notify_cb,
+                         closure);
   }
 
   g_object_unref (closure->proxy);
@@ -276,7 +283,7 @@ _call_raw_async_finished_cb (SoupMessage *message,
 
 static void 
 _call_raw_async_weak_notify_cb (gpointer *data,
-                                GObject *dead_object)
+                                GObject  *dead_object)
 {
   RestProxyCallRawAsyncClosure *closure;
 
@@ -284,23 +291,23 @@ _call_raw_async_weak_notify_cb (gpointer *data,
 
   /* Remove the "finished" signal handler on the message */
   g_signal_handlers_disconnect_by_func (closure->message,
-      _call_raw_async_finished_cb,
-      closure);
+                                        _call_raw_async_finished_cb,
+                                        closure);
 
   g_object_unref (closure->proxy);
   g_free (closure);
 }
 
 gboolean
-rest_proxy_call_raw_async_valist (RestProxy *proxy,
-                                  const gchar *function,
-                                  const gchar *method,
+rest_proxy_call_raw_async_valist (RestProxy               *proxy,
+                                  const gchar             *function,
+                                  const gchar             *method,
                                   RestProxyCallRawCallback callback,
-                                  GObject *weak_object,
-                                  gpointer userdata,
-                                  GError **error,
-                                  const gchar *first_field_name,
-                                  va_list params)
+                                  GObject                 *weak_object,
+                                  gpointer                 userdata,
+                                  GError                 **error,
+                                  const gchar             *first_field_name,
+                                  va_list                  params)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
   SoupMessage *message = NULL;
@@ -362,10 +369,10 @@ rest_proxy_call_raw_async_valist (RestProxy *proxy,
     {
       /* This function takes over the memory so no need to free */
       soup_message_set_request (message,
-          "application/x-www-form-urlencoded",
-          SOUP_MEMORY_TAKE,
-          formdata,
-          strlen (formdata));
+                                "application/x-www-form-urlencoded",
+                                SOUP_MEMORY_TAKE,
+                                formdata,
+                                strlen (formdata));
       formdata = NULL;
     }
 
@@ -381,44 +388,44 @@ rest_proxy_call_raw_async_valist (RestProxy *proxy,
 
   /* Set up the closure. */
   /* FIXME: For cancellation perhaps we should return an opaque like dbus */
-  closure = g_new0 (RestProxyCallRawAsyncClosure, 1);
-  closure->proxy = g_object_ref (proxy);
-  closure->callback = callback;
+  closure              = g_new0 (RestProxyCallRawAsyncClosure, 1);
+  closure->proxy       = g_object_ref (proxy);
+  closure->callback    = callback;
   closure->weak_object = weak_object;
-  closure->message = message;
-  closure->userdata = userdata;
+  closure->message     = message;
+  closure->userdata    = userdata;
 
   /* Weakly reference this object. We remove our callback if it goes away. */
   if (closure->weak_object)
   {
     g_object_weak_ref (closure->weak_object, 
-        (GWeakNotify)_call_raw_async_weak_notify_cb, 
-        closure);
+                       (GWeakNotify)_call_raw_async_weak_notify_cb, 
+                       closure);
   }
 
   g_signal_connect (message,
-      "finished", 
-      (GCallback)_call_raw_async_finished_cb,
-      closure);
+                    "finished", 
+                    (GCallback)_call_raw_async_finished_cb,
+                    closure);
 
   /* TODO: Should we do something in this callback ? */
   soup_session_queue_message (priv->session,
-      message,
-      NULL,
-      NULL);
+                              message,
+                              NULL,
+                              NULL);
 
   return TRUE;
 }
 
 gboolean
-rest_proxy_call_raw_async (RestProxy *proxy,
-                           const gchar *function,
-                           const gchar *method,
+rest_proxy_call_raw_async (RestProxy               *proxy,
+                           const gchar             *function,
+                           const gchar             *method,
                            RestProxyCallRawCallback callback,
-                           GObject *weak_object,
-                           gpointer userdata,
-                           GError **error,
-                           const gchar *first_field_name,
+                           GObject                 *weak_object,
+                           gpointer                 userdata,
+                           GError                 **error,
+                           const gchar             *first_field_name,
                            ...)
 
 {
@@ -427,14 +434,14 @@ rest_proxy_call_raw_async (RestProxy *proxy,
 
   va_start (params, first_field_name);
   res = rest_proxy_call_raw_async_valist (proxy,
-      function,
-      method,
-      callback,
-      weak_object,
-      userdata,
-      error,
-      first_field_name,
-      params);
+                                          function,
+                                          method,
+                                          callback,
+                                          weak_object,
+                                          userdata,
+                                          error,
+                                          first_field_name,
+                                          params);
   va_end (params);
 
   return res;
@@ -451,14 +458,14 @@ typedef struct
 } RestProxyRunRawClosure;
 
 static void
-_call_raw_async_for_run_raw_cb (RestProxy *proxy,
-                                guint status_code,
+_call_raw_async_for_run_raw_cb (RestProxy   *proxy,
+                                guint        status_code,
                                 const gchar *response_message,
-                                GHashTable *headers,
+                                GHashTable  *headers,
                                 const gchar *payload,
-                                goffset len,
-                                GObject *weak_object,
-                                gpointer userdata)
+                                goffset      len,
+                                GObject     *weak_object,
+                                gpointer     userdata)
 {
   RestProxyRunRawClosure *closure;
 
@@ -483,15 +490,15 @@ _call_raw_async_for_run_raw_cb (RestProxy *proxy,
 }
 
 gboolean
-rest_proxy_run_raw (RestProxy *proxy,
+rest_proxy_run_raw (RestProxy   *proxy,
                     const gchar *function,
                     const gchar *method,
-                    guint *status_code,
-                    gchar **response_message,
+                    guint       *status_code,
+                    gchar      **response_message,
                     GHashTable **headers,
-                    gchar **payload,
-                    goffset *len,
-                    GError **error,
+                    gchar      **payload,
+                    goffset     *len,
+                    GError     **error,
                     const gchar *first_field_name,
                     ...)
 {
@@ -500,21 +507,21 @@ rest_proxy_run_raw (RestProxy *proxy,
 
   gboolean res = TRUE;
 
-  closure = g_new0 (RestProxyRunRawClosure, 1);
-  closure->loop = g_main_loop_new (NULL, FALSE);
+  closure          = g_new0 (RestProxyRunRawClosure, 1);
+  closure->loop    = g_main_loop_new (NULL, FALSE);
   closure->payload = payload;
-  closure->len = len;
+  closure->len     = len;
 
   va_start (params, first_field_name);
   res = rest_proxy_call_raw_async_valist (proxy,
-      function,
-      method,
-      _call_raw_async_for_run_raw_cb,
-      NULL,
-      closure,
-      error,
-      first_field_name,
-      params);
+                                          function,
+                                          method,
+                                          _call_raw_async_for_run_raw_cb,
+                                          NULL,
+                                          closure,
+                                          error,
+                                          first_field_name,
+                                          params);
   va_end (params);
 
   if (!res)
@@ -612,8 +619,9 @@ rest_proxy_simple_run_valist (RestProxy *proxy,
 
 gboolean
 rest_proxy_simple_run (RestProxy *proxy, 
-                       char **payload, goffset *len,
-                       GError **error,
+                       gchar    **payload,
+                       goffset   *len,
+                       GError   **error,
                        ...)
 {
   va_list params;
