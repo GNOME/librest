@@ -109,6 +109,11 @@ rest_proxy_dispose (GObject *object)
 static void
 rest_proxy_finalize (GObject *object)
 {
+  RestProxyPrivate *priv = GET_PRIVATE (object);
+
+  g_free (priv->url);
+  g_free (priv->url_format);
+
   if (G_OBJECT_CLASS (rest_proxy_parent_class)->finalize)
     G_OBJECT_CLASS (rest_proxy_parent_class)->finalize (object);
 }
