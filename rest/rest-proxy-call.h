@@ -41,6 +41,7 @@ void rest_proxy_call_add_header (RestProxyCall *call,
                                  const gchar   *header,
                                  const gchar   *value);
 
+G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_headers (RestProxyCall *call,
                                   const char    *first_header_name,
                                   ...);
@@ -61,6 +62,7 @@ void rest_proxy_call_add_param (RestProxyCall *call,
                                 const gchar   *param,
                                 const gchar   *value);
 
+G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_params (RestProxyCall *call,
                                  ...);
 
