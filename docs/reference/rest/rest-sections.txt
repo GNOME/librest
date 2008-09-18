@@ -37,6 +37,7 @@ rest_proxy_call_add_params_from_valist
 rest_proxy_call_add_params_from_hash
 rest_proxy_call_lookup_param
 rest_proxy_call_remove_param
+rest_proxy_call_get_params
 rest_proxy_call_run
 RestProxyCallAsyncCallback
 rest_proxy_call_async
