@@ -73,6 +73,42 @@ rest_xml_parser_init (RestXmlParser *self)
 }
 
 static RestXmlNode *
+rest_xml_node_reverse_siblings (RestXmlNode *current)
+{
+  RestXmlNode *next;
+  RestXmlNode *prev = NULL;
+
+  while (current)
+  {
+    next = current->next;
+    current->next = prev;
+
+    prev = current;
+    current = next;
+  }
+
+  return prev;
+}
+
+static void
+rest_xml_node_reverse_children_siblings (RestXmlNode *node)
+{
+  GList *l, *children;
+  RestXmlNode *new_node;
+
+  children = g_hash_table_get_values (node->children);
+
+  for (l = children; l; l = l->next)
+  {
+    new_node = rest_xml_node_reverse_siblings ((RestXmlNode *)l->data);
+    g_hash_table_insert (node->children, new_node->name, new_node);
+  }
+
+  if (children)
+    g_list_free (children);
+}
+
+static RestXmlNode *
 rest_xml_node_prepend (RestXmlNode *cur_node, RestXmlNode *new_node)
 {
   g_assert (new_node->next == NULL);
@@ -167,6 +203,8 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   RestXmlNode *new_node = NULL;
   RestXmlNode *tmp_node = NULL;
   RestXmlNode *root_node = NULL;
+  RestXmlNode *node = NULL;
+
   const gchar *name = NULL;
   const gchar *attr_name = NULL;
   const gchar *attr_value = NULL;
@@ -266,7 +304,12 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                  xmlTextReaderConstLocalName (priv->reader));
 
         REST_DEBUG (XML_PARSER, "Popping from stack and updating state.");
-        g_queue_pop_head (nodes);
+
+        /* For those children that have siblings, reverse the siblings */
+        node = (RestXmlNode *)g_queue_pop_head (nodes);
+        rest_xml_node_reverse_children_siblings (node);
+
+        /* Update the current node to the new top of the stack */
         cur_node = (RestXmlNode *)g_queue_peek_head (nodes);
 
         if (cur_node)
