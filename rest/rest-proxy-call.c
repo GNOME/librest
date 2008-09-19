@@ -690,6 +690,14 @@ error:
   return res;
 }
 
+/**
+ * rest_proxy_call_get_payload_length:
+ * @call: The #RestProxyCall
+ *
+ * Get the length of the return payload.
+ *
+ * Returns: the length of the payload in bytes.
+ */ 
 goffset
 rest_proxy_call_get_payload_length (RestProxyCall *call)
 {
@@ -697,6 +705,15 @@ rest_proxy_call_get_payload_length (RestProxyCall *call)
   return priv->length;
 }
 
+/**
+ * rest_proxy_call_get_payload:
+ * @call: The #RestProxyCall
+ *
+ * Get the return payload.
+ *
+ * Returns: A pointer to the payload. This is owned by #RestProxyCall and should
+ * not be freed.
+ */ 
 const gchar *
 rest_proxy_call_get_payload (RestProxyCall *call)
 {
