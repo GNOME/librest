@@ -62,9 +62,6 @@ void rest_proxy_call_add_headers (RestProxyCall *call,
 void rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
                                               va_list        headers);
 
-void rest_proxy_call_add_headers_from_hash (RestProxyCall *call,
-                                            GHashTable    *headers);
-
 const gchar *rest_proxy_call_lookup_header (RestProxyCall *call,
                                             const gchar   *header);
 
@@ -81,9 +78,6 @@ void rest_proxy_call_add_params (RestProxyCall *call,
 
 void rest_proxy_call_add_params_from_valist (RestProxyCall *call,
                                              va_list        params);
-
-void rest_proxy_call_add_params_from_hash (RestProxyCall *call,
-                                           GHashTable    *params);
 
 const gchar *rest_proxy_call_lookup_param (RestProxyCall *call,
                                            const gchar   *param);
