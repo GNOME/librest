@@ -46,7 +46,7 @@ rest_proxy_call_get_response_headers
 rest_proxy_call_get_payload_length
 rest_proxy_call_get_payload
 rest_proxy_call_get_status_code
-rest_proxy_call_get_response_message
+rest_proxy_call_get_status_message
 <SUBSECTION Standard>
 REST_PROXY_CALL
 REST_IS_PROXY_CALL

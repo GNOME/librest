@@ -21,7 +21,7 @@ struct _RestProxyCallPrivate {
   goffset length;
   gchar *payload;
   guint status_code;
-  gchar *response_message;
+  gchar *status_message;
 
   RestProxy *proxy;
 };
@@ -108,7 +108,7 @@ rest_proxy_call_finalize (GObject *object)
   g_free (priv->function);
 
   g_free (priv->payload);
-  g_free (priv->response_message);
+  g_free (priv->status_message);
 
   if (G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize)
     G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize (object);
@@ -498,7 +498,7 @@ _call_async_finished_cb (SoupMessage *message,
   priv->length = message->response_body->length;
 
   priv->status_code = message->status_code;
-  priv->response_message = g_strdup (message->reason_phrase);
+  priv->status_message = g_strdup (message->reason_phrase);
 
   _handle_error_from_message (message, &error);
 
@@ -729,9 +729,8 @@ rest_proxy_call_get_status_code (RestProxyCall *call)
 }
 
 const gchar *
-rest_proxy_call_get_response_message (RestProxyCall *call)
+rest_proxy_call_get_status_message (RestProxyCall *call)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  return priv->response_message;
+  return priv->status_message;
 }
-

@@ -112,7 +112,7 @@ GHashTable *rest_proxy_call_get_response_headers (RestProxyCall *call);
 goffset rest_proxy_call_get_payload_length (RestProxyCall *call);
 const gchar *rest_proxy_call_get_payload (RestProxyCall *call);
 guint rest_proxy_call_get_status_code (RestProxyCall *call);
-const gchar *rest_proxy_call_get_response_message (RestProxyCall *call);
+const gchar *rest_proxy_call_get_status_message (RestProxyCall *call);
 
 G_END_DECLS
 
