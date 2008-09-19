@@ -721,6 +721,12 @@ rest_proxy_call_get_payload (RestProxyCall *call)
   return priv->payload;
 }
 
+/**
+ * rest_proxy_call_get_status_code:
+ * @call: The #RestProxyCall
+ * 
+ * Get the HTTP status code for the call.
+ */
 guint
 rest_proxy_call_get_status_code (RestProxyCall *call)
 {
@@ -728,6 +734,15 @@ rest_proxy_call_get_status_code (RestProxyCall *call)
   return priv->status_code;  
 }
 
+/**
+ * rest_proxy_call_get_status_message:
+ * @call: The #RestProxyCall
+ * 
+ * Get the human-readable HTTP status message for the call.
+ *
+ * Returns: The status message. This string is owned by #RestProxyCall and
+ * should not be freed.
+ */
 const gchar *
 rest_proxy_call_get_status_message (RestProxyCall *call)
 {
