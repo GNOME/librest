@@ -188,6 +188,15 @@ rest_proxy_call_set_function (RestProxyCall *call,
   priv->function = g_strdup (function);
 }
 
+/**
+ * rest_proxy_call_add_header:
+ * @call: The #RestProxyCall
+ * @header: The name of the header to set
+ * @value: The value of the header
+ *
+ * Add a header called @header with the value @value to the call.  If a
+ * header with this name already exists, the new value will replace the old.
+ */
 void 
 rest_proxy_call_add_header (RestProxyCall *call,
                             const gchar   *header,
@@ -201,6 +210,14 @@ rest_proxy_call_add_header (RestProxyCall *call,
 
 }
 
+/**
+ * rest_proxy_call_add_headers:
+ * @call: The #RestProxyCall
+ * @Varargs: Header name and value pairs, followed by %NULL.
+ *
+ * Add the specified header name and value pairs to the call.  If a header
+ * already exists, the new value will replace the old.
+ */
 void
 rest_proxy_call_add_headers (RestProxyCall *call,
                              const char    *first_header_name,
@@ -213,7 +230,15 @@ rest_proxy_call_add_headers (RestProxyCall *call,
   va_end (headers);
 }
 
-void 
+/**
+ * rest_proxy_call_add_headers_from_valist:
+ * @call: The #RestProxyCall
+ * @headers: Header name and value pairs, followed by %NULL.
+ *
+ * Add the specified header name and value pairs to the call.  If a header
+ * already exists, the new value will replace the old.
+ */
+void
 rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
                                          va_list        headers)
 {
@@ -227,6 +252,16 @@ rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
   }
 }
 
+/**
+ * rest_proxy_call_lookup_header:
+ * @call: The #RestProxyCall
+ * @header: The header name
+ *
+ * Get the value of the header called @header.
+ *
+ * Returns: The header value, or %NULL if it does not exist. This string is
+ * owned by the #RestProxyCall and should not be freed.
+ */
 const gchar *
 rest_proxy_call_lookup_header (RestProxyCall *call,
                                const gchar   *header)
@@ -236,6 +271,13 @@ rest_proxy_call_lookup_header (RestProxyCall *call,
   return g_hash_table_lookup (priv->headers, header);
 }
 
+/**
+ * rest_proxy_call_remove_header:
+ * @call: The #RestProxyCall
+ * @header: The header name
+ *
+ * Remove the header named @header from the call.
+ */
 void 
 rest_proxy_call_remove_header (RestProxyCall *call,
                                const gchar   *header)
@@ -251,7 +293,7 @@ rest_proxy_call_remove_header (RestProxyCall *call,
  * @param: The name of the parameter to set
  * @value: The value of the parameter
  *
- * Add a query parameter called @param with the value %value to the call.  If a
+ * Add a query parameter called @param with the value @value to the call.  If a
  * parameter with this name already exists, the new value will replace the old.
  */
 void 
