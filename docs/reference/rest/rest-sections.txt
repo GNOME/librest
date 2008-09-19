@@ -2,6 +2,7 @@
 <FILE>rest-proxy</FILE>
 <TITLE>RestProxy</TITLE>
 RestProxy
+RestProxyClass
 RestProxyCallRawCallback
 rest_proxy_new
 rest_proxy_bind
@@ -24,6 +25,7 @@ REST_PROXY_GET_CLASS
 <FILE>rest-proxy-call</FILE>
 <TITLE>RestProxyCall</TITLE>
 RestProxyCall
+RestProxyCallClass
 rest_proxy_call_set_method
 rest_proxy_call_add_header
 rest_proxy_call_add_headers
