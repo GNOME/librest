@@ -220,12 +220,11 @@ rest_proxy_call_add_header (RestProxyCall *call,
  */
 void
 rest_proxy_call_add_headers (RestProxyCall *call,
-                             const char    *first_header_name,
                              ...)
 {
   va_list headers;
 
-  va_start (headers, first_header_name);
+  va_start (headers, call);
   rest_proxy_call_add_headers_from_valist (call, headers);
   va_end (headers);
 }

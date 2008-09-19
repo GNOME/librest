@@ -57,7 +57,6 @@ void rest_proxy_call_add_header (RestProxyCall *call,
 
 G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_headers (RestProxyCall *call,
-                                  const char    *first_header_name,
                                   ...);
 
 void rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
