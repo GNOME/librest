@@ -22,12 +22,26 @@ G_BEGIN_DECLS
 #define REST_PROXY_CALL_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), REST_TYPE_PROXY_CALL, RestProxyCallClass))
 
+/**
+ * RestProxyCall:
+ *
+ * #RestProxyCall has no publicly available members.
+ */
 typedef struct {
   GObject parent;
 } RestProxyCall;
 
+/**
+ * RestProxyCallClass:
+ * @prepare: Virtual function called before making the request, This allows the
+ * call to be modified, for example to add a signature.
+ *
+ * Class structure for #RestProxy.
+ */
 typedef struct {
+  /*< private >*/
   GObjectClass parent_class;
+  /*< public >*/
   gboolean (*prepare)(RestProxyCall *call, GError **error);
 } RestProxyCallClass;
 
@@ -41,6 +55,7 @@ void rest_proxy_call_add_header (RestProxyCall *call,
                                  const gchar   *header,
                                  const gchar   *value);
 
+G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_headers (RestProxyCall *call,
                                   const char    *first_header_name,
                                   ...);
@@ -61,6 +76,7 @@ void rest_proxy_call_add_param (RestProxyCall *call,
                                 const gchar   *param,
                                 const gchar   *value);
 
+G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_params (RestProxyCall *call,
                                  ...);
 

@@ -156,6 +156,13 @@ rest_proxy_call_init (RestProxyCall *self)
                                                   g_free);
 }
 
+/**
+ * rest_proxy_call_set_method:
+ * @call: The #RestProxyCall
+ * @method: The HTTP method to use
+ *
+ * Set the HTTP method to use when making the call, for example GET or POST.
+ */
 void 
 rest_proxy_call_set_method (RestProxyCall *call,
                             const gchar   *method)
@@ -238,6 +245,15 @@ rest_proxy_call_remove_header (RestProxyCall *call,
   g_hash_table_remove (priv->headers, header);
 }
 
+/**
+ * rest_proxy_call_add_param:
+ * @call: The #RestProxyCall
+ * @param: The name of the parameter to set
+ * @value: The value of the parameter
+ *
+ * Add a query parameter called @param with the value %value to the call.  If a
+ * parameter with this name already exists, the new value will replace the old.
+ */
 void 
 rest_proxy_call_add_param (RestProxyCall *call,
                            const gchar   *param,
@@ -251,6 +267,14 @@ rest_proxy_call_add_param (RestProxyCall *call,
 
 }
 
+/**
+ * rest_proxy_call_add_params:
+ * @call: The #RestProxyCall
+ * @Varargs: Parameter name and value pairs, followed by %NULL.
+ *
+ * Add the specified parameter name and value pairs to the call.  If a parameter
+ * already exists, the new value will replace the old.
+ */
 void
 rest_proxy_call_add_params (RestProxyCall *call,
                             ...)
@@ -262,6 +286,14 @@ rest_proxy_call_add_params (RestProxyCall *call,
   va_end (params);
 }
 
+/**
+ * rest_proxy_call_add_params_from_valist:
+ * @call: The #RestProxyCall
+ * @params: Parameter name and value pairs, followed by %NULL.
+ *
+ * Add the specified parameter name and value pairs to the call.  If a parameter
+ * already exists, the new value will replace the old.
+ */
 void 
 rest_proxy_call_add_params_from_valist (RestProxyCall *call,
                                         va_list        params)
@@ -276,6 +308,16 @@ rest_proxy_call_add_params_from_valist (RestProxyCall *call,
   }
 }
 
+/**
+ * rest_proxy_call_lookup_param:
+ * @call: The #RestProxyCall
+ * @param: The paramter name
+ *
+ * Get the value of the parameter called @name.
+ *
+ * Returns: The parameter value, or %NULL if it does not exist. This string is
+ * owned by the #RestProxyCall and should not be freed.
+ */
 const gchar *
 rest_proxy_call_lookup_param (RestProxyCall *call,
                               const gchar   *param)
@@ -285,6 +327,13 @@ rest_proxy_call_lookup_param (RestProxyCall *call,
   return g_hash_table_lookup (priv->params, param);
 }
 
+/**
+ * rest_proxy_call_remove_param:
+ * @call: The #RestProxyCall
+ * @param: The paramter name
+ *
+ * Remove the parameter named @param from the call.
+ */
 void 
 rest_proxy_call_remove_param (RestProxyCall *call,
                               const gchar   *param)
@@ -294,6 +343,15 @@ rest_proxy_call_remove_param (RestProxyCall *call,
   g_hash_table_remove (priv->params, param);
 }
 
+/**
+ * rest_proxy_call_get_params:
+ * @call: The #RestProxyCall
+ *
+ * Get the parameters as a #GHashTable of parameter names to values.  The caller
+ * should call g_hash_table_unref() when they have finished using it.
+ *
+ * Returns: A #GHashTable.
+ */
 GHashTable *
 rest_proxy_call_get_params (RestProxyCall *call)
 {

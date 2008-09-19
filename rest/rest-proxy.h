@@ -23,6 +23,11 @@ G_BEGIN_DECLS
 #define REST_PROXY_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), REST_TYPE_PROXY, RestProxyClass))
 
+/**
+ * RestProxy:
+ *
+ * #RestProxy has no publicly available members.
+ */
 typedef struct {
   GObject parent;
 } RestProxy;

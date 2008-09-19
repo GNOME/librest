@@ -164,6 +164,20 @@ rest_proxy_init (RestProxy *self)
   priv->session = soup_session_async_new ();
 }
 
+/**
+ * rest_proxy_new:
+ * @url_format: the endpoint URL
+ * @binding_required: whether the URL needs to be bound before calling
+ *
+ * Create a new #RestProxy for the specified endpoint @url_format, using the
+ * %GET method.
+ *
+ * Set @binding_required to %TRUE if the URL contains string formatting
+ * operations (for example "http://foo.com/%<!-- -->s".  These must be expanded
+ * using rest_proxy_bind() before invoking the proxy.
+ *
+ * Returns: A new #RestProxy.
+ */
 RestProxy *
 rest_proxy_new (const gchar *url_format, 
                 gboolean     binding_required)
