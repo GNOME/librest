@@ -58,6 +58,39 @@ REST_PROXY_CALL_GET_CLASS
 </SECTION>
 
 <SECTION>
+<FILE>oauth-proxy</FILE>
+<TITLE>OAuthProxy</TITLE>
+OAuthProxy
+oauth_proxy_new
+OAuthProxyAuthCallback
+oauth_proxy_auth_step
+oauth_proxy_auth_step_async
+oauth_proxy_get_token
+<SUBSECTION Standard>
+OAUTH_PROXY
+OAUTH_IS_PROXY
+OAUTH_TYPE_PROXY
+oauth_proxy_get_type
+OAUTH_PROXY_CLASS
+OAUTH_IS_PROXY_CLASS
+OAUTH_PROXY_GET_CLASS
+</SECTION>
+
+<SECTION>
+<FILE>oauth-proxy-call</FILE>
+<TITLE>OAuthProxyCall</TITLE>
+OAuthProxyCall
+<SUBSECTION Standard>
+OAUTH_PROXY_CALL
+OAUTH_IS_PROXY_CALL
+OAUTH_TYPE_PROXY_CALL
+oauth_proxy_call_get_type
+OAUTH_PROXY_CALL_CLASS
+OAUTH_IS_PROXY_CALL_CLASS
+OAUTH_PROXY_CALL_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>rest-xml-parser</FILE>
 <TITLE>RestXmlParser</TITLE>
 RestXmlParser
