@@ -21,7 +21,7 @@ struct _RestProxyCallPrivate {
   goffset length;
   gchar *payload;
   guint status_code;
-  gchar *response_message;
+  gchar *status_message;
 
   RestProxy *proxy;
 };
@@ -108,7 +108,7 @@ rest_proxy_call_finalize (GObject *object)
   g_free (priv->function);
 
   g_free (priv->payload);
-  g_free (priv->response_message);
+  g_free (priv->status_message);
 
   if (G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize)
     G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize (object);
@@ -188,6 +188,15 @@ rest_proxy_call_set_function (RestProxyCall *call,
   priv->function = g_strdup (function);
 }
 
+/**
+ * rest_proxy_call_add_header:
+ * @call: The #RestProxyCall
+ * @header: The name of the header to set
+ * @value: The value of the header
+ *
+ * Add a header called @header with the value @value to the call.  If a
+ * header with this name already exists, the new value will replace the old.
+ */
 void 
 rest_proxy_call_add_header (RestProxyCall *call,
                             const gchar   *header,
@@ -201,19 +210,34 @@ rest_proxy_call_add_header (RestProxyCall *call,
 
 }
 
+/**
+ * rest_proxy_call_add_headers:
+ * @call: The #RestProxyCall
+ * @Varargs: Header name and value pairs, followed by %NULL.
+ *
+ * Add the specified header name and value pairs to the call.  If a header
+ * already exists, the new value will replace the old.
+ */
 void
 rest_proxy_call_add_headers (RestProxyCall *call,
-                             const char    *first_header_name,
                              ...)
 {
   va_list headers;
 
-  va_start (headers, first_header_name);
+  va_start (headers, call);
   rest_proxy_call_add_headers_from_valist (call, headers);
   va_end (headers);
 }
 
-void 
+/**
+ * rest_proxy_call_add_headers_from_valist:
+ * @call: The #RestProxyCall
+ * @headers: Header name and value pairs, followed by %NULL.
+ *
+ * Add the specified header name and value pairs to the call.  If a header
+ * already exists, the new value will replace the old.
+ */
+void
 rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
                                          va_list        headers)
 {
@@ -227,6 +251,16 @@ rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
   }
 }
 
+/**
+ * rest_proxy_call_lookup_header:
+ * @call: The #RestProxyCall
+ * @header: The header name
+ *
+ * Get the value of the header called @header.
+ *
+ * Returns: The header value, or %NULL if it does not exist. This string is
+ * owned by the #RestProxyCall and should not be freed.
+ */
 const gchar *
 rest_proxy_call_lookup_header (RestProxyCall *call,
                                const gchar   *header)
@@ -236,6 +270,13 @@ rest_proxy_call_lookup_header (RestProxyCall *call,
   return g_hash_table_lookup (priv->headers, header);
 }
 
+/**
+ * rest_proxy_call_remove_header:
+ * @call: The #RestProxyCall
+ * @header: The header name
+ *
+ * Remove the header named @header from the call.
+ */
 void 
 rest_proxy_call_remove_header (RestProxyCall *call,
                                const gchar   *header)
@@ -251,7 +292,7 @@ rest_proxy_call_remove_header (RestProxyCall *call,
  * @param: The name of the parameter to set
  * @value: The value of the parameter
  *
- * Add a query parameter called @param with the value %value to the call.  If a
+ * Add a query parameter called @param with the value @value to the call.  If a
  * parameter with this name already exists, the new value will replace the old.
  */
 void 
@@ -457,7 +498,7 @@ _call_async_finished_cb (SoupMessage *message,
   priv->length = message->response_body->length;
 
   priv->status_code = message->status_code;
-  priv->response_message = g_strdup (message->reason_phrase);
+  priv->status_message = g_strdup (message->reason_phrase);
 
   _handle_error_from_message (message, &error);
 
@@ -649,6 +690,14 @@ error:
   return res;
 }
 
+/**
+ * rest_proxy_call_get_payload_length:
+ * @call: The #RestProxyCall
+ *
+ * Get the length of the return payload.
+ *
+ * Returns: the length of the payload in bytes.
+ */ 
 goffset
 rest_proxy_call_get_payload_length (RestProxyCall *call)
 {
@@ -656,6 +705,15 @@ rest_proxy_call_get_payload_length (RestProxyCall *call)
   return priv->length;
 }
 
+/**
+ * rest_proxy_call_get_payload:
+ * @call: The #RestProxyCall
+ *
+ * Get the return payload.
+ *
+ * Returns: A pointer to the payload. This is owned by #RestProxyCall and should
+ * not be freed.
+ */ 
 const gchar *
 rest_proxy_call_get_payload (RestProxyCall *call)
 {
@@ -663,6 +721,12 @@ rest_proxy_call_get_payload (RestProxyCall *call)
   return priv->payload;
 }
 
+/**
+ * rest_proxy_call_get_status_code:
+ * @call: The #RestProxyCall
+ * 
+ * Get the HTTP status code for the call.
+ */
 guint
 rest_proxy_call_get_status_code (RestProxyCall *call)
 {
@@ -670,10 +734,18 @@ rest_proxy_call_get_status_code (RestProxyCall *call)
   return priv->status_code;  
 }
 
+/**
+ * rest_proxy_call_get_status_message:
+ * @call: The #RestProxyCall
+ * 
+ * Get the human-readable HTTP status message for the call.
+ *
+ * Returns: The status message. This string is owned by #RestProxyCall and
+ * should not be freed.
+ */
 const gchar *
-rest_proxy_call_get_response_message (RestProxyCall *call)
+rest_proxy_call_get_status_message (RestProxyCall *call)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  return priv->response_message;
+  return priv->status_message;
 }
-

@@ -57,14 +57,10 @@ void rest_proxy_call_add_header (RestProxyCall *call,
 
 G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_headers (RestProxyCall *call,
-                                  const char    *first_header_name,
                                   ...);
 
 void rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
                                               va_list        headers);
-
-void rest_proxy_call_add_headers_from_hash (RestProxyCall *call,
-                                            GHashTable    *headers);
 
 const gchar *rest_proxy_call_lookup_header (RestProxyCall *call,
                                             const gchar   *header);
@@ -82,9 +78,6 @@ void rest_proxy_call_add_params (RestProxyCall *call,
 
 void rest_proxy_call_add_params_from_valist (RestProxyCall *call,
                                              va_list        params);
-
-void rest_proxy_call_add_params_from_hash (RestProxyCall *call,
-                                           GHashTable    *params);
 
 const gchar *rest_proxy_call_lookup_param (RestProxyCall *call,
                                            const gchar   *param);
@@ -119,7 +112,7 @@ GHashTable *rest_proxy_call_get_response_headers (RestProxyCall *call);
 goffset rest_proxy_call_get_payload_length (RestProxyCall *call);
 const gchar *rest_proxy_call_get_payload (RestProxyCall *call);
 guint rest_proxy_call_get_status_code (RestProxyCall *call);
-const gchar *rest_proxy_call_get_response_message (RestProxyCall *call);
+const gchar *rest_proxy_call_get_status_message (RestProxyCall *call);
 
 G_END_DECLS
 
