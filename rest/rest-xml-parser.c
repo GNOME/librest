@@ -251,7 +251,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
             REST_DEBUG (XML_PARSER, "Existing node found for this name. "
                               "Prepending to the list.");
             g_hash_table_insert (cur_node->children, 
-                                 G(new_node->name),
+                                 G(tmp_node->name),
                                  rest_xml_node_prepend (tmp_node, new_node));
           } else {
             REST_DEBUG (XML_PARSER, "Unseen name. Adding to the children table.");
