@@ -137,9 +137,11 @@ rest_xml_node_free (RestXmlNode *node)
 {
   GList *l;
 
-  for (l = g_hash_table_get_values (node->children); l; l = l->next)
+  l = g_hash_table_get_values (node->children);
+  while (l)
   {
     rest_xml_node_free ((RestXmlNode *)l->data);
+    l = g_list_delete_link (l, l);
   }
 
   g_hash_table_unref (node->children);
