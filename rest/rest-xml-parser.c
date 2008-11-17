@@ -208,7 +208,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   const gchar *name = NULL;
   const gchar *attr_name = NULL;
   const gchar *attr_value = NULL;
-  GQueue *nodes = NULL;
+  GQueue nodes = G_QUEUE_INIT;
   gint res = 0;
 
   _rest_setup_debugging ();
@@ -218,7 +218,6 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                      NULL, /* URL? */
                                      NULL, /* encoding */
                                      XML_PARSE_RECOVER | XML_PARSE_NOCDATA);
-  nodes = g_queue_new ();
 
   while ((res = xmlTextReaderRead (priv->reader)) == 1)
   {
@@ -272,7 +271,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         } else {
           REST_DEBUG (XML_PARSER, "Non-empty element found."
                             "  Pushing to stack and updating current state.");
-          g_queue_push_head (nodes, new_node);
+          g_queue_push_head (&nodes, new_node);
           cur_node = new_node;
         }
 
@@ -306,11 +305,11 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         REST_DEBUG (XML_PARSER, "Popping from stack and updating state.");
 
         /* For those children that have siblings, reverse the siblings */
-        node = (RestXmlNode *)g_queue_pop_head (nodes);
+        node = (RestXmlNode *)g_queue_pop_head (&nodes);
         rest_xml_node_reverse_children_siblings (node);
 
         /* Update the current node to the new top of the stack */
-        cur_node = (RestXmlNode *)g_queue_peek_head (nodes);
+        cur_node = (RestXmlNode *)g_queue_peek_head (&nodes);
 
         if (cur_node)
         {
