@@ -123,7 +123,7 @@ rest_xml_node_new ()
   RestXmlNode *node;
 
   node = g_slice_new0 (RestXmlNode);
-  node->children = g_hash_table_new (g_str_hash, g_str_equal);
+  node->children = g_hash_table_new (NULL, NULL);
   node->attrs = g_hash_table_new_full (g_str_hash,
                                        g_str_equal,
                                        g_free,
@@ -146,7 +146,6 @@ rest_xml_node_free (RestXmlNode *node)
 
   g_hash_table_unref (node->children);
   g_hash_table_unref (node->attrs);
-  g_free (node->name);
   g_free (node->content);
   g_slice_free (RestXmlNode, node);
 }
@@ -166,12 +165,15 @@ rest_xml_node_find (RestXmlNode *start,
   RestXmlNode *tmp;
   GQueue stack = G_QUEUE_INIT;
   GList *children, *l;
+  const char *tag_interned;
+
+  tag_interned = g_intern_string (tag);
 
   g_queue_push_head (&stack, start);
 
   while ((node = g_queue_pop_head (&stack)) != NULL)
   {
-    if ((tmp = g_hash_table_lookup (node->children, tag)) != NULL)
+    if ((tmp = g_hash_table_lookup (node->children, tag_interned)) != NULL)
     {
       return tmp;
     }
@@ -231,7 +233,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         /* Create our new node for this tag */
 
         new_node = rest_xml_node_new ();
-        new_node->name = g_strdup (name);
+        new_node->name = G (g_intern_string (name));
 
         if (!root_node)
         {
@@ -244,7 +246,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
          */
         if (cur_node)
         {
-          tmp_node = g_hash_table_lookup (cur_node->children, name);
+          tmp_node = g_hash_table_lookup (cur_node->children, new_node->name);
 
           if (tmp_node)
           {
