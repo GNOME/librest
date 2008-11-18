@@ -428,6 +428,7 @@ rest_proxy_call_raw_async_valist (RestProxy               *proxy,
                               NULL,
                               NULL);
 
+  g_free (url);
   return TRUE;
 }
 
