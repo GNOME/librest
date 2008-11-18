@@ -133,21 +133,41 @@ rest_xml_node_new ()
 }
 
 void
-rest_xml_node_free (RestXmlNode *node)
+rest_xml_node_free (RestXmlNode *node_in)
 {
   GList *l;
+  RestXmlNode *next = NULL, *node;
 
-  l = g_hash_table_get_values (node->children);
-  while (l)
+  /* This node variable contains the current node we care about */
+  node = node_in;
+
+  while (node)
   {
-    rest_xml_node_free ((RestXmlNode *)l->data);
-    l = g_list_delete_link (l, l);
-  }
+    /*
+     * Save this pointer now since we are going to free the structure it
+     * contains soon.
+     */
+    next = node->next;
 
-  g_hash_table_unref (node->children);
-  g_hash_table_unref (node->attrs);
-  g_free (node->content);
-  g_slice_free (RestXmlNode, node);
+    l = g_hash_table_get_values (node->children);
+    while (l)
+    {
+      rest_xml_node_free ((RestXmlNode *)l->data);
+      l = g_list_delete_link (l, l);
+    }
+
+    g_hash_table_unref (node->children);
+    g_hash_table_unref (node->attrs);
+    g_free (node->content);
+    g_slice_free (RestXmlNode, node);
+
+    /*
+     * Free the next in the chain by updating node. If we're at the end or
+     * there are no siblings then the next = NULL definition deals with this
+     * case
+     */
+    node = next;
+  }
 }
 
 const gchar *
