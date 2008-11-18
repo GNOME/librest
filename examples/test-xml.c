@@ -6,20 +6,28 @@
 static gchar *
 _generate_attrs_output (GHashTable *attrs)
 {
-  gchar *res = "";
+  gchar *res;
+  gchar *res_old = NULL;
   GList *keys, *values, *l, *ll;
 
-  res = g_strconcat (res, "{ ", NULL);
+  res = g_strdup ("{ ");
 
   keys = g_hash_table_get_keys (attrs);
   values = g_hash_table_get_values (attrs);
 
   for (l = keys, ll = values; l; l = l->next, ll = ll->next)
   {
+    res_old = res;
     res = g_strconcat (res, l->data, ":", ll->data, " ", NULL);
+    g_free (res_old);
   }
 
+  g_list_free (keys);
+  g_list_free (values);
+
+  res_old = res;
   res = g_strconcat (res, "}", NULL);
+  g_free (res_old);
 
   return res;
 }
@@ -30,14 +38,17 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
   RestXmlNode *child;
   GList *values;
   GList *l;
+  gchar *attrs_output = NULL;
 
   do {
+    attrs_output = _generate_attrs_output (node->attrs);
     g_debug ("%*s[%s, %s, %s]", 
              depth, 
              "", 
              node->name, 
              node->content, 
-             _generate_attrs_output (node->attrs));
+             attrs_output);
+    g_free (attrs_output);
     values = g_hash_table_get_values (node->children);
     for (l = values; l; l = l->next)
     {
@@ -45,6 +56,7 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
       g_debug ("%*s%s - >", depth, "", child->name);
       _rest_xml_node_output (child, depth + 4);
     }
+    g_list_free (values);
   } while ((node = node->next) != NULL);
 }
 
@@ -101,6 +113,7 @@ main (gint argc, gchar **argv)
       NULL);
 
   g_main_loop_run (loop);
+  g_object_unref (proxy);
 
   proxy = rest_proxy_new ("http://www.flickr.com/services/rest/", FALSE);
   rest_proxy_call_raw_async (proxy,
@@ -119,6 +132,7 @@ main (gint argc, gchar **argv)
       NULL);
 
   g_main_loop_run (loop);
+  g_object_unref (proxy);
 
   g_main_loop_unref (loop);
 }
