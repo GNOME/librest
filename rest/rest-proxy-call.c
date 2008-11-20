@@ -537,19 +537,19 @@ _call_async_weak_notify_cb (gpointer *data,
                             GObject  *dead_object)
 {
   RestProxyCallAsyncClosure *closure;
-  RestProxyCallPrivate *priv;
+  GError *error = NULL;
 
   closure = (RestProxyCallAsyncClosure *)data;
-  priv = GET_PRIVATE (closure->call);
 
-  /* Remove the "finished" signal handler on the message */
-  g_signal_handlers_disconnect_by_func (closure->message,
-      _call_async_finished_cb,
-      closure);
+  /* Will end up freeing the closure */
+  rest_proxy_call_cancel (closure->call, &error);
 
-  g_object_unref (closure->call);
-  g_slice_free (RestProxyCallAsyncClosure, closure);
-  priv->cur_call_closure = NULL;
+  if (!error)
+  {
+    g_warning (G_STRLOC ": Error when cancelling call in weak notify: %s",
+               error->message);
+    g_clear_error (&error);
+  }
 }
 
 gboolean
@@ -645,6 +645,33 @@ rest_proxy_call_async (RestProxyCall                *call,
 error:
   g_free (url);
   return FALSE;
+}
+
+gboolean
+rest_proxy_call_cancel (RestProxyCall *call,
+                        GError       **error)
+{
+  RestProxyCallPrivate *priv;
+  RestProxyCallAsyncClosure *closure;
+
+  priv = GET_PRIVATE (call);
+  closure = priv->cur_call_closure;
+
+  if (closure)
+  {
+    /* Remove the "finished" signal handler on the message */
+    g_signal_handlers_disconnect_by_func (closure->message,
+        _call_async_finished_cb,
+        closure);
+
+    _rest_proxy_cancel_message (priv->proxy, closure->message);
+
+    g_object_unref (closure->call);
+    g_slice_free (RestProxyCallAsyncClosure, closure);
+  }
+
+  priv->cur_call_closure = NULL;
+  return TRUE;
 }
 
 typedef struct

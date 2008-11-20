@@ -108,6 +108,9 @@ gboolean rest_proxy_call_async (RestProxyCall                *call,
                                 gpointer                      userdata,
                                 GError                      **error);
 
+gboolean rest_proxy_call_cancel (RestProxyCall *call,
+                                 GError       **error);
+
 /* Functions for dealing with responses */
 
 const gchar *rest_proxy_call_lookup_response_header (RestProxyCall *call,

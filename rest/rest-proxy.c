@@ -344,3 +344,14 @@ _rest_proxy_queue_message (RestProxy   *proxy,
       NULL,
       NULL);
 }
+
+void
+_rest_proxy_cancel_message (RestProxy   *proxy,
+                            SoupMessage *message)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+
+  soup_session_cancel_message (priv->session,
+                               message,
+                               SOUP_STATUS_CANCELLED);
+}
