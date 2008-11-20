@@ -9,6 +9,15 @@ G_DEFINE_TYPE (RestProxyCall, rest_proxy_call, G_TYPE_OBJECT)
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_PROXY_CALL, RestProxyCallPrivate))
 
+/* Internal closure */
+typedef struct {
+  RestProxyCall *call;
+  RestProxyCallAsyncCallback callback;
+  GObject *weak_object;
+  gpointer userdata;
+  SoupMessage *message;
+} RestProxyCallAsyncClosure;
+
 typedef struct _RestProxyCallPrivate RestProxyCallPrivate;
 
 struct _RestProxyCallPrivate {
@@ -24,6 +33,8 @@ struct _RestProxyCallPrivate {
   gchar *status_message;
 
   RestProxy *proxy;
+
+  RestProxyCallAsyncClosure *cur_call_closure;
 };
 
 enum
@@ -408,13 +419,6 @@ rest_proxy_call_get_params (RestProxyCall *call)
 }
 
 
-typedef struct {
-  RestProxyCall *call;
-  RestProxyCallAsyncCallback callback;
-  GObject *weak_object;
-  gpointer userdata;
-  SoupMessage *message;
-} RestProxyCallAsyncClosure;
 
 static void _call_async_weak_notify_cb (gpointer *data, 
                                         GObject  *dead_object);
@@ -525,6 +529,7 @@ _call_async_finished_cb (SoupMessage *message,
 
   g_object_unref (closure->call);
   g_slice_free (RestProxyCallAsyncClosure, closure);
+  priv->cur_call_closure = NULL;
 }
 
 static void 
@@ -532,8 +537,10 @@ _call_async_weak_notify_cb (gpointer *data,
                             GObject  *dead_object)
 {
   RestProxyCallAsyncClosure *closure;
+  RestProxyCallPrivate *priv;
 
   closure = (RestProxyCallAsyncClosure *)data;
+  priv = GET_PRIVATE (closure->call);
 
   /* Remove the "finished" signal handler on the message */
   g_signal_handlers_disconnect_by_func (closure->message,
@@ -542,6 +549,7 @@ _call_async_weak_notify_cb (gpointer *data,
 
   g_object_unref (closure->call);
   g_slice_free (RestProxyCallAsyncClosure, closure);
+  priv->cur_call_closure = NULL;
 }
 
 gboolean
@@ -563,6 +571,13 @@ rest_proxy_call_async (RestProxyCall                *call,
   priv = GET_PRIVATE (call);
   g_assert (priv->proxy);
   call_class = REST_PROXY_CALL_GET_CLASS (call);
+
+  if (priv->cur_call_closure)
+  {
+    /* FIXME: Use GError here */
+    g_critical (G_STRLOC ": Call already in progress.");
+    return FALSE;
+  }
 
   bound_url =_rest_proxy_get_bound_url (priv->proxy);
 
@@ -607,6 +622,8 @@ rest_proxy_call_async (RestProxyCall                *call,
   closure->weak_object = weak_object;
   closure->message = message;
   closure->userdata = userdata;
+
+  priv->cur_call_closure = closure;
 
   /* Weakly reference this object. We remove our callback if it goes away. */
   if (closure->weak_object)
