@@ -86,15 +86,6 @@ typedef enum {
 
 GQuark rest_proxy_error_quark (void);
 
-typedef void (*RestProxyCallRawCallback)(RestProxy   *proxy, 
-                                         guint        status_code, 
-                                         const gchar *response_message,
-                                         GHashTable  *headers,
-                                         const gchar *payload,
-                                         goffset      len,
-                                         GObject     *weak_object,
-                                         gpointer     userdata);
-
 GType rest_proxy_get_type (void);
 
 RestProxy *rest_proxy_new (const gchar *url_format, 
@@ -105,40 +96,6 @@ gboolean rest_proxy_bind (RestProxy *proxy,
 
 gboolean rest_proxy_bind_valist (RestProxy *proxy,
                                  va_list    params);
-G_GNUC_DEPRECATED
-gboolean rest_proxy_call_raw_async (RestProxy               *proxy,
-                                    const gchar             *function,
-                                    const gchar             *method,
-                                    RestProxyCallRawCallback callback,
-                                    GObject                 *weak_object,
-                                    gpointer                 userdata,
-                                    GError                 **error,
-                                    const gchar             *first_field_name,
-                                    ...);
-
-G_GNUC_DEPRECATED
-gboolean rest_proxy_call_raw_async_valist (RestProxy               *proxy,
-                                           const gchar             *function,
-                                           const gchar             *method,
-                                           RestProxyCallRawCallback callback,
-                                           GObject                 *weak_object,
-                                           gpointer                 userdata,
-                                           GError                 **error,
-                                           const gchar             *first_field_name,
-                                           va_list                  params);
-
-G_GNUC_DEPRECATED
-gboolean rest_proxy_run_raw (RestProxy   *proxy,
-                             const gchar *function,
-                             const gchar *method,
-                             guint       *status_code,
-                             gchar      **response_message,
-                             GHashTable **headers,
-                             gchar      **payload,
-                             goffset     *len,
-                             GError     **error,
-                             const gchar *first_field_name,
-                             ...);
 
 RestProxyCall *rest_proxy_new_call (RestProxy *proxy);
 
