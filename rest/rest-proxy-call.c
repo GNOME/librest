@@ -32,6 +32,12 @@ enum
   PROP_PROXY
 };
 
+GQuark
+rest_proxy_call_error_quark (void)
+{
+  return g_quark_from_static_string ("rest-proxy-call-error-quark");
+}
+
 static void
 rest_proxy_call_get_property (GObject    *object,
                               guint       property_id,

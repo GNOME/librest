@@ -45,6 +45,12 @@ typedef struct {
   gboolean (*prepare)(RestProxyCall *call, GError **error);
 } RestProxyCallClass;
 
+#define REST_PROXY_CALL_ERROR rest_proxy_call_error_quark ()
+
+typedef enum {
+  REST_PROXY_CALL_FAILED
+} RestProxyCallError;
+
 GType rest_proxy_call_get_type (void);
 
 /* Functions for dealing with request */
