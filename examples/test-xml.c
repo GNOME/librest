@@ -61,20 +61,21 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
 }
 
 static void
-proxy_call_raw_async_cb (RestProxy *proxy,
-                         guint status_code,
-                         const gchar *response_message,
-                         GHashTable *headers,
-                         const gchar *payload,
-                         goffset len,
-                         GObject *weak_object,
-                         gpointer userdata)
+proxy_call_raw_async_cb (RestProxyCall *call,
+                         GError        *error,
+                         GObject       *weak_object,
+                         gpointer       userdata)
 {
   RestXmlParser *parser;
   RestXmlNode *node;
+  const gchar *payload;
+  goffset len;
 
   write (1, payload, len);
   parser = rest_xml_parser_new ();
+
+  payload = rest_proxy_call_get_payload (call);
+  len = rest_proxy_call_get_payload_length (call);
   node = rest_xml_parser_parse_from_data (parser, payload, len);
 
   _rest_xml_node_output (node, 0);
@@ -87,6 +88,7 @@ gint
 main (gint argc, gchar **argv)
 {
   RestProxy *proxy;
+  RestProxyCall *call;
   GMainLoop *loop;
   gchar *payload;
   gssize len;
@@ -97,41 +99,37 @@ main (gint argc, gchar **argv)
   loop = g_main_loop_new (NULL, FALSE);
 
   proxy = rest_proxy_new ("http://www.flickr.com/services/rest/", FALSE);
-  rest_proxy_call_raw_async (proxy,
-      NULL,
-      "GET",
-      proxy_call_raw_async_cb,
-      NULL,
-      loop,
-      NULL,
-      "method",
-      "flickr.photos.getInfo",
-      "api_key",
-      "314691be2e63a4d58994b2be01faacfb",
-      "photo_id",
-      "2658808091",
-      NULL);
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_method (call, "GET");
+  rest_proxy_call_add_params (call,
+                              "method", "flickr.photos.getInfo",
+                              "api_key", "314691be2e63a4d58994b2be01faacfb",
+                              "photo_id", "2658808091",
+                              NULL);
+  rest_proxy_call_async (call, 
+                         proxy_call_raw_async_cb,
+                         NULL,
+                         loop,
+                         NULL);
 
   g_main_loop_run (loop);
-  g_object_unref (proxy);
+  g_object_unref (call);
 
-  proxy = rest_proxy_new ("http://www.flickr.com/services/rest/", FALSE);
-  rest_proxy_call_raw_async (proxy,
-      NULL,
-      "GET",
-      proxy_call_raw_async_cb,
-      NULL,
-      loop,
-      NULL,
-      "method",
-      "flickr.people.getPublicPhotos",
-      "api_key",
-      "314691be2e63a4d58994b2be01faacfb",
-      "user_id",
-      "66598853@N00",
-      NULL);
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_method (call, "GET");
+  rest_proxy_call_add_params (call,
+                              "method", "flickr.people.getPublicPhotos",
+                              "api_key", "314691be2e63a4d58994b2be01faacfb",
+                              "user_id","66598853@N00", 
+                              NULL);
+  rest_proxy_call_async (call, 
+                         proxy_call_raw_async_cb,
+                         NULL,
+                         loop,
+                         NULL);
 
   g_main_loop_run (loop);
+  g_object_unref (call);
   g_object_unref (proxy);
 
   g_main_loop_unref (loop);
