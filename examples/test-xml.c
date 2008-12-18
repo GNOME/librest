@@ -79,7 +79,7 @@ proxy_call_raw_async_cb (RestProxyCall *call,
   node = rest_xml_parser_parse_from_data (parser, payload, len);
 
   _rest_xml_node_output (node, 0);
-  rest_xml_node_free (node);
+  rest_xml_node_unref (node);
   g_object_unref (parser);
   g_main_loop_quit ((GMainLoop *)userdata);
 }
