@@ -117,12 +117,25 @@ rest_xml_node_prepend (RestXmlNode *cur_node, RestXmlNode *new_node)
   return new_node;
 }
 
+GType
+rest_xml_node_get_type (void)
+{
+  static GType type = 0;
+  if (G_UNLIKELY (type == 0)) {
+    type = g_boxed_type_register_static ("RestXmlNode",
+                                         (GBoxedCopyFunc)rest_xml_node_ref,
+                                         (GBoxedFreeFunc)rest_xml_node_unref);
+  }
+  return type;
+}
+
 RestXmlNode *
 rest_xml_node_new ()
 {
   RestXmlNode *node;
 
   node = g_slice_new0 (RestXmlNode);
+  node->ref_count = 1;
   node->children = g_hash_table_new (NULL, NULL);
   node->attrs = g_hash_table_new_full (g_str_hash,
                                        g_str_equal,
@@ -132,42 +145,61 @@ rest_xml_node_new ()
   return node;
 }
 
-void
-rest_xml_node_free (RestXmlNode *node_in)
+RestXmlNode *
+rest_xml_node_ref (RestXmlNode *node)
 {
-  GList *l;
-  RestXmlNode *next = NULL, *node;
+  g_return_val_if_fail (node, NULL);
+  g_return_val_if_fail (node->ref_count > 0, NULL);
 
-  /* This node variable contains the current node we care about */
-  node = node_in;
+  g_atomic_int_inc (&node->ref_count);
 
-  while (node)
-  {
-    /*
-     * Save this pointer now since we are going to free the structure it
-     * contains soon.
-     */
-    next = node->next;
+  return node;
+}
 
-    l = g_hash_table_get_values (node->children);
-    while (l)
+void
+rest_xml_node_unref (RestXmlNode *node)
+{
+  g_return_if_fail (node);
+  g_return_if_fail (node->ref_count > 0);
+
+  if (g_atomic_int_dec_and_test (&node->ref_count)) {
+    GList *l;
+    RestXmlNode *next = NULL;
+
+    while (node)
     {
-      rest_xml_node_free ((RestXmlNode *)l->data);
-      l = g_list_delete_link (l, l);
+        /*
+         * Save this pointer now since we are going to free the structure it
+         * contains soon.
+         */
+      next = node->next;
+
+      l = g_hash_table_get_values (node->children);
+      while (l)
+      {
+        rest_xml_node_unref ((RestXmlNode *)l->data);
+        l = g_list_delete_link (l, l);
+      }
+
+      g_hash_table_unref (node->children);
+      g_hash_table_unref (node->attrs);
+      g_free (node->content);
+      g_slice_free (RestXmlNode, node);
+
+      /*
+       * Free the next in the chain by updating node. If we're at the end or
+       * there are no siblings then the next = NULL definition deals with this
+       * case
+       */
+      node = next;
     }
-
-    g_hash_table_unref (node->children);
-    g_hash_table_unref (node->attrs);
-    g_free (node->content);
-    g_slice_free (RestXmlNode, node);
-
-    /*
-     * Free the next in the chain by updating node. If we're at the end or
-     * there are no siblings then the next = NULL definition deals with this
-     * case
-     */
-    node = next;
   }
+}
+
+G_GNUC_DEPRECATED void
+rest_xml_node_free (RestXmlNode *node)
+{
+  rest_xml_node_unref (node);
 }
 
 const gchar *
@@ -354,5 +386,3 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   xmlTextReaderClose (priv->reader);
   return root_node;
 }
-
-

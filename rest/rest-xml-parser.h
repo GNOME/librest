@@ -22,6 +22,8 @@ G_BEGIN_DECLS
 #define REST_XML_PARSER_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), REST_TYPE_XML_PARSER, RestXmlParserClass))
 
+#define REST_TYPE_XML_NODE rest_xml_node_get_type ()
+
 typedef struct {
   GObject parent;
 } RestXmlParser;
@@ -32,6 +34,7 @@ typedef struct {
 
 typedef struct _RestXmlNode RestXmlNode;
 struct _RestXmlNode {
+  volatile int ref_count;
   gchar *name;
   gchar *content;
   GHashTable *children;
@@ -41,13 +44,18 @@ struct _RestXmlNode {
 
 GType rest_xml_parser_get_type (void);
 
-RestXmlNode *rest_xml_node_new (void);
-void rest_xml_node_free (RestXmlNode *node);
-
 RestXmlParser *rest_xml_parser_new (void);
 RestXmlNode *rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                               const gchar   *data,
                                               goffset        len);
+
+GType rest_xml_node_get_type (void);
+
+RestXmlNode *rest_xml_node_new (void);
+
+RestXmlNode * rest_xml_node_ref (RestXmlNode *node);
+void rest_xml_node_unref (RestXmlNode *node);
+G_GNUC_DEPRECATED void rest_xml_node_free (RestXmlNode *node);
 
 const gchar *rest_xml_node_get_attr (RestXmlNode *node,
                                      const gchar *attr_name);
