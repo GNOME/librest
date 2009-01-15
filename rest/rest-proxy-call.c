@@ -763,6 +763,51 @@ error:
 }
 
 /**
+ * rest_proxy_call_lookup_response_header
+ *
+ * @call: The #RestProxyCall
+ * @header: The name of the header to lookup.
+ *
+ * Returns: The string value of the header @header or NULL if that header is
+ * not present or there are no headers.
+ */
+const gchar *
+rest_proxy_call_lookup_response_header (RestProxyCall *call,
+                                        const gchar   *header)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+
+  if (!priv->response_headers)
+  {
+    return NULL;
+  }
+
+  return g_hash_table_lookup (priv->response_headers, header);
+}
+
+/**
+ * rest_proxy_call_get_response_headers
+ *
+ * @call: The #RestProxyCall
+ *
+ * Returns: A pointer to a hash table of headers. This hash table must not be
+ * changed. You should call g_hash_table_unref() when you have finished with
+ * it.
+ */
+GHashTable *
+rest_proxy_call_get_response_headers (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+
+  if (!priv->response_headers)
+  {
+    return NULL;
+  }
+
+  return g_hash_table_ref (priv->response_headers);
+}
+
+/**
  * rest_proxy_call_get_payload_length:
  * @call: The #RestProxyCall
  *
