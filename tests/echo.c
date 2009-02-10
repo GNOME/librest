@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
@@ -29,6 +30,18 @@ server_callback (SoupServer *server, SoupMessage *msg,
     soup_message_set_response (msg, "text/plain", SOUP_MEMORY_TAKE,
                                value, strlen (value));
     soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+  else if (g_str_equal (path, "/error")) {
+    const char *value;
+    int status;
+
+    value = g_hash_table_lookup (query, "status");
+    if (value) {
+      status = atoi (value);
+      soup_message_set_status (msg, status ?: SOUP_STATUS_INTERNAL_SERVER_ERROR);
+    } else {
+      soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+    }
   }
 }
 
@@ -134,6 +147,32 @@ reverse_test (RestProxy *proxy)
   }
 }
 
+static void
+error_test (RestProxy *proxy, int status)
+{
+  RestProxyCall *call;
+  GError *error = NULL;
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "error");
+  rest_proxy_call_add_param (call, "status", g_strdup_printf ("%d", status));
+
+  if (rest_proxy_call_run (call, NULL, &error)) {
+    g_printerr ("Call succeeded should have failed");
+    errors++;
+    g_object_unref (call);
+    return;
+  }
+
+  if (rest_proxy_call_get_status_code (call) != status) {
+    g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
+    errors++;
+    return;
+  }
+
+  g_object_unref (call);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -158,6 +197,8 @@ main (int argc, char **argv)
   ping_test (proxy);
   echo_test (proxy);
   reverse_test (proxy);
+  error_test (proxy, SOUP_STATUS_BAD_REQUEST);
+  error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
 
   return errors != 0;
 }
