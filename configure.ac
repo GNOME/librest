@@ -30,6 +30,7 @@ AC_OUTPUT([
         docs/Makefile
         docs/reference/Makefile
         docs/reference/rest/Makefile
+        tests/Makefile
         rest.pc
 ])
 

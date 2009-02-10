@@ -1,4 +1,4 @@
-SUBDIRS = rest examples docs
+SUBDIRS = rest examples docs tests
 
 pkgconfig_DATA = rest.pc
 pkgconfigdir   = $(libdir)/pkgconfig
