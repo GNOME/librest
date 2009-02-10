@@ -592,8 +592,8 @@ rest_proxy_call_async (RestProxyCall                *call,
 {
   RestProxyCallPrivate *priv;
   RestProxyCallClass *call_class;
-  const gchar *bound_url;
-  gchar *url = NULL, *user_agent = NULL;
+  const gchar *bound_url, *user_agent;
+  gchar *url = NULL;
   SoupMessage *message;
   RestProxyCallAsyncClosure *closure;
   GError *error = NULL;
@@ -648,7 +648,7 @@ rest_proxy_call_async (RestProxyCall                *call,
                                              priv->params);
 
   /* Set the user agent, if one was set in the proxy */
-  g_object_get (priv->proxy, "user-agent", &user_agent, NULL);
+  user_agent = rest_proxy_get_user_agent (priv->proxy);
   if (user_agent) {
     soup_message_headers_append (message->request_headers, "User-Agent", user_agent);
   }
