@@ -574,6 +574,15 @@ _call_async_weak_notify_cb (gpointer *data,
   }
 }
 
+static void
+set_header (gpointer key, gpointer value, gpointer user_data)
+{
+  const char *name = key;
+  SoupMessageHeaders *headers = user_data;
+
+  soup_message_headers_replace (headers, name, value);
+}
+
 gboolean
 rest_proxy_call_async (RestProxyCall                *call,
                        RestProxyCallAsyncCallback    callback,
@@ -643,6 +652,9 @@ rest_proxy_call_async (RestProxyCall                *call,
   if (user_agent) {
     soup_message_headers_append (message->request_headers, "User-Agent", user_agent);
   }
+
+  /* Set the headers */
+  g_hash_table_foreach (priv->headers, set_header, message->request_headers);
 
   closure = g_slice_new0 (RestProxyCallAsyncClosure);
   closure->call = g_object_ref (call);
