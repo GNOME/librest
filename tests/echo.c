@@ -9,14 +9,18 @@ server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
 {
-  if (g_str_equal (path, "/echo")) {
+  if (g_str_equal (path, "/ping")) {
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+  else if (g_str_equal (path, "/echo")) {
     const char *value;
 
     value = g_hash_table_lookup (query, "value");
     soup_message_set_response (msg, "text/plain", SOUP_MEMORY_COPY,
                                value, strlen (value));
     soup_message_set_status (msg, SOUP_STATUS_OK);
-  } else if (g_str_equal (path, "/reverse")) {
+  }
+  else if (g_str_equal (path, "/reverse")) {
     char *value;
 
     value = g_strdup (g_hash_table_lookup (query, "value"));
@@ -26,6 +30,32 @@ server_callback (SoupServer *server, SoupMessage *msg,
                                value, strlen (value));
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
+}
+
+static void
+ping_test (RestProxy *proxy)
+{
+  RestProxyCall *call;
+  GError *error = NULL;
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "ping");
+
+  if (!rest_proxy_call_run (call, NULL, &error)) {
+    g_printerr ("Call failed: %s\n", error->message);
+    g_error_free (error);
+    errors++;
+    g_object_unref (call);
+    return;
+  }
+
+  if (rest_proxy_call_get_payload_length (call) != 0) {
+    g_printerr ("wrong length returned\n");
+    errors++;
+    return;
+  }
+
+  g_object_unref (call);
 }
 
 static void
@@ -109,6 +139,7 @@ main (int argc, char **argv)
   proxy = rest_proxy_new (url, FALSE);
   g_free (url);
 
+  ping_test (proxy);
   echo_test (proxy);
   reverse_test (proxy);
 
