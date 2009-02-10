@@ -73,6 +73,8 @@ typedef enum {
   REST_PROXY_CALL_FAILED
 } RestProxyCallError;
 
+GQuark rest_proxy_call_error_quark (void);
+
 GType rest_proxy_call_get_type (void);
 
 /* Functions for dealing with request */
