@@ -148,6 +148,33 @@ reverse_test (RestProxy *proxy)
 }
 
 static void
+status_ok_test (RestProxy *proxy, int status)
+{
+  RestProxyCall *call;
+  GError *error = NULL;
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "status");
+  rest_proxy_call_add_param (call, "status", g_strdup_printf ("%d", status));
+
+  if (!rest_proxy_call_run (call, NULL, &error)) {
+    g_printerr ("Call failed: %s\n", error->message);
+    g_error_free (error);
+    errors++;
+    g_object_unref (call);
+    return;
+  }
+
+  if (rest_proxy_call_get_status_code (call) != status) {
+    g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
+    errors++;
+    return;
+  }
+
+  g_object_unref (call);
+}
+
+static void
 status_error_test (RestProxy *proxy, int status)
 {
   RestProxyCall *call;
@@ -197,6 +224,9 @@ main (int argc, char **argv)
   ping_test (proxy);
   echo_test (proxy);
   reverse_test (proxy);
+  status_ok_test (proxy, SOUP_STATUS_OK);
+  status_ok_test (proxy, SOUP_STATUS_NO_CONTENT);
+  /* status_ok_test (proxy, SOUP_STATUS_MULTIPLE_CHOICES); */
   status_error_test (proxy, SOUP_STATUS_BAD_REQUEST);
   status_error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
 
