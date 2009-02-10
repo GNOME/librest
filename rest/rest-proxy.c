@@ -36,6 +36,7 @@ typedef struct _RestProxyPrivate RestProxyPrivate;
 struct _RestProxyPrivate {
   gchar *url_format;
   gchar *url;
+  gchar *user_agent;
   gboolean binding_required;
   SoupSession *session;
 };
@@ -44,7 +45,8 @@ enum
 {
   PROP0 = 0,
   PROP_URL_FORMAT,
-  PROP_BINDING_REQUIRED
+  PROP_BINDING_REQUIRED,
+  PROP_USER_AGENT
 };
 
 static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
@@ -79,6 +81,9 @@ rest_proxy_get_property (GObject   *object,
     case PROP_BINDING_REQUIRED:
       g_value_set_boolean (value, priv->binding_required);
       break;
+    case PROP_USER_AGENT:
+      g_value_set_string (value, priv->user_agent);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -108,6 +113,10 @@ rest_proxy_set_property (GObject      *object,
       g_free (priv->url);
       priv->url = NULL;
       break;
+    case PROP_USER_AGENT:
+      g_free (priv->user_agent);
+      priv->user_agent = g_value_dup_string (value);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -135,6 +144,7 @@ rest_proxy_finalize (GObject *object)
 
   g_free (priv->url);
   g_free (priv->url_format);
+  g_free (priv->user_agent);
 
   if (G_OBJECT_CLASS (rest_proxy_parent_class)->finalize)
     G_OBJECT_CLASS (rest_proxy_parent_class)->finalize (object);
@@ -174,6 +184,15 @@ rest_proxy_class_init (RestProxyClass *klass)
                                 G_PARAM_READWRITE);
   g_object_class_install_property (object_class,
                                    PROP_BINDING_REQUIRED,
+                                   pspec);
+
+  pspec = g_param_spec_string ("user-agent",
+                               "user-agent",
+                               "The User-Agent of the client",
+                               NULL,
+                               G_PARAM_READWRITE);
+  g_object_class_install_property (object_class,
+                                   PROP_USER_AGENT,
                                    pspec);
 }
 
@@ -247,6 +266,12 @@ rest_proxy_bind (RestProxy *proxy, ...)
   va_end (params);
 
   return res;
+}
+
+void
+rest_proxy_set_user_agent (RestProxy *proxy, const char *user_agent)
+{
+  g_object_set (proxy, "user-agent", user_agent, NULL);
 }
 
 static RestProxyCall *
