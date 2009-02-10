@@ -1,8 +1,8 @@
-TESTS = echo
+TESTS = proxy
 
 AM_CPPFLAGS = $(SOUP_CFLAGS) -I$(top_srcdir)
 AM_LDFLAGS = $(SOUP_LIBS) ../rest/librest.la
 
-check_PROGRAMS = echo
+check_PROGRAMS = proxy
 
-echo_SOURCES = echo.c
+proxy_SOURCES = proxy.c
