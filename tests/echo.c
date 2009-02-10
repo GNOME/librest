@@ -31,7 +31,7 @@ server_callback (SoupServer *server, SoupMessage *msg,
                                value, strlen (value));
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
-  else if (g_str_equal (path, "/error")) {
+  else if (g_str_equal (path, "/status")) {
     const char *value;
     int status;
 
@@ -148,13 +148,13 @@ reverse_test (RestProxy *proxy)
 }
 
 static void
-error_test (RestProxy *proxy, int status)
+status_error_test (RestProxy *proxy, int status)
 {
   RestProxyCall *call;
   GError *error = NULL;
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "error");
+  rest_proxy_call_set_function (call, "status");
   rest_proxy_call_add_param (call, "status", g_strdup_printf ("%d", status));
 
   if (rest_proxy_call_run (call, NULL, &error)) {
@@ -197,8 +197,8 @@ main (int argc, char **argv)
   ping_test (proxy);
   echo_test (proxy);
   reverse_test (proxy);
-  error_test (proxy, SOUP_STATUS_BAD_REQUEST);
-  error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
+  status_error_test (proxy, SOUP_STATUS_BAD_REQUEST);
+  status_error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
 
   return errors != 0;
 }
