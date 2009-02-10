@@ -93,11 +93,11 @@ proxy_call_raw_async_cb (RestProxyCall *call,
   const gchar *payload;
   goffset len;
 
-  write (1, payload, len);
   parser = rest_xml_parser_new ();
 
   payload = rest_proxy_call_get_payload (call);
   len = rest_proxy_call_get_payload_length (call);
+  write (1, payload, len);
   node = rest_xml_parser_parse_from_data (parser, payload, len);
 
   _rest_xml_node_output (node, 0);
@@ -112,8 +112,6 @@ main (gint argc, gchar **argv)
   RestProxy *proxy;
   RestProxyCall *call;
   GMainLoop *loop;
-  gchar *payload;
-  gssize len;
 
   g_type_init ();
   g_thread_init (NULL);
