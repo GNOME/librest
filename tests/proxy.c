@@ -154,7 +154,7 @@ echo_test (RestProxy *proxy)
     errors++;
     return;
   }
-  if (strcmp ("echome", rest_proxy_call_get_payload (call)) != 0) {
+  if (g_strcmp0 ("echome", rest_proxy_call_get_payload (call)) != 0) {
     g_printerr ("wrong string returned\n");
     errors++;
     return;
@@ -189,7 +189,7 @@ reverse_test (RestProxy *proxy)
     errors++;
     return;
   }
-  if (strcmp ("emesrever", rest_proxy_call_get_payload (call)) != 0) {
+  if (g_strcmp0 ("emesrever", rest_proxy_call_get_payload (call)) != 0) {
     g_printerr ("wrong string returned\n");
     errors++;
     return;
