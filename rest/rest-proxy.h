@@ -121,6 +121,8 @@ gboolean rest_proxy_bind_valist (RestProxy *proxy,
 
 void rest_proxy_set_user_agent (RestProxy *proxy, const char *user_agent);
 
+const gchar *rest_proxy_get_user_agent (RestProxy *proxy);
+
 RestProxyCall *rest_proxy_new_call (RestProxy *proxy);
 
 G_GNUC_NULL_TERMINATED

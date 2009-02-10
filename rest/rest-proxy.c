@@ -274,6 +274,14 @@ rest_proxy_set_user_agent (RestProxy *proxy, const char *user_agent)
   g_object_set (proxy, "user-agent", user_agent, NULL);
 }
 
+const gchar *
+rest_proxy_get_user_agent (RestProxy *proxy)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+
+  return priv->user_agent;
+}
+
 static RestProxyCall *
 _rest_proxy_new_call (RestProxy *proxy)
 {
