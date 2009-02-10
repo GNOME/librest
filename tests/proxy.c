@@ -24,7 +24,6 @@
  * TODO:
  * - port to gtest
  * - decide if status 3xx is success or failure
- * - test user agent handling
  * - test query params
  * - test request headers
  * - test response headers
@@ -75,6 +74,22 @@ server_callback (SoupServer *server, SoupMessage *msg,
       soup_message_set_status (msg, status ?: SOUP_STATUS_INTERNAL_SERVER_ERROR);
     } else {
       soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+    }
+  }
+  else if (g_str_equal (path, "/useragent/none")) {
+    if (soup_message_headers_get (msg->request_headers, "User-Agent") == NULL) {
+      soup_message_set_status (msg, SOUP_STATUS_OK);
+    } else {
+      soup_message_set_status (msg, SOUP_STATUS_EXPECTATION_FAILED);
+    }
+  }
+  else if (g_str_equal (path, "/useragent/testsuite")) {
+    const char *value;
+    value = soup_message_headers_get (msg->request_headers, "User-Agent");
+    if (g_strcmp0 (value, "TestSuite-1.0") == 0) {
+      soup_message_set_status (msg, SOUP_STATUS_OK);
+    } else {
+      soup_message_set_status (msg, SOUP_STATUS_EXPECTATION_FAILED);
     }
   }
 }
@@ -234,6 +249,32 @@ status_error_test (RestProxy *proxy, int status)
   g_object_unref (call);
 }
 
+static void
+test_status_ok (RestProxy *proxy, const char *function)
+{
+  RestProxyCall *call;
+  GError *error = NULL;
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, function);
+
+  if (!rest_proxy_call_run (call, NULL, &error)) {
+    g_printerr ("%s call failed: %s\n", function, error->message);
+    g_error_free (error);
+    errors++;
+    g_object_unref (call);
+    return;
+  }
+
+  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
+    g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
+    errors++;
+    return;
+  }
+
+  g_object_unref (call);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -263,6 +304,10 @@ main (int argc, char **argv)
   /* status_ok_test (proxy, SOUP_STATUS_MULTIPLE_CHOICES); */
   status_error_test (proxy, SOUP_STATUS_BAD_REQUEST);
   status_error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
+
+  test_status_ok (proxy, "useragent/none");
+  rest_proxy_set_user_agent (proxy, "TestSuite-1.0");
+  test_status_ok (proxy, "useragent/testsuite");
 
   return errors != 0;
 }
