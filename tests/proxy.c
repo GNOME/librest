@@ -20,6 +20,16 @@
  *
  */
 
+/*
+ * TODO:
+ * - port to gtest
+ * - decide if status 3xx is success or failure
+ * - test user agent handling
+ * - test query params
+ * - test request headers
+ * - test response headers
+ */
+
 #include <config.h>
 
 #include <string.h>
