@@ -82,7 +82,7 @@ void rest_proxy_call_set_method (RestProxyCall *call,
                                  const gchar   *method);
 
 void rest_proxy_call_set_function (RestProxyCall *call,
-                              const gchar   *function);
+                                   const gchar   *function);
 
 void rest_proxy_call_add_header (RestProxyCall *call,
                                  const gchar   *header,
