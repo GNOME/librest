@@ -49,6 +49,12 @@ ping_test (RestProxy *proxy)
     return;
   }
 
+  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
+    g_printerr ("wrong response code\n");
+    errors++;
+    return;
+  }
+
   if (rest_proxy_call_get_payload_length (call) != 0) {
     g_printerr ("wrong length returned\n");
     errors++;
@@ -76,6 +82,11 @@ echo_test (RestProxy *proxy)
     return;
   }
 
+  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
+    g_printerr ("wrong response code\n");
+    errors++;
+    return;
+  }
   if (rest_proxy_call_get_payload_length (call) != 6) {
     g_printerr ("wrong length returned\n");
     errors++;
@@ -106,6 +117,11 @@ reverse_test (RestProxy *proxy)
     return;
   }
 
+  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
+    g_printerr ("wrong response code\n");
+    errors++;
+    return;
+  }
   if (rest_proxy_call_get_payload_length (call) != 9) {
     g_printerr ("wrong length returned\n");
     errors++;
