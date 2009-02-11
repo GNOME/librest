@@ -20,8 +20,13 @@
  *
  */
 
-#include <libsoup/soup.h>
+#include <config.h>
 #include <string.h>
+
+#include <libsoup/soup.h>
+#if WITH_GNOME
+#include <libsoup/soup-gnome.h>
+#endif
 
 #include "rest-proxy.h"
 #include "rest-private.h"
@@ -201,8 +206,11 @@ rest_proxy_init (RestProxy *self)
 {
   RestProxyPrivate *priv = GET_PRIVATE (self);
 
-  /* TODO: Use proxy settings, etc etc... */
   priv->session = soup_session_async_new ();
+#if WITH_GNOME
+  soup_session_add_feature_by_type (priv->session,
+                                    SOUP_TYPE_PROXY_RESOLVER_GNOME);
+#endif
 }
 
 /**
