@@ -18,6 +18,20 @@ PKG_CHECK_MODULES(SOUP, libsoup-2.4)
 PKG_CHECK_MODULES(XML, libxml-2.0)
 PKG_CHECK_MODULES(GTHREAD, gthread-2.0)
 
+AC_MSG_CHECKING([whether to use the GNOME environment])
+AC_ARG_WITH([gnome],[AS_HELP_STRING([--without-gnome], [disable support for GNOME environment])],
+            [], [with_gnome=yes])
+
+AS_IF(
+        [test "$with_gnome" = yes],
+        [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([WITH_GNOME], 1, [Use GNOME])
+        PKG_CHECK_MODULES(SOUP_GNOME, libsoup-gnome-2.4 >= 2.25.1)
+        ],
+        AC_MSG_RESULT([no])
+)
+
 GTK_DOC_CHECK(1.9)
 
 localedir=${datadir}/locale
