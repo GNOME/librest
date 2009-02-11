@@ -6,6 +6,7 @@ Makefile.in
 .deps
 .libs
 *~
+*.pc
 aclocal.m4
 autom4te.cache
 compile
@@ -18,3 +19,9 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+docs/reference/rest/html/
+docs/reference/rest/xml/
+docs/reference/rest/rest-decl*.txt
+examples/test-oauth
+examples/test-raw
+examples/test-xml
