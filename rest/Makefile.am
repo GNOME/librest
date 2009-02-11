@@ -1,9 +1,11 @@
 lib_LTLIBRARIES = librest.la
 
-librest_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) $(SOUP_CFLAGS)  \
+librest_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
+		    $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
 		    $(XML_CFLAGS) \
 		    -I$(top_srcdir) -Wall -DG_LOG_DOMAIN=\"Rest\"
-librest_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) $(SOUP_LIBS) $(XML_LIBS)
+librest_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
+                    $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS)
 librest_la_SOURCES = rest-proxy.c 	\
 		     rest-proxy-call.c	\
 		     rest-xml-parser.c	\
