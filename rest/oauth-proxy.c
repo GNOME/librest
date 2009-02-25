@@ -31,7 +31,9 @@ G_DEFINE_TYPE (OAuthProxy, oauth_proxy, REST_TYPE_PROXY)
 enum {
   PROP_0,
   PROP_CONSUMER_KEY,
-  PROP_CONSUMER_SECRET
+  PROP_CONSUMER_SECRET,
+  PROP_TOKEN,
+  PROP_TOKEN_SECRET
 };
 
 static RestProxyCall *
@@ -62,6 +64,16 @@ oauth_proxy_set_property (GObject *object, guint property_id,
     if (priv->consumer_secret)
       g_free (priv->consumer_secret);
     priv->consumer_secret = g_value_dup_string (value);
+    break;
+  case PROP_TOKEN:
+    if (priv->token)
+      g_free (priv->token);
+    priv->token = g_value_dup_string (value);
+    break;
+  case PROP_TOKEN_SECRET:
+    if (priv->token_secret)
+      g_free (priv->token_secret);
+    priv->token_secret = g_value_dup_string (value);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -113,6 +125,21 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
   g_object_class_install_property (object_class, 
                                    PROP_CONSUMER_SECRET,
                                    pspec);
+  
+  pspec = g_param_spec_string ("token",  "token",
+                               "The request or access token", NULL,
+                               G_PARAM_WRITABLE|G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, 
+                                   PROP_TOKEN,
+                                   pspec);
+
+  pspec = g_param_spec_string ("token-secret",  "token-secret",
+                               "The request or access token secret", NULL,
+                               G_PARAM_WRITABLE|G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, 
+                                   PROP_TOKEN_SECRET,
+                                   pspec);
+
 }
 
 static void
@@ -129,6 +156,24 @@ oauth_proxy_new (const char *consumer_key,
   return g_object_new (OAUTH_TYPE_PROXY, 
                        "consumer-key", consumer_key,
                        "consumer-secret", consumer_secret,
+                       "url-format", url_format,
+                       "binding-required", binding_required,
+                       NULL);
+}
+
+RestProxy *
+oauth_proxy_new_with_token (const char *consumer_key,
+                 const char *consumer_secret,
+                 const char *token,
+                 const char *token_secret,
+                 const gchar *url_format,
+                 gboolean binding_required)
+{
+  return g_object_new (OAUTH_TYPE_PROXY, 
+                       "consumer-key", consumer_key,
+                       "consumer-secret", consumer_secret,
+                       "token", token,
+                       "token-secret", token_secret,
                        "url-format", url_format,
                        "binding-required", binding_required,
                        NULL);
@@ -227,4 +272,20 @@ oauth_proxy_get_token (OAuthProxy *proxy)
 {  
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   return priv->token;
+}
+
+/**
+ * oauth_proxy_get_token_secret:
+ * @proxy:
+ *
+ * Get the current request or access token secret.
+ *
+ * Returns: the token secret, or %NULL if there is no token secret yet.  This
+ * string is owned by #OAuthProxy and should not be freed.
+ */
+const char *
+oauth_proxy_get_token_secret (OAuthProxy *proxy)
+{  
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  return priv->token_secret;
 }

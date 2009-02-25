@@ -59,6 +59,13 @@ RestProxy* oauth_proxy_new (const char *consumer_key,
                             const gchar *url_format,
                             gboolean binding_required);
 
+RestProxy* oauth_proxy_new_with_token (const char *consumer_key,
+                                       const char *consumer_secret,
+                                       const char *token,
+                                       const char *token_secret,
+                                       const gchar *url_format,
+                                       gboolean binding_required);
+
 typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
                                            GError        *error,
                                            GObject       *weak_object,
@@ -74,6 +81,8 @@ gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
                              GError **error_out);
 
 const char * oauth_proxy_get_token (OAuthProxy *proxy);
+
+const char * oauth_proxy_get_token_secret (OAuthProxy *proxy);
 
 G_END_DECLS
 
