@@ -23,8 +23,6 @@
 #include <rest/oauth-proxy.h>
 #include <stdio.h>
 
-static GMainLoop *loop;
-
 int
 main (int argc, char **argv)
 {
@@ -35,8 +33,6 @@ main (int argc, char **argv)
   g_thread_init (NULL);
   g_type_init ();
 
-  loop = g_main_loop_new (NULL, TRUE);
-  
   /* Create the proxy */
   proxy = oauth_proxy_new (
                            /* Consumer Key */
