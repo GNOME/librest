@@ -44,6 +44,8 @@ G_BEGIN_DECLS
 #define REST_PROXY_CALL_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), REST_TYPE_PROXY_CALL, RestProxyCallClass))
 
+typedef struct _RestProxyCallPrivate RestProxyCallPrivate;
+
 /**
  * RestProxyCall:
  *
@@ -51,6 +53,7 @@ G_BEGIN_DECLS
  */
 typedef struct {
   GObject parent;
+  RestProxyCallPrivate *priv;
 } RestProxyCall;
 
 /**

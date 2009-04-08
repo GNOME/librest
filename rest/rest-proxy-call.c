@@ -25,38 +25,19 @@
 #include <libsoup/soup.h>
 
 #include "rest-private.h"
+#include "rest-proxy-call-private.h"
 
 G_DEFINE_TYPE (RestProxyCall, rest_proxy_call, G_TYPE_OBJECT)
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_PROXY_CALL, RestProxyCallPrivate))
 
-/* Internal closure */
-typedef struct {
+struct _RestProxyCallAsyncClosure {
   RestProxyCall *call;
   RestProxyCallAsyncCallback callback;
   GObject *weak_object;
   gpointer userdata;
   SoupMessage *message;
-} RestProxyCallAsyncClosure;
-
-typedef struct _RestProxyCallPrivate RestProxyCallPrivate;
-
-struct _RestProxyCallPrivate {
-  gchar *method;
-  gchar *function;
-  GHashTable *headers;
-  GHashTable *params;
-
-  GHashTable *response_headers;
-  goffset length;
-  gchar *payload;
-  guint status_code;
-  gchar *status_message;
-
-  RestProxy *proxy;
-
-  RestProxyCallAsyncClosure *cur_call_closure;
 };
 
 enum
@@ -178,6 +159,8 @@ static void
 rest_proxy_call_init (RestProxyCall *self)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (self);
+
+  self->priv = priv;
 
   priv->method = g_strdup ("GET");
 

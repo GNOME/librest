@@ -8,6 +8,7 @@ librest_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
                     $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS)
 librest_la_SOURCES = rest-proxy.c 	\
 		     rest-proxy-call.c	\
+		     rest-proxy-call-private.h	\
 		     rest-xml-parser.c	\
 		     rest-main.c	\
 		     rest-private.h	\
