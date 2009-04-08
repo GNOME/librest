@@ -35,6 +35,8 @@ struct _RestProxyCallPrivate {
   gchar *function;
   GHashTable *headers;
   GHashTable *params;
+  /* The real URL we're about to invoke */
+  gchar *url;
 
   GHashTable *response_headers;
   goffset length;

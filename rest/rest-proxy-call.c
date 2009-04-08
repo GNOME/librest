@@ -584,7 +584,6 @@ rest_proxy_call_async (RestProxyCall                *call,
   RestProxyCallPrivate *priv;
   RestProxyCallClass *call_class;
   const gchar *bound_url, *user_agent;
-  gchar *url = NULL;
   SoupMessage *message;
   RestProxyCallAsyncClosure *closure;
   GError *error = NULL;
@@ -614,12 +613,12 @@ rest_proxy_call_async (RestProxyCall                *call,
   {
     if (g_str_has_suffix (bound_url, "/"))
     {
-      url = g_strdup_printf ("%s%s", bound_url, priv->function);
+      priv->url = g_strdup_printf ("%s%s", bound_url, priv->function);
     } else {
-      url = g_strdup_printf ("%s/%s", bound_url, priv->function);
+      priv->url = g_strdup_printf ("%s/%s", bound_url, priv->function);
     }
   } else {
-    url = g_strdup (bound_url);
+    priv->url = g_strdup (bound_url);
   }
 
   /* Allow an overrideable prepare function that is called before every
@@ -635,7 +634,7 @@ rest_proxy_call_async (RestProxyCall                *call,
   }
 
   message = soup_form_request_new_from_hash (priv->method,
-                                             url,
+                                             priv->url,
                                              priv->params);
 
   /* Set the user agent, if one was set in the proxy */
@@ -670,11 +669,13 @@ rest_proxy_call_async (RestProxyCall                *call,
       closure);
 
   _rest_proxy_queue_message (priv->proxy, message);
-  g_free (url);
+  g_free (priv->url);
+  priv->url = NULL;
   return TRUE;
 
 error:
-  g_free (url);
+  g_free (priv->url);
+  priv->url = NULL;
   return FALSE;
 }
 
