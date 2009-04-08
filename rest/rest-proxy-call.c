@@ -199,6 +199,14 @@ rest_proxy_call_set_method (RestProxyCall *call,
     priv->method = g_strdup ("GET");
 }
 
+const char *
+rest_proxy_call_get_method (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+
+  return priv->method;
+}
+
 void
 rest_proxy_call_set_function (RestProxyCall *call,
                               const gchar   *function)

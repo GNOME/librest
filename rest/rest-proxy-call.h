@@ -84,6 +84,8 @@ GType rest_proxy_call_get_type (void);
 void rest_proxy_call_set_method (RestProxyCall *call,
                                  const gchar   *method);
 
+const char * rest_proxy_call_get_method (RestProxyCall *call);
+
 void rest_proxy_call_set_function (RestProxyCall *call,
                                    const gchar   *function);
 
