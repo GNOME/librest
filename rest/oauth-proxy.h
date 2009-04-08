@@ -52,6 +52,11 @@ typedef struct {
   RestProxyClass parent_class;
 } OAuthProxyClass;
 
+typedef enum {
+  PLAINTEXT,
+  HMAC_SHA1
+} OAuthSignatureMethod;
+
 GType oauth_proxy_get_type (void);
 
 RestProxy* oauth_proxy_new (const char *consumer_key,
