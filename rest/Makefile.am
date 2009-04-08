@@ -15,6 +15,8 @@ librest_la_SOURCES = rest-proxy.c 	\
 		     oauth-proxy.c	\
 		     oauth-proxy-call.c	\
 		     oauth-proxy-private.h \
+		     sha1.c	\
+		     sha1.h	\
 		     $(librest_la_HEADERS)
 librest_la_HEADERS = rest-proxy.h 	\
 		     rest-proxy-call.h	\
