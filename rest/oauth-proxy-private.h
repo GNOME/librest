@@ -30,4 +30,5 @@ typedef struct {
   char *consumer_secret;
   char *token;
   char *token_secret;
+  OAuthSignatureMethod method;
 } OAuthProxyPrivate;

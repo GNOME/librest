@@ -140,11 +140,13 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
                                    PROP_TOKEN_SECRET,
                                    pspec);
 
+  /* TODO: add enum property for signature method */
 }
 
 static void
 oauth_proxy_init (OAuthProxy *self)
 {
+  PROXY_GET_PRIVATE (self)->method = HMAC_SHA1;
 }
 
 RestProxy *
