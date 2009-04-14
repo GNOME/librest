@@ -20,6 +20,7 @@
  */
 
 #include <string.h>
+#include <glib.h>
 #include "sha1.h"
 
 #define SHA1_BLOCK_SIZE 64
