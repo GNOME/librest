@@ -57,7 +57,7 @@ encode_params (GHashTable *hash)
 
     k = soup_uri_encode (key, "&=");
     /* TODO: Don't like the look of this one bit */
-    v = soup_uri_encode (value, "=!\"£$%^&*()");
+    v = soup_uri_encode (value, "=!\"$%^&*()+/");
 
     if (s->len)
       g_string_append (s, "&");
