@@ -56,7 +56,8 @@ encode_params (GHashTable *hash)
     value = g_hash_table_lookup (hash, key);
 
     k = soup_uri_encode (key, "&=");
-    v = soup_uri_encode (value, "&=");
+    /* TODO: Don't like the look of this one bit */
+    v = soup_uri_encode (value, "=!\"£$%^&*()");
 
     if (s->len)
       g_string_append (s, "&");
@@ -86,11 +87,11 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call)
   key = g_strdup_printf ("%s&%s", priv->consumer_secret, priv->token_secret ?: "");
 
   text = g_string_new (NULL);
-  g_string_append_uri_escaped (text, rest_proxy_call_get_method (REST_PROXY_CALL (call)), NULL, FALSE);
+  g_string_append (text, rest_proxy_call_get_method (REST_PROXY_CALL (call)));
   g_string_append_c (text, '&');
   g_string_append_uri_escaped (text, callpriv->url, NULL, FALSE);
   g_string_append_c (text, '&');
-  g_string_append_uri_escaped (text, encode_params (callpriv->params), NULL, FALSE);
+  g_string_append (text, soup_uri_encode (encode_params (callpriv->params), "&="));
 
   signature = hmac_sha1 (key, text->str);
 
