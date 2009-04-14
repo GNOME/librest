@@ -557,7 +557,7 @@ _call_async_weak_notify_cb (gpointer *data,
   /* Will end up freeing the closure */
   rest_proxy_call_cancel (closure->call, &error);
 
-  if (!error)
+  if (error)
   {
     g_warning (G_STRLOC ": Error when cancelling call in weak notify: %s",
                error->message);
