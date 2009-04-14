@@ -25,3 +25,5 @@ docs/reference/rest/rest-decl*.txt
 examples/test-oauth
 examples/test-raw
 examples/test-xml
+tests/oauth
+tests/proxy
