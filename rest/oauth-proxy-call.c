@@ -90,20 +90,26 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call)
 {
   OAuthProxyPrivate *priv;
   RestProxyCallPrivate *callpriv;
-  char *key, *signature;
+  char *key, *signature, *ep, *eep;
   GString *text;
 
   priv = PROXY_GET_PRIVATE (proxy);
   callpriv = call->priv;
 
-  key = g_strdup_printf ("%s&%s", priv->consumer_secret, priv->token_secret ?: "");
+  /* PLAINTEXT signature value is the HMAC-SHA1 key value */
+  key = sign_plaintext (priv);
 
   text = g_string_new (NULL);
   g_string_append (text, rest_proxy_call_get_method (REST_PROXY_CALL (call)));
   g_string_append_c (text, '&');
   g_string_append_uri_escaped (text, callpriv->url, NULL, FALSE);
   g_string_append_c (text, '&');
-  g_string_append (text, soup_uri_encode (encode_params (callpriv->params), "&="));
+
+  ep = encode_params (callpriv->params);
+  eep = OAUTH_ENCODE_STRING (ep);
+  g_string_append (text, eep);
+  g_free (ep);
+  g_free (eep);
 
   signature = hmac_sha1 (key, text->str);
 
