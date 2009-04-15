@@ -30,6 +30,8 @@
 
 G_DEFINE_TYPE (OAuthProxyCall, oauth_proxy_call, REST_TYPE_PROXY_CALL)
 
+#define OAUTH_ENCODE_STRING(x_) soup_uri_encode( (x_), "!$&'()*+,;=@")
+
 static char *
 sign_plaintext (OAuthProxyPrivate *priv)
 {
