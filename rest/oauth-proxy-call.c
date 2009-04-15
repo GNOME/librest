@@ -68,9 +68,8 @@ encode_params (GHashTable *hash)
     key = keys->data;
     value = g_hash_table_lookup (hash, key);
 
-    k = soup_uri_encode (key, "&=");
-    /* TODO: Don't like the look of this one bit */
-    v = soup_uri_encode (value, "=!\"$%^&*()+/");
+    k = OAUTH_ENCODE_STRING (key);
+    v = OAUTH_ENCODE_STRING (value);
 
     if (s->len)
       g_string_append (s, "&");
@@ -83,7 +82,7 @@ encode_params (GHashTable *hash)
     keys = keys->next;
   }
 
-  return s->str;
+  return g_string_free (s, FALSE);
 }
 
 static char *
