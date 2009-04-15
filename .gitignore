@@ -28,3 +28,4 @@ examples/test-xml
 examples/dump-xml
 tests/oauth
 tests/proxy
+rest/test-runner
