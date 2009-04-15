@@ -35,7 +35,18 @@ G_DEFINE_TYPE (OAuthProxyCall, oauth_proxy_call, REST_TYPE_PROXY_CALL)
 static char *
 sign_plaintext (OAuthProxyPrivate *priv)
 {
-  return g_strdup_printf ("%s&%s", priv->consumer_secret, priv->token_secret ?: "");
+  char *cs;
+  char *ts;
+  char *rv;
+
+  cs = OAUTH_ENCODE_STRING (priv->consumer_secret);
+  ts = OAUTH_ENCODE_STRING (priv->token_secret ? priv->token_secret : "");
+  rv = g_strconcat (cs, "&", ts, NULL);
+
+  g_free (cs);
+  g_free (ts);
+
+  return rv;
 }
 
 static char *
