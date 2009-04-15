@@ -40,7 +40,7 @@ sign_plaintext (OAuthProxyPrivate *priv)
   char *rv;
 
   cs = OAUTH_ENCODE_STRING (priv->consumer_secret);
-  ts = OAUTH_ENCODE_STRING (priv->token_secret ? priv->token_secret : "");
+  ts = OAUTH_ENCODE_STRING (priv->token_secret);
   rv = g_strconcat (cs, "&", ts, NULL);
 
   g_free (cs);
