@@ -277,6 +277,27 @@ oauth_proxy_get_token (OAuthProxy *proxy)
 }
 
 /**
+ * oauth_proxy_set_token:
+ * @proxy:
+ * @token:
+ *
+ * Set the access token.
+ */
+void
+oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
+{
+  OAuthProxyPrivate *priv;
+
+  g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  priv = PROXY_GET_PRIVATE (proxy);
+
+  if (priv->token)
+    g_free (priv->token);
+
+  priv->token = g_strdup (token);
+}
+
+/**
  * oauth_proxy_get_token_secret:
  * @proxy:
  *
@@ -290,4 +311,25 @@ oauth_proxy_get_token_secret (OAuthProxy *proxy)
 {  
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   return priv->token_secret;
+}
+
+/**
+ * oauth_proxy_set_token_secret:
+ * @proxy:
+ * @token_secret:
+ *
+ * Set the access token secret.
+ */
+void
+oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
+{
+  OAuthProxyPrivate *priv;
+
+  g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  priv = PROXY_GET_PRIVATE (proxy);
+
+  if (priv->token_secret)
+    g_free (priv->token_secret);
+
+  priv->token_secret = g_strdup (token_secret);
 }

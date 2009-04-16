@@ -87,7 +87,11 @@ gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
 
 const char * oauth_proxy_get_token (OAuthProxy *proxy);
 
+void oauth_proxy_set_token (OAuthProxy *proxy, const char *token);
+
 const char * oauth_proxy_get_token_secret (OAuthProxy *proxy);
+
+void oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret);
 
 G_END_DECLS
 
