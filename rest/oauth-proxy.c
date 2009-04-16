@@ -49,6 +49,30 @@ _new_call (RestProxy *proxy)
 }
 
 static void
+oauth_proxy_get_property (GObject *object, guint property_id,
+                              GValue *value, GParamSpec *pspec)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+
+  switch (property_id) {
+  case PROP_CONSUMER_KEY:
+    g_value_set_string (value, priv->consumer_key);
+    break;
+  case PROP_CONSUMER_SECRET:
+    g_value_set_string (value, priv->consumer_secret);
+    break;
+  case PROP_TOKEN:
+    g_value_set_string (value, priv->token);
+    break;
+  case PROP_TOKEN_SECRET:
+    g_value_set_string (value, priv->token_secret);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+  }
+}
+
+static void
 oauth_proxy_set_property (GObject *object, guint property_id,
                               const GValue *value, GParamSpec *pspec)
 {
@@ -107,6 +131,7 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
 
   g_type_class_add_private (klass, sizeof (OAuthProxyPrivate));
 
+  object_class->get_property = oauth_proxy_get_property;
   object_class->set_property = oauth_proxy_set_property;
   object_class->finalize = oauth_proxy_finalize;
 
@@ -114,28 +139,28 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
 
   pspec = g_param_spec_string ("consumer-key",  "consumer-key",
                                "The consumer key", NULL,
-                               G_PARAM_WRITABLE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
+                               G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, 
                                    PROP_CONSUMER_KEY,
                                    pspec);
 
   pspec = g_param_spec_string ("consumer-secret",  "consumer-secret",
                                "The consumer secret", NULL,
-                               G_PARAM_WRITABLE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
+                               G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, 
                                    PROP_CONSUMER_SECRET,
                                    pspec);
   
   pspec = g_param_spec_string ("token",  "token",
                                "The request or access token", NULL,
-                               G_PARAM_WRITABLE|G_PARAM_STATIC_STRINGS);
+                               G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, 
                                    PROP_TOKEN,
                                    pspec);
 
   pspec = g_param_spec_string ("token-secret",  "token-secret",
                                "The request or access token secret", NULL,
-                               G_PARAM_WRITABLE|G_PARAM_STATIC_STRINGS);
+                               G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, 
                                    PROP_TOKEN_SECRET,
                                    pspec);
