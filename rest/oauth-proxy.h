@@ -76,7 +76,7 @@ typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
                                            GObject       *weak_object,
                                            gpointer       userdata);
 
-void oauth_proxy_auth_step (OAuthProxy *proxy, const char *function);
+gboolean oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error);
 
 gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
                              const char *function,
