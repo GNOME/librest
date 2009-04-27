@@ -225,17 +225,18 @@ auth_callback (RestProxyCall *call,
   if (error)
     /* TODO: something useful! */
     g_error (error->message);
-  
+
   g_object_get (call, "proxy", &proxy, NULL);
   priv = PROXY_GET_PRIVATE (proxy);
 
+  /* TODO: sanity check response */
   form = soup_form_decode (rest_proxy_call_get_payload (call));
   priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
   priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
   g_hash_table_destroy (form);
 
   data->callback (proxy, error, weak_object, data->user_data);
-  
+
   g_slice_free (AuthData, data);
   g_object_unref (call);
   g_object_unref (proxy);
@@ -243,7 +244,7 @@ auth_callback (RestProxyCall *call,
 
 gboolean
 oauth_proxy_auth_step_async (OAuthProxy *proxy,
-                             const char *fragment,
+                             const char *function,
                              OAuthProxyAuthCallback callback,
                              GObject *weak_object,
                              gpointer user_data,
@@ -252,8 +253,8 @@ oauth_proxy_auth_step_async (OAuthProxy *proxy,
   RestProxyCall *call;
   AuthData *data;
 
-  rest_proxy_bind (REST_PROXY (proxy), fragment);
   call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function);
 
   data = g_slice_new0 (AuthData);
   data->callback = callback;
@@ -263,20 +264,32 @@ oauth_proxy_auth_step_async (OAuthProxy *proxy,
   /* TODO: if call_async fails, the call is leaked */
 }
 
+/**
+ * oauth_proxy_auth_step:
+ * @proxy: an #OAuthProxy
+ * @function: the function to invoke on the proxy
+ *
+ * Perform an OAuth authorisation step.  This calls @function and then updates
+ * the token and token secret in the proxy.
+ *
+ * @proxy must not require binding, the function will be invoked using
+ * rest_proxy_call_set_function().
+ */
 void
-oauth_proxy_auth_step (OAuthProxy *proxy, const char *fragment)
+oauth_proxy_auth_step (OAuthProxy *proxy, const char *function)
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   GError *error = NULL;
   RestProxyCall *call;
   GHashTable *form;
 
-  rest_proxy_bind (REST_PROXY (proxy), fragment);
   call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function);
 
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
 
+  /* TODO: sanity check response */
   form = soup_form_decode (rest_proxy_call_get_payload (call));
   priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
   priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
