@@ -38,27 +38,29 @@ main (int argc, char **argv)
 
   /* Create the proxy */
   proxy = oauth_proxy_new ("key", "secret",
-                           "http://term.ie/oauth/example/%s",
-                           TRUE);
+                           "http://term.ie/oauth/example/",
+                           FALSE);
   oproxy = OAUTH_PROXY (proxy);
   g_assert (oproxy);
   priv = PROXY_GET_PRIVATE (oproxy);
 
   /* First stage authentication, this gets a request token */
-  oauth_proxy_auth_step (oproxy, "request_token.php");
+  oauth_proxy_auth_step (oproxy, "request_token.php", &error);
+  g_assert_no_error (error);
   g_assert_cmpstr (priv->token, ==, "requestkey");
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "access_token");
+  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "access_token", &error);
+  g_assert_no_error (error);
 
   g_assert_cmpstr (priv->token, ==, "accesskey");
   g_assert_cmpstr (priv->token_secret, ==, "accesssecret");
 
   /* Make some test calls */
-  rest_proxy_bind (proxy, "echo_api.php");
 
   call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "echo_api.php");
   rest_proxy_call_add_param (call, "foo", "bar");
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
@@ -66,6 +68,7 @@ main (int argc, char **argv)
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "echo_api.php");
   rest_proxy_call_add_param (call, "numbers", "1234567890");
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
@@ -73,6 +76,7 @@ main (int argc, char **argv)
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "echo_api.php");
   rest_proxy_call_add_param (call, "escape", "!£$%^&*()");
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);

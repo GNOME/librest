@@ -43,7 +43,7 @@ main (int argc, char **argv)
                            "https://fireeagle.yahooapis.com/%s", TRUE);
 
   /* First stage authentication, this gets a request token */
-  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/request_token");
+  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/request_token", NULL);
 
   /* From the token construct a URL for the user to visit */
   g_print ("Go to https://fireeagle.yahoo.net/oauth/authorize?oauth_token=%s then hit any key\n",
@@ -51,8 +51,8 @@ main (int argc, char **argv)
   getchar ();
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/access_token");
-  
+  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/access_token", NULL);
+
   /* We're now authenticated */
   g_print ("Got access token\n");
 
