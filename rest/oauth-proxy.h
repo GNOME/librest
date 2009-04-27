@@ -76,10 +76,10 @@ typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
                                            GObject       *weak_object,
                                            gpointer       userdata);
 
-void oauth_proxy_auth_step (OAuthProxy *proxy, const char *fragment);
+void oauth_proxy_auth_step (OAuthProxy *proxy, const char *function);
 
 gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
-                             const char *fragment,
+                             const char *function,
                              OAuthProxyAuthCallback callback,
                              GObject *weak_object,
                              gpointer user_data,
