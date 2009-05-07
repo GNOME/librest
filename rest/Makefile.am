@@ -30,7 +30,7 @@ librest_ladir = $(includedir)/rest/rest
 TESTS = test-runner
 check_PROGRAMS = test-runner
 
-test_runner_SOURCES = test-runner.c test-runner.h $(librest_la_SOURCES)
+test_runner_SOURCES = test-runner.c $(librest_la_SOURCES)
 test_runner_CFLAGS = -DBUILD_TESTS $(librest_la_CFLAGS)
 test_runner_LDFLAGS = $(librest_la_LIBADD)
 
