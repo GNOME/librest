@@ -839,6 +839,30 @@ error:
   return res;
 }
 
+gboolean
+rest_proxy_call_sync (RestProxyCall *call,
+                      GError       **error_out)
+{
+  RestProxyCallPrivate *priv;
+  SoupMessage *message;
+  guint status;
+  gboolean ret;
+
+  priv = GET_PRIVATE (call);
+
+  message = prepare_message (call, error_out);
+  if (!message)
+    return FALSE;
+
+  status = _rest_proxy_send_message (priv->proxy, message);
+
+  ret = finish_call (call, message, error_out);
+
+  g_object_unref (message);
+
+  return ret;
+}
+
 /**
  * rest_proxy_call_lookup_response_header
  *
