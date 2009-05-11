@@ -591,44 +591,17 @@ set_header (gpointer key, gpointer value, gpointer user_data)
   soup_message_headers_replace (headers, name, value);
 }
 
-/**
- * rest_proxy_call_async:
- * @call: The #RestProxyCall
- * @callback: a #RestProxyCallAsyncCallback to invoke on completion of the call
- * @weak_object: The #GObject to weakly reference and tie the lifecycle too
- * @userdata: data to pass to @callback
- * @error_out: a #GError, or %NULL
- *
- * Asynchronously invoke @call.
- *
- * When the call has finished, @callback will be called.  If @weak_object is
- * disposed during the call then this call will be cancelled.
- */
-gboolean
-rest_proxy_call_async (RestProxyCall                *call,
-                       RestProxyCallAsyncCallback    callback,
-                       GObject                      *weak_object,
-                       gpointer                      userdata,
-                       GError                      **error_out)
+static SoupMessage *
+prepare_message (RestProxyCall *call, GError **error_out)
 {
   RestProxyCallPrivate *priv;
   RestProxyCallClass *call_class;
   const gchar *bound_url, *user_agent;
   SoupMessage *message;
-  RestProxyCallAsyncClosure *closure;
   GError *error = NULL;
 
-  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
   priv = GET_PRIVATE (call);
-  g_assert (priv->proxy);
   call_class = REST_PROXY_CALL_GET_CLASS (call);
-
-  if (priv->cur_call_closure)
-  {
-    /* FIXME: Use GError here */
-    g_critical (G_STRLOC ": Call already in progress.");
-    return FALSE;
-  }
 
   bound_url =_rest_proxy_get_bound_url (priv->proxy);
 
@@ -659,7 +632,7 @@ rest_proxy_call_async (RestProxyCall                *call,
     if (!call_class->prepare (call, &error))
     {
       g_propagate_error (error_out, error);
-      goto error;
+      return NULL;
     }
   }
 
@@ -675,6 +648,50 @@ rest_proxy_call_async (RestProxyCall                *call,
 
   /* Set the headers */
   g_hash_table_foreach (priv->headers, set_header, message->request_headers);
+
+  return message;
+}
+
+/**
+ * rest_proxy_call_async:
+ * @call: The #RestProxyCall
+ * @callback: a #RestProxyCallAsyncCallback to invoke on completion of the call
+ * @weak_object: The #GObject to weakly reference and tie the lifecycle too
+ * @userdata: data to pass to @callback
+ * @error_out: a #GError, or %NULL
+ *
+ * Asynchronously invoke @call.
+ *
+ * When the call has finished, @callback will be called.  If @weak_object is
+ * disposed during the call then this call will be cancelled.
+ */
+gboolean
+rest_proxy_call_async (RestProxyCall                *call,
+                       RestProxyCallAsyncCallback    callback,
+                       GObject                      *weak_object,
+                       gpointer                      userdata,
+                       GError                      **error_out)
+{
+  RestProxyCallPrivate *priv;
+  RestProxyCallClass *call_class;
+  SoupMessage *message;
+  RestProxyCallAsyncClosure *closure;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  priv = GET_PRIVATE (call);
+  g_assert (priv->proxy);
+  call_class = REST_PROXY_CALL_GET_CLASS (call);
+
+  if (priv->cur_call_closure)
+  {
+    /* FIXME: Use GError here */
+    g_critical (G_STRLOC ": Call already in progress.");
+    return FALSE;
+  }
+
+  message = prepare_message (call, error_out);
+  if (message == NULL)
+    goto error;
 
   closure = g_slice_new0 (RestProxyCallAsyncClosure);
   closure->call = g_object_ref (call);
