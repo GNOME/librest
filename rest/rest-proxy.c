@@ -44,6 +44,7 @@ struct _RestProxyPrivate {
   gchar *user_agent;
   gboolean binding_required;
   SoupSession *session;
+  SoupSession *session_sync;
 };
 
 enum
@@ -140,6 +141,12 @@ rest_proxy_dispose (GObject *object)
     g_object_unref (priv->session);
     priv->session = NULL;
   }
+
+  if (priv->session_sync)
+  {
+    g_object_unref (priv->session_sync);
+    priv->session_sync = NULL;
+  }
 }
 
 static void
@@ -209,8 +216,11 @@ rest_proxy_init (RestProxy *self)
   RestProxyPrivate *priv = GET_PRIVATE (self);
 
   priv->session = soup_session_async_new ();
+  priv->session_sync = soup_session_sync_new ();
 #if WITH_GNOME
   soup_session_add_feature_by_type (priv->session,
+                                    SOUP_TYPE_PROXY_RESOLVER_GNOME);
+  soup_session_add_feature_by_type (priv->session_sync,
                                     SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
 
@@ -424,4 +434,13 @@ _rest_proxy_cancel_message (RestProxy   *proxy,
   soup_session_cancel_message (priv->session,
                                message,
                                SOUP_STATUS_CANCELLED);
+}
+
+guint
+_rest_proxy_send_message (RestProxy   *proxy,
+                            SoupMessage *message)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+
+  return soup_session_send_message (priv->session_sync, message);
 }
