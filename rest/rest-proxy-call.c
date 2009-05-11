@@ -514,17 +514,13 @@ _handle_error_from_message (SoupMessage *message, GError **error)
   return FALSE;
 }
 
-static void
-_call_async_finished_cb (SoupMessage *message,
-                         gpointer     userdata)
+static gboolean
+finish_call (RestProxyCall *call, SoupMessage *message, GError **error)
 {
-  RestProxyCallAsyncClosure *closure;
-  RestProxyCall *call;
   RestProxyCallPrivate *priv;
-  GError *error = NULL;
 
-  closure = (RestProxyCallAsyncClosure *)userdata;
-  call = closure->call;
+  g_assert (call);
+  g_assert (message);
   priv = GET_PRIVATE (call);
 
   /* Convert the soup headers in to hash */
@@ -540,7 +536,23 @@ _call_async_finished_cb (SoupMessage *message,
   priv->status_code = message->status_code;
   priv->status_message = g_strdup (message->reason_phrase);
 
-  _handle_error_from_message (message, &error);
+  return _handle_error_from_message (message, error);
+}
+
+static void
+_call_async_finished_cb (SoupMessage *message,
+                         gpointer     userdata)
+{
+  RestProxyCallAsyncClosure *closure;
+  RestProxyCall *call;
+  RestProxyCallPrivate *priv;
+  GError *error = NULL;
+
+  closure = (RestProxyCallAsyncClosure *)userdata;
+  call = closure->call;
+  priv = GET_PRIVATE (call);
+
+  finish_call (call, message, &error);
 
   closure->callback (closure->call,
                      error,
