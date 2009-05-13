@@ -540,9 +540,9 @@ _call_async_finished_cb (SoupMessage *message,
         closure);
   }
 
+  priv->cur_call_closure = NULL;
   g_object_unref (closure->call);
   g_slice_free (RestProxyCallAsyncClosure, closure);
-  priv->cur_call_closure = NULL;
 }
 
 static void 
