@@ -167,6 +167,14 @@ rest_xml_node_new ()
   return node;
 }
 
+/**
+ * rest_xml_node_ref:
+ * @node: a #RestXmlNode
+ *
+ * Increases the reference count of @node.
+ *
+ * Returns: the same @node.
+ */
 RestXmlNode *
 rest_xml_node_ref (RestXmlNode *node)
 {
@@ -178,6 +186,13 @@ rest_xml_node_ref (RestXmlNode *node)
   return node;
 }
 
+/**
+ * rest_xml_node_unref:
+ * @node: a #RestXmlNode
+ *
+ * Decreases the reference count of @node. When its reference count drops to 0,
+ * the node is finalized (i.e. its memory is freed).
+ */
 void
 rest_xml_node_unref (RestXmlNode *node)
 {
@@ -224,6 +239,17 @@ rest_xml_node_free (RestXmlNode *node)
   rest_xml_node_unref (node);
 }
 
+/**
+ * rest_xml_node_get_attr:
+ * @node: a #RestXmlNode
+ * @attr_name: the name of an attribute
+ *
+ * Get the value of the attribute named @attr_name, or %NULL if it doesn't
+ * exist.
+ *
+ * Returns: the attribute value. This string is owned by #RestXmlNode and should
+ * not be freed.
+ */
 const gchar *
 rest_xml_node_get_attr (RestXmlNode *node, 
                         const gchar *attr_name)
@@ -231,6 +257,15 @@ rest_xml_node_get_attr (RestXmlNode *node,
   return g_hash_table_lookup (node->attrs, attr_name);
 }
 
+/**
+ * rest_xml_node_find:
+ * @start: a #RestXmlNode
+ * @tag: the name of a node
+ *
+ * Searches for the first child node of @start named @tag.
+ *
+ * Returns: the first child node, or %NULL if it doesn't exist.
+ */
 RestXmlNode *
 rest_xml_node_find (RestXmlNode *start,
                     const gchar *tag)
@@ -263,12 +298,30 @@ rest_xml_node_find (RestXmlNode *start,
   return NULL;
 }
 
+/**
+ * rest_xml_parser_new:
+ *
+ * Create a new #RestXmlParser, for parsing XML documents.
+ *
+ * Returns: a new #RestXmlParser.
+ */
 RestXmlParser *
 rest_xml_parser_new (void)
 {
   return g_object_new (REST_TYPE_XML_PARSER, NULL);
 }
 
+/**
+ * rest_xml_parser_parse_from_data:
+ * @parser: a #RestXmlParser
+ * @data: the XML content to parse
+ * @len: the length of @data
+ *
+ * Parse the XML in @data, and return a new #RestXmlNode.  If @data is invalid
+ * XML, %NULL is returned.
+ *
+ * Returns: a new #RestXmlNode, or %NULL if the XML was invalid.
+ */
 RestXmlNode *
 rest_xml_parser_parse_from_data (RestXmlParser *parser, 
                                  const gchar   *data,
