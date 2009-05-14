@@ -3,12 +3,8 @@
 <TITLE>RestProxy</TITLE>
 RestProxy
 RestProxyClass
-RestProxyCallRawCallback
 rest_proxy_new
 rest_proxy_bind
-rest_proxy_call_raw_async
-rest_proxy_call_raw_async_valist
-rest_proxy_run_raw
 rest_proxy_new_call
 rest_proxy_simple_run
 <SUBSECTION Standard>
@@ -96,7 +92,7 @@ OAUTH_PROXY_CALL_GET_CLASS
 RestXmlParser
 RestXmlNode
 rest_xml_node_new
-rest_xml_node_free
+rest_xml_node_unref
 rest_xml_parser_new
 rest_xml_parser_parse_from_data
 rest_xml_node_get_attr
