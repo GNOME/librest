@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -185,7 +185,7 @@ rest_proxy_call_init (RestProxyCall *self)
  *
  * Set the HTTP method to use when making the call, for example GET or POST.
  */
-void 
+void
 rest_proxy_call_set_method (RestProxyCall *call,
                             const gchar   *method)
 {
@@ -227,7 +227,7 @@ rest_proxy_call_set_function (RestProxyCall *call,
  * Add a header called @header with the value @value to the call.  If a
  * header with this name already exists, the new value will replace the old.
  */
-void 
+void
 rest_proxy_call_add_header (RestProxyCall *call,
                             const gchar   *header,
                             const gchar   *value)
@@ -307,7 +307,7 @@ rest_proxy_call_lookup_header (RestProxyCall *call,
  *
  * Remove the header named @header from the call.
  */
-void 
+void
 rest_proxy_call_remove_header (RestProxyCall *call,
                                const gchar   *header)
 {
@@ -325,7 +325,7 @@ rest_proxy_call_remove_header (RestProxyCall *call,
  * Add a query parameter called @param with the value @value to the call.  If a
  * parameter with this name already exists, the new value will replace the old.
  */
-void 
+void
 rest_proxy_call_add_param (RestProxyCall *call,
                            const gchar   *param,
                            const gchar   *value)
@@ -365,7 +365,7 @@ rest_proxy_call_add_params (RestProxyCall *call,
  * Add the specified parameter name and value pairs to the call.  If a parameter
  * already exists, the new value will replace the old.
  */
-void 
+void
 rest_proxy_call_add_params_from_valist (RestProxyCall *call,
                                         va_list        params)
 {
@@ -405,7 +405,7 @@ rest_proxy_call_lookup_param (RestProxyCall *call,
  *
  * Remove the parameter named @param from the call.
  */
-void 
+void
 rest_proxy_call_remove_param (RestProxyCall *call,
                               const gchar   *param)
 {
@@ -433,7 +433,7 @@ rest_proxy_call_get_params (RestProxyCall *call)
 
 
 
-static void _call_async_weak_notify_cb (gpointer *data, 
+static void _call_async_weak_notify_cb (gpointer *data,
                                         GObject  *dead_object);
 
 static void _call_async_finished_cb (SoupMessage *message,
@@ -535,7 +535,7 @@ _call_async_finished_cb (SoupMessage *message,
   /* Success. We don't need the weak reference any more */
   if (closure->weak_object)
   {
-    g_object_weak_unref (closure->weak_object, 
+    g_object_weak_unref (closure->weak_object,
         (GWeakNotify)_call_async_weak_notify_cb,
         closure);
   }
@@ -545,7 +545,7 @@ _call_async_finished_cb (SoupMessage *message,
   g_slice_free (RestProxyCallAsyncClosure, closure);
 }
 
-static void 
+static void
 _call_async_weak_notify_cb (gpointer *data,
                             GObject  *dead_object)
 {
@@ -658,13 +658,13 @@ rest_proxy_call_async (RestProxyCall                *call,
   /* Weakly reference this object. We remove our callback if it goes away. */
   if (closure->weak_object)
   {
-    g_object_weak_ref (closure->weak_object, 
-        (GWeakNotify)_call_async_weak_notify_cb, 
+    g_object_weak_ref (closure->weak_object,
+        (GWeakNotify)_call_async_weak_notify_cb,
         closure);
   }
 
   g_signal_connect (message,
-      "finished", 
+      "finished",
       (GCallback)_call_async_finished_cb,
       closure);
 
@@ -741,7 +741,7 @@ rest_proxy_call_run (RestProxyCall *call,
   if (loop_out)
     *loop_out = closure.loop;
 
-  res = rest_proxy_call_async (call, 
+  res = rest_proxy_call_async (call,
       _rest_proxy_call_async_cb,
       NULL,
       &closure,
@@ -824,7 +824,7 @@ rest_proxy_call_get_response_headers (RestProxyCall *call)
  * Get the length of the return payload.
  *
  * Returns: the length of the payload in bytes.
- */ 
+ */
 goffset
 rest_proxy_call_get_payload_length (RestProxyCall *call)
 {
@@ -840,7 +840,7 @@ rest_proxy_call_get_payload_length (RestProxyCall *call)
  *
  * Returns: A pointer to the payload. This is owned by #RestProxyCall and should
  * not be freed.
- */ 
+ */
 const gchar *
 rest_proxy_call_get_payload (RestProxyCall *call)
 {
@@ -851,20 +851,20 @@ rest_proxy_call_get_payload (RestProxyCall *call)
 /**
  * rest_proxy_call_get_status_code:
  * @call: The #RestProxyCall
- * 
+ *
  * Get the HTTP status code for the call.
  */
 guint
 rest_proxy_call_get_status_code (RestProxyCall *call)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  return priv->status_code;  
+  return priv->status_code;
 }
 
 /**
  * rest_proxy_call_get_status_message:
  * @call: The #RestProxyCall
- * 
+ *
  * Get the human-readable HTTP status message for the call.
  *
  * Returns: The status message. This string is owned by #RestProxyCall and
