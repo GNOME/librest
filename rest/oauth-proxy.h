@@ -44,6 +44,11 @@ G_BEGIN_DECLS
 #define OAUTH_PROXY_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), OAUTH_TYPE_PROXY, OAuthProxyClass))
 
+/**
+ * OAuthProxy:
+ *
+ * #OAuthProxy has no publicly available members.
+ */
 typedef struct {
   RestProxy parent;
 } OAuthProxy;
