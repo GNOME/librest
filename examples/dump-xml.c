@@ -104,8 +104,12 @@ main (int argc, char **argv)
 
   parser = rest_xml_parser_new ();
   node = rest_xml_parser_parse_from_data (parser, data, length);
-  _rest_xml_node_output (node, 0);
-  rest_xml_node_unref (node);
+  if (node) {
+    _rest_xml_node_output (node, 0);
+    rest_xml_node_unref (node);
+  } else {
+    g_print ("Cannot parse document\n");
+  }
   g_object_unref (parser);
 
   return 0;
