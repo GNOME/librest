@@ -84,8 +84,6 @@ RestXmlNode *rest_xml_parser_parse_from_data (RestXmlParser *parser,
 
 GType rest_xml_node_get_type (void);
 
-RestXmlNode *rest_xml_node_new (void);
-
 RestXmlNode * rest_xml_node_ref (RestXmlNode *node);
 void rest_xml_node_unref (RestXmlNode *node);
 G_GNUC_DEPRECATED void rest_xml_node_free (RestXmlNode *node);

@@ -151,7 +151,7 @@ rest_xml_node_get_type (void)
   return type;
 }
 
-RestXmlNode *
+static RestXmlNode *
 rest_xml_node_new ()
 {
   RestXmlNode *node;
