@@ -61,7 +61,8 @@ typedef struct {
  * @prepare: Virtual function called before making the request, This allows the
  * call to be modified, for example to add a signature.
  *
- * Class structure for #RestProxyCall.
+ * Class structure for #RestProxyCall for subclasses to implement specialised
+ * behaviour.
  */
 typedef struct {
   /*< private >*/

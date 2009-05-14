@@ -54,6 +54,19 @@ typedef struct {
   GObject parent;
 } RestProxy;
 
+/**
+ * RestProxyClass:
+ *
+ * @bind_valist: Virtual function called to bind parameters.
+ * @new_call: Virtual function called to construct a new #RestProxyCall.
+ * @simple_run_valist: Virtual function called when making a "simple" call.
+ *
+ * Class structure for #RestProxy for subclasses to implement specialised
+ * behaviour.
+ *
+ * Typically subclasses will override @new_call to construct a subclass of
+ * #RestProxyCall.
+ */
 typedef struct {
   GObjectClass parent_class;
   gboolean (*bind_valist)(RestProxy *proxy, va_list params);
