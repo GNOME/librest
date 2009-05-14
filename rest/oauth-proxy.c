@@ -301,7 +301,7 @@ oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
 
 /**
  * oauth_proxy_get_token:
- * @proxy:
+ * @proxy: an #OAuthProxy
  *
  * Get the current request or access token.
  *
@@ -317,8 +317,8 @@ oauth_proxy_get_token (OAuthProxy *proxy)
 
 /**
  * oauth_proxy_set_token:
- * @proxy:
- * @token:
+ * @proxy: an #OAuthProxy
+ * @token: the access token
  *
  * Set the access token.
  */
@@ -338,7 +338,7 @@ oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
 
 /**
  * oauth_proxy_get_token_secret:
- * @proxy:
+ * @proxy: an #OAuthProxy
  *
  * Get the current request or access token secret.
  *
@@ -354,8 +354,8 @@ oauth_proxy_get_token_secret (OAuthProxy *proxy)
 
 /**
  * oauth_proxy_set_token_secret:
- * @proxy:
- * @token_secret:
+ * @proxy: an #OAuthProxy
+ * @token_secret: the access token secret
  *
  * Set the access token secret.
  */
