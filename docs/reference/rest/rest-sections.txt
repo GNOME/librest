@@ -71,7 +71,6 @@ RestXmlParser
 RestXmlNode
 rest_xml_parser_new
 rest_xml_parser_parse_from_data
-rest_xml_node_new
 rest_xml_node_ref
 rest_xml_node_unref
 rest_xml_node_get_attr
