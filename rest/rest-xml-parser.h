@@ -54,14 +54,25 @@ typedef struct {
   GObjectClass parent_class;
 } RestXmlParserClass;
 
+/**
+ * RestXmlNode:
+ * @name: the name of the element
+ * @content: the textual content of the element
+ * @children: a #GHashTable of string name to #RestXmlNode for the children of
+ * the element.
+ * @attrs: a #GHashTable of string name to string values for the attributes of
+ * the element.
+ * @next: the sibling #RestXmlNode with the same name
+ */
 typedef struct _RestXmlNode RestXmlNode;
 struct _RestXmlNode {
-  volatile int ref_count;
   gchar *name;
   gchar *content;
   GHashTable *children;
   GHashTable *attrs;
   RestXmlNode *next;
+  /*< private >*/
+  volatile int ref_count;
 };
 
 GType rest_xml_parser_get_type (void);
