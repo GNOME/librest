@@ -39,8 +39,10 @@ typedef enum
 
 extern guint rest_debug_flags;
 
+#define REST_DEBUG_ENABLED(category) (rest_debug_flags & REST_DEBUG_##category)
+
 #define REST_DEBUG(category,x,a...)             G_STMT_START {      \
-        if (rest_debug_flags & REST_DEBUG_##category)               \
+    if (REST_DEBUG_ENABLED(category))                               \
           { g_message ("[" #category "] " G_STRLOC ": " x, ##a); }  \
                                                 } G_STMT_END
 
