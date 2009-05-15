@@ -64,7 +64,7 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
 
   do {
     attrs_output = _generate_attrs_output (node->attrs);
-    g_debug ("%*s[%s, %s, %s]", 
+    g_print ("%*s[%s, %s, %s]\n", 
              depth, 
              "", 
              node->name, 
@@ -75,7 +75,7 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
     for (l = values; l; l = l->next)
     {
       child = (RestXmlNode *)l->data;
-      g_debug ("%*s%s - >", depth, "", child->name);
+      g_print ("%*s%s - >\n", depth, "", child->name);
       _rest_xml_node_output (child, depth + 4);
     }
     g_list_free (values);
