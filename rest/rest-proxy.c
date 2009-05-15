@@ -162,6 +162,8 @@ rest_proxy_class_init (RestProxyClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   RestProxyClass *proxy_class = REST_PROXY_CLASS (klass);
 
+  _rest_setup_debugging ();
+
   g_type_class_add_private (klass, sizeof (RestProxyPrivate));
 
   object_class->get_property = rest_proxy_get_property;
@@ -211,6 +213,11 @@ rest_proxy_init (RestProxy *self)
   soup_session_add_feature_by_type (priv->session,
                                     SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
+
+  if (REST_DEBUG_ENABLED(PROXY)) {
+    soup_session_add_feature
+      (priv->session, (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0));
+  }
 }
 
 /**
