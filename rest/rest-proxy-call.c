@@ -199,6 +199,12 @@ rest_proxy_call_set_method (RestProxyCall *call,
     priv->method = g_strdup ("GET");
 }
 
+/**
+ * rest_proxy_call_get_method:
+ * @call: The #RestProxyCall
+ *
+ * Get the HTTP method to use when making the call, for example GET or POST.
+ */
 const char *
 rest_proxy_call_get_method (RestProxyCall *call)
 {
@@ -207,6 +213,17 @@ rest_proxy_call_get_method (RestProxyCall *call)
   return priv->method;
 }
 
+/**
+ * rest_proxy_call_set_function:
+ * @call: The #RestProxyCall
+ * @function: The function to call
+ *
+ * Set the REST "function" to call on the proxy.  This is appended to the URL,
+ * so that for example a proxy with the URL
+ * <literal>http://www.example.com/</literal> and the function
+ * <literal>test</literal> would actually access the URL
+ * <literal>http://www.example.com/test</literal>
+ */
 void
 rest_proxy_call_set_function (RestProxyCall *call,
                               const gchar   *function)
@@ -574,6 +591,19 @@ set_header (gpointer key, gpointer value, gpointer user_data)
   soup_message_headers_replace (headers, name, value);
 }
 
+/**
+ * rest_proxy_call_async:
+ * @call: The #RestProxyCall
+ * @callback: a #RestProxyCallAsyncCallback to invoke on completion of the call
+ * @weak_object: The #GObject to weakly reference and tie the lifecycle too
+ * @userdata: data to pass to @callback
+ * @error_out: a #GError, or %NULL
+ *
+ * Asynchronously invoke @call.
+ *
+ * When the call has finished, @callback will be called.  If @weak_object is
+ * disposed during the call then this call will be cancelled.
+ */
 gboolean
 rest_proxy_call_async (RestProxyCall                *call,
                        RestProxyCallAsyncCallback    callback,
@@ -679,6 +709,14 @@ error:
   return FALSE;
 }
 
+/**
+ * rest_proxy_call_cancel:
+ * @call: The #RestProxyCall
+ * @error: unused (TODO remove)
+ *
+ * Cancel this call.  It may be too late to not actually send the message, but
+ * the callback will not be invoked.
+ */
 gboolean
 rest_proxy_call_cancel (RestProxyCall *call,
                         GError       **error)
