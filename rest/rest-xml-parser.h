@@ -66,13 +66,14 @@ typedef struct {
  */
 typedef struct _RestXmlNode RestXmlNode;
 struct _RestXmlNode {
+  /*< private >*/
+  volatile int ref_count;
+  /*< public >*/
   gchar *name;
   gchar *content;
   GHashTable *children;
   GHashTable *attrs;
   RestXmlNode *next;
-  /*< private >*/
-  volatile int ref_count;
 };
 
 GType rest_xml_parser_get_type (void);
