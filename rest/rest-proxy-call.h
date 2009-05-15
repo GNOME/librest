@@ -141,8 +141,7 @@ gboolean rest_proxy_call_async (RestProxyCall                *call,
                                 gpointer                      userdata,
                                 GError                      **error);
 
-gboolean rest_proxy_call_cancel (RestProxyCall *call,
-                                 GError       **error);
+gboolean rest_proxy_call_cancel (RestProxyCall *call);
 
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
 

@@ -579,19 +579,11 @@ _call_async_weak_notify_cb (gpointer *data,
                             GObject  *dead_object)
 {
   RestProxyCallAsyncClosure *closure;
-  GError *error = NULL;
 
   closure = (RestProxyCallAsyncClosure *)data;
 
   /* Will end up freeing the closure */
-  rest_proxy_call_cancel (closure->call, &error);
-
-  if (error)
-  {
-    g_warning (G_STRLOC ": Error when cancelling call in weak notify: %s",
-               error->message);
-    g_clear_error (&error);
-  }
+  rest_proxy_call_cancel (closure->call);
 }
 
 static void
@@ -741,14 +733,12 @@ error:
 /**
  * rest_proxy_call_cancel:
  * @call: The #RestProxyCall
- * @error: unused (TODO remove)
  *
  * Cancel this call.  It may be too late to not actually send the message, but
  * the callback will not be invoked.
  */
 gboolean
-rest_proxy_call_cancel (RestProxyCall *call,
-                        GError       **error)
+rest_proxy_call_cancel (RestProxyCall *call)
 {
   RestProxyCallPrivate *priv;
   RestProxyCallAsyncClosure *closure;
