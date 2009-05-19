@@ -15,6 +15,9 @@ librest_la_SOURCES = rest-proxy.c 	\
 		     oauth-proxy.c	\
 		     oauth-proxy-call.c	\
 		     oauth-proxy-private.h \
+		     flickr-proxy.c	\
+		     flickr-proxy-call.c	\
+		     flickr-proxy-private.h \
 		     sha1.c	\
 		     sha1.h	\
 		     $(librest_la_HEADERS)
@@ -22,6 +25,8 @@ librest_la_HEADERS = rest-proxy.h 	\
 		     rest-proxy-call.h	\
 		     oauth-proxy.h	\
 		     oauth-proxy-call.h	\
+		     flickr-proxy.h	\
+		     flickr-proxy-call.h	\
 		     rest-xml-parser.h
 librest_ladir = $(includedir)/rest/rest
 

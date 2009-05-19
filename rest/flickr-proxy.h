@@ -1,0 +1,82 @@
+/*
+ * librest - RESTful web services access
+ * Copyright (c) 2008, 2009, Intel Corporation.
+ *
+ * Authors: Rob Bradford <rob@linux.intel.com>
+ *          Ross Burton <ross@linux.intel.com>
+ * 
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
+
+#ifndef _FLICKR_PROXY
+#define _FLICKR_PROXY
+
+#include <rest/rest-proxy.h>
+
+G_BEGIN_DECLS
+
+#define FLICKR_TYPE_PROXY flickr_proxy_get_type()
+
+#define FLICKR_PROXY(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), FLICKR_TYPE_PROXY, FlickrProxy))
+
+#define FLICKR_PROXY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), FLICKR_TYPE_PROXY, FlickrProxyClass))
+
+#define FLICKR_IS_PROXY(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), FLICKR_TYPE_PROXY))
+
+#define FLICKR_IS_PROXY_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), FLICKR_TYPE_PROXY))
+
+#define FLICKR_PROXY_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), FLICKR_TYPE_PROXY, FlickrProxyClass))
+
+typedef struct _FlickrProxyPrivate FlickrProxyPrivate;
+
+/**
+ * FlickrProxy:
+ *
+ * #FlickrProxy has no publicly available members.
+ */
+typedef struct {
+  RestProxy parent;
+  FlickrProxyPrivate *priv;
+} FlickrProxy;
+
+typedef struct {
+  RestProxyClass parent_class;
+} FlickrProxyClass;
+
+GType flickr_proxy_get_type (void);
+
+RestProxy* flickr_proxy_new (const char *consumer_key,
+                             const char *consumer_secret);
+
+RestProxy* flickr_proxy_new_with_token (const char *consumer_key,
+                                        const char *consumer_secret,
+                                        const char *token);
+
+const char * flickr_proxy_get_token (FlickrProxy *proxy);
+
+void flickr_proxy_set_token (FlickrProxy *proxy, const char *token);
+
+char * flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params);
+
+char * flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob);
+
+G_END_DECLS
+
+#endif /* _FLICKR_PROXY */
