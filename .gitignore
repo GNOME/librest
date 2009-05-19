@@ -26,6 +26,7 @@ examples/test-oauth
 examples/test-raw
 examples/test-xml
 examples/dump-xml
+examples/test-flickr
 tests/oauth
 tests/proxy
 rest/test-runner
