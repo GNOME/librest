@@ -5,6 +5,7 @@ Makefile
 Makefile.in
 .deps
 .libs
+*.bak
 *~
 *.pc
 aclocal.m4
@@ -22,6 +23,14 @@ stamp-h1
 docs/reference/rest/html/
 docs/reference/rest/xml/
 docs/reference/rest/rest-decl*.txt
+docs/reference/rest/*.stamp
+docs/reference/rest/rest-undeclared.txt
+docs/reference/rest/rest-undocumented.txt
+docs/reference/rest/rest.args
+docs/reference/rest/rest.hierarchy
+docs/reference/rest/rest.interfaces
+docs/reference/rest/rest.prerequisites
+docs/reference/rest/rest.signals
 examples/test-oauth
 examples/test-raw
 examples/test-xml
