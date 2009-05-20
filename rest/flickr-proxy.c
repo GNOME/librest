@@ -32,8 +32,8 @@ G_DEFINE_TYPE (FlickrProxy, flickr_proxy, REST_TYPE_PROXY)
 
 enum {
   PROP_0,
-  PROP_CONSUMER_KEY,
-  PROP_CONSUMER_SECRET,
+  PROP_API_KEY,
+  PROP_SHARED_SECRET,
   PROP_TOKEN,
 };
 
@@ -56,11 +56,11 @@ flickr_proxy_get_property (GObject *object, guint property_id,
   FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (object);
 
   switch (property_id) {
-  case PROP_CONSUMER_KEY:
-    g_value_set_string (value, priv->consumer_key);
+  case PROP_API_KEY:
+    g_value_set_string (value, priv->api_key);
     break;
-  case PROP_CONSUMER_SECRET:
-    g_value_set_string (value, priv->consumer_secret);
+  case PROP_SHARED_SECRET:
+    g_value_set_string (value, priv->shared_secret);
     break;
   case PROP_TOKEN:
     g_value_set_string (value, priv->token);
@@ -77,15 +77,15 @@ flickr_proxy_set_property (GObject *object, guint property_id,
   FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (object);
 
   switch (property_id) {
-  case PROP_CONSUMER_KEY:
-    if (priv->consumer_key)
-      g_free (priv->consumer_key);
-    priv->consumer_key = g_value_dup_string (value);
+  case PROP_API_KEY:
+    if (priv->api_key)
+      g_free (priv->api_key);
+    priv->api_key = g_value_dup_string (value);
     break;
-  case PROP_CONSUMER_SECRET:
-    if (priv->consumer_secret)
-      g_free (priv->consumer_secret);
-    priv->consumer_secret = g_value_dup_string (value);
+  case PROP_SHARED_SECRET:
+    if (priv->shared_secret)
+      g_free (priv->shared_secret);
+    priv->shared_secret = g_value_dup_string (value);
     break;
   case PROP_TOKEN:
     if (priv->token)
@@ -102,8 +102,8 @@ flickr_proxy_finalize (GObject *object)
 {
   FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (object);
 
-  g_free (priv->consumer_key);
-  g_free (priv->consumer_secret);
+  g_free (priv->api_key);
+  g_free (priv->shared_secret);
   g_free (priv->token);
 
   G_OBJECT_CLASS (flickr_proxy_parent_class)->finalize (object);
@@ -128,18 +128,18 @@ flickr_proxy_class_init (FlickrProxyClass *klass)
 
   proxy_class->new_call = _new_call;
 
-  pspec = g_param_spec_string ("consumer-key",  "consumer-key",
-                               "The consumer key", NULL,
+  pspec = g_param_spec_string ("api-key",  "api-key",
+                               "The API key", NULL,
                                G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class,
-                                   PROP_CONSUMER_KEY,
+                                   PROP_API_KEY,
                                    pspec);
 
-  pspec = g_param_spec_string ("consumer-secret",  "consumer-secret",
-                               "The consumer secret", NULL,
+  pspec = g_param_spec_string ("shared-secret",  "shared-secret",
+                               "The shared secret", NULL,
                                G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class,
-                                   PROP_CONSUMER_SECRET,
+                                   PROP_SHARED_SECRET,
                                    pspec);
 
   pspec = g_param_spec_string ("token",  "token",
@@ -157,22 +157,22 @@ flickr_proxy_init (FlickrProxy *self)
 }
 
 RestProxy *
-flickr_proxy_new (const char *consumer_key,
-                 const char *consumer_secret)
+flickr_proxy_new (const char *api_key,
+                 const char *shared_secret)
 {
-  return flickr_proxy_new_with_token (consumer_key,
-                                      consumer_secret,
+  return flickr_proxy_new_with_token (api_key,
+                                      shared_secret,
                                       NULL);
 }
 
 RestProxy *
-flickr_proxy_new_with_token (const char *consumer_key,
-                             const char *consumer_secret,
+flickr_proxy_new_with_token (const char *api_key,
+                             const char *shared_secret,
                              const char *token)
 {
   return g_object_new (FLICKR_TYPE_PROXY, 
-                       "consumer-key", consumer_key,
-                       "consumer-secret", consumer_secret,
+                       "api-key", api_key,
+                       "shared-secret", shared_secret,
                        "token", token,
                        "url-format", "http://api.flickr.com/services/rest/",
                        "binding-required", FALSE,
@@ -229,7 +229,7 @@ flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params)
 
   priv = PROXY_GET_PRIVATE (proxy);
 
-  s = g_string_new (priv->consumer_secret);
+  s = g_string_new (priv->shared_secret);
 
   keys = g_hash_table_get_keys (params);
   keys = g_list_sort (keys, (GCompareFunc)strcmp);
@@ -266,7 +266,7 @@ flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob)
   uri = soup_uri_new ("http://flickr.com/services/auth/");
   params = g_hash_table_new (g_str_hash, g_str_equal);
 
-  g_hash_table_insert (params, "api_key", proxy->priv->consumer_key);
+  g_hash_table_insert (params, "api_key", proxy->priv->api_key);
   /* TODO: parameter */
   g_hash_table_insert (params, "perms", "read");
   g_hash_table_insert (params, "frob", (gpointer)frob);

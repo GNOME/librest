@@ -62,11 +62,11 @@ typedef struct {
 
 GType flickr_proxy_get_type (void);
 
-RestProxy* flickr_proxy_new (const char *consumer_key,
-                             const char *consumer_secret);
+RestProxy* flickr_proxy_new (const char *api_key,
+                             const char *shared_secret);
 
-RestProxy* flickr_proxy_new_with_token (const char *consumer_key,
-                                        const char *consumer_secret,
+RestProxy* flickr_proxy_new_with_token (const char *api_key,
+                                        const char *shared_secret,
                                         const char *token);
 
 const char * flickr_proxy_get_token (FlickrProxy *proxy);

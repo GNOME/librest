@@ -47,7 +47,7 @@ _prepare (RestProxyCall *call, GError **error)
 
   rest_proxy_call_add_params (call,
                               "method", call_priv->function,
-                              "api_key", priv->consumer_key,
+                              "api_key", priv->api_key,
                               NULL);
 
   if (priv->token)

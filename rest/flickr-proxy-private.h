@@ -26,10 +26,8 @@
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), FLICKR_TYPE_PROXY, FlickrProxyPrivate))
 
 struct _FlickrProxyPrivate {
-  /* TODO rename to api_key */
-  char *consumer_key;
-  /* TODO: rename to shared secret */
-  char *consumer_secret;
+  char *api_key;
+  char *shared_secret;
   char *token;
 };
 
