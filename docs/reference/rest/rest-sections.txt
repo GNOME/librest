@@ -1,8 +1,29 @@
 <SECTION>
+<FILE>flickr-proxy</FILE>
+FlickrProxyPrivate
+<TITLE>FlickrProxy</TITLE>
+FlickrProxy
+flickr_proxy_new
+flickr_proxy_new_with_token
+flickr_proxy_get_token
+flickr_proxy_set_token
+flickr_proxy_sign
+flickr_proxy_build_login_url
+<SUBSECTION Standard>
+FlickrProxyClass
+FLICKR_PROXY
+FLICKR_IS_PROXY
+FLICKR_TYPE_PROXY
+flickr_proxy_get_type
+FLICKR_PROXY_CLASS
+FLICKR_IS_PROXY_CLASS
+FLICKR_PROXY_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>rest-proxy-call</FILE>
 <TITLE>RestProxyCall</TITLE>
 RestProxyCall
-RestProxyCallClass
 REST_PROXY_CALL_ERROR
 RestProxyCallError
 rest_proxy_call_set_method
@@ -109,6 +130,21 @@ oauth_proxy_get_type
 OAUTH_PROXY_CLASS
 OAUTH_IS_PROXY_CLASS
 OAUTH_PROXY_GET_CLASS
+</SECTION>
+
+<SECTION>
+<FILE>flickr-proxy-call</FILE>
+<TITLE>FlickrProxyCall</TITLE>
+FlickrProxyCall
+<SUBSECTION Standard>
+FlickrProxyCallClass
+FLICKR_PROXY_CALL
+FLICKR_IS_PROXY_CALL
+FLICKR_TYPE_PROXY_CALL
+flickr_proxy_call_get_type
+FLICKR_PROXY_CALL_CLASS
+FLICKR_IS_PROXY_CALL_CLASS
+FLICKR_PROXY_CALL_GET_CLASS
 </SECTION>
 
 <SECTION>
