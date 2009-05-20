@@ -29,4 +29,5 @@ examples/dump-xml
 examples/test-flickr
 tests/oauth
 tests/proxy
+tests/flickr
 rest/test-runner
