@@ -24,6 +24,8 @@
 #include <rest/rest-xml-parser.h>
 #include <stdio.h>
 
+#define API_KEY "cf4e02fc57240a9b07346ad26e291080"
+#define SHARED_SECRET "cdfa2329cb206e50"
 #define ROSS_ID "35468147630@N01"
 int
 main (int argc, char **argv)
@@ -38,7 +40,12 @@ main (int argc, char **argv)
   g_type_init ();
 
   /* Create the proxy */
-  proxy = flickr_proxy_new ("cf4e02fc57240a9b07346ad26e291080", "cdfa2329cb206e50");
+  proxy = flickr_proxy_new (API_KEY, SHARED_SECRET);
+
+  g_assert_cmpstr (flickr_proxy_get_api_key (FLICKR_PROXY (proxy)),
+                   ==, API_KEY);
+  g_assert_cmpstr (flickr_proxy_get_shared_secret (FLICKR_PROXY (proxy)),
+                   ==, SHARED_SECRET);
 
   /*
    * Sadly can't unit test authentication.
