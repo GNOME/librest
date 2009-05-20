@@ -69,6 +69,10 @@ RestProxy* flickr_proxy_new_with_token (const char *api_key,
                                         const char *shared_secret,
                                         const char *token);
 
+const char * flickr_proxy_get_api_key (FlickrProxy *proxy);
+
+const char * flickr_proxy_get_shared_secret (FlickrProxy *proxy);
+
 const char * flickr_proxy_get_token (FlickrProxy *proxy);
 
 void flickr_proxy_set_token (FlickrProxy *proxy, const char *token);

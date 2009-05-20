@@ -180,10 +180,42 @@ flickr_proxy_new_with_token (const char *api_key,
 }
 
 /**
+ * flickr_proxy_get_api_key:
+ * @proxy: an #FlickrProxy
+ *
+ * Get the API key.
+ *
+ * Returns: the API key. This string is owned by #FlickrProxy and should not be
+ * freed.
+ */
+const char *
+flickr_proxy_get_api_key (FlickrProxy *proxy)
+{
+  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  return priv->api_key;
+}
+
+/**
+ * flickr_proxy_get_shared_secret:
+ * @proxy: an #FlickrProxy
+ *
+ * Get the shared secret for authentication.
+ *
+ * Returns: the shared secret. This string is owned by #FlickrProxy and should not be
+ * freed.
+ */
+const char *
+flickr_proxy_get_shared_secret (FlickrProxy *proxy)
+{
+  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  return priv->shared_secret;
+}
+
+/**
  * flickr_proxy_get_token:
  * @proxy: an #FlickrProxy
  *
- * Get the current request or access token.
+ * Get the current token.
  *
  * Returns: the token, or %NULL if there is no token yet.  This string is owned
  * by #FlickrProxy and should not be freed.
@@ -200,7 +232,7 @@ flickr_proxy_get_token (FlickrProxy *proxy)
  * @proxy: an #FlickrProxy
  * @token: the access token
  *
- * Set the access token.
+ * Set the token.
  */
 void
 flickr_proxy_set_token (FlickrProxy *proxy, const char *token)
