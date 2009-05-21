@@ -40,10 +40,11 @@ main (int argc, char **argv)
                            /* Consumer Secret */
                            "t4FM7LiUeD4RBwKSPa6ichKPDh5Jx4kt",
                            /* FireEagle endpoint, which we bind as required */
-                           "https://fireeagle.yahooapis.com/%s", TRUE);
+                           "https://fireeagle.yahooapis.com/", FALSE);
 
   /* First stage authentication, this gets a request token */
-  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/request_token", NULL);
+  if (!oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/request_token", &error))
+    g_error ("Cannot request token: %s", error->message);
 
   /* From the token construct a URL for the user to visit */
   g_print ("Go to https://fireeagle.yahoo.net/oauth/authorize?oauth_token=%s then hit any key\n",
@@ -51,14 +52,15 @@ main (int argc, char **argv)
   getchar ();
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/access_token", NULL);
+  if (!oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/access_token", &error))
+    g_error ("Cannot request token: %s", error->message);
 
   /* We're now authenticated */
   g_print ("Got access token\n");
 
   /* Get the user's current location */
-  rest_proxy_bind (proxy, "api/0.1/user");
   call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "api/0.1/user");
 
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
