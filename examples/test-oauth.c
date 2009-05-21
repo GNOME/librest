@@ -39,7 +39,7 @@ main (int argc, char **argv)
                            "NmUm6hxQ9a4u",
                            /* Consumer Secret */
                            "t4FM7LiUeD4RBwKSPa6ichKPDh5Jx4kt",
-                           /* FireEagle endpoint, which we bind as required */
+                           /* FireEagle endpoint */
                            "https://fireeagle.yahooapis.com/", FALSE);
 
   /* First stage authentication, this gets a request token */
