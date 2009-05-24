@@ -34,7 +34,7 @@ main (int argc, char **argv)
   RestProxyCall *call;
   RestXmlNode *root, *node;
   const char *secret, *session_key;
-  char *token, *url;
+  char *token, *url, *name;
 
   g_thread_init (NULL);
   g_type_init ();
@@ -84,18 +84,40 @@ main (int argc, char **argv)
     facebook_proxy_set_app_secret (FACEBOOK_PROXY (proxy), secret);
   }
 
-  /* Make an authenticated call */
+  /* Make some authenticated calls */
+
+  /* Get the user name */
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "users.getInfo");
   rest_proxy_call_add_param (call, "uids", "1340627425");
-  rest_proxy_call_add_param (call, "fields", "uid,name");
+  rest_proxy_call_add_param (call, "fields", "name");
 
   if (!rest_proxy_call_run (call, NULL, NULL))
     g_error ("Cannot get user info");
 
   root = get_xml (call);
   node = rest_xml_node_find (root, "name");
-  g_print ("Logged in as %s\n", node->content);
+  name = g_strdup (node->content);
+  g_print ("Logged in as %s\n", name);
+  rest_xml_node_unref (root);
+
+  /* Get the user status messages */
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "status.get");
+  rest_proxy_call_add_param (call, "limit", "5");
+
+  if (!rest_proxy_call_run (call, NULL, NULL))
+    g_error ("Cannot get statuses");
+
+  root = get_xml (call);
+  {
+    RestXmlNode *node, *msg;
+    for (node = rest_xml_node_find (root, "status"); node; node = node->next) {
+      msg = rest_xml_node_find (node, "message");
+      g_print ("%s %s\n", name, msg->content);
+    }
+  }
+  rest_xml_node_unref (root);
 
   return 0;
 }
