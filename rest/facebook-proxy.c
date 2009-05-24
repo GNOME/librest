@@ -174,7 +174,7 @@ facebook_proxy_new_with_session (const char *api_key,
                        "api-key", api_key,
                        "app-secret", app_secret,
                        "session-key", session_key,
-                       "url-format", "http://api.facebook.com/restserver.php",
+                       "url-format", "https://api.facebook.com/restserver.php",
                        "binding-required", FALSE,
                        NULL);
 }
