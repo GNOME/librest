@@ -51,10 +51,15 @@ _prepare (RestProxyCall *call, GError **error)
                               "v", "1.0",
                               NULL);
 
-  if (priv->session_key)
-    rest_proxy_call_add_param (call, "session_key", priv->session_key);
+  if (priv->session_key) {
+    GTimeVal time;
+    g_get_current_time (&time);
+    s = g_strdup_printf ("%ld.%ld", time.tv_sec, time.tv_usec);
+    rest_proxy_call_add_param (call, "call_id", s);
+    g_free (s);
 
-  /* TODO call id */
+    rest_proxy_call_add_param (call, "session_key", priv->session_key);
+  }
 
   s = facebook_proxy_sign (proxy, call_priv->params);
   rest_proxy_call_add_param (call, "sig", s);
