@@ -14,6 +14,8 @@
     <xi:include href="xml/oauth-proxy-call.xml"/>
     <xi:include href="xml/flickr-proxy.xml"/>
     <xi:include href="xml/flickr-proxy-call.xml"/>
+    <xi:include href="xml/facebook-proxy.xml"/>
+    <xi:include href="xml/facebook-proxy-call.xml"/>
     <xi:include href="xml/rest-xml-parser.xml"/>
   </chapter>
 </book>

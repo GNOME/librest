@@ -5,3 +5,5 @@ oauth_proxy_get_type
 oauth_proxy_call_get_type
 flickr_proxy_get_type
 flickr_proxy_call_get_type
+facebook_proxy_get_type
+facebook_proxy_call_get_type
