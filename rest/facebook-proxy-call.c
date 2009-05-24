@@ -43,7 +43,7 @@ _prepare (RestProxyCall *call, GError **error)
   call_priv = call->priv;
 
   /* First reset the URL because Facebook puts the function in the parameters */
-  call_priv->url = g_strdup ("http://api.facebook.com/restserver.php");
+  g_object_get (proxy, "url-format", &call_priv->url, NULL);
 
   rest_proxy_call_add_params (call,
                               "method", call_priv->function,
