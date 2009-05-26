@@ -326,3 +326,29 @@ facebook_proxy_build_login_url (FacebookProxy *proxy, const char *token)
   soup_uri_free (uri);
   return s;
 }
+
+char *
+facebook_proxy_build_permission_url (FacebookProxy *proxy, const char *perms)
+{
+  SoupURI *uri;
+  GHashTable *params;
+  char *s;
+
+  g_return_val_if_fail (FACEBOOK_IS_PROXY (proxy), NULL);
+  g_return_val_if_fail (perms, NULL);
+
+  uri = soup_uri_new ("http://facebook.com/authorize.php");
+  params = g_hash_table_new (g_str_hash, g_str_equal);
+
+  g_hash_table_insert (params, "api_key", proxy->priv->api_key);
+  g_hash_table_insert (params, "v", "1.0");
+  g_hash_table_insert (params, "ext_perm", (gpointer)perms);
+
+  soup_uri_set_query_from_form (uri, params);
+
+  s = soup_uri_to_string (uri, FALSE);
+
+  g_hash_table_unref (params);
+  soup_uri_free (uri);
+  return s;
+}

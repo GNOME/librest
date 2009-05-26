@@ -83,6 +83,8 @@ char * facebook_proxy_sign (FacebookProxy *proxy, GHashTable *params);
 
 char * facebook_proxy_build_login_url (FacebookProxy *proxy, const char *frob);
 
+char * facebook_proxy_build_permission_url (FacebookProxy *proxy, const char *perms);
+
 G_END_DECLS
 
 #endif /* _FACEBOOK_PROXY */
