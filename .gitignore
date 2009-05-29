@@ -40,4 +40,5 @@ examples/test-facebook
 tests/oauth
 tests/proxy
 tests/flickr
+tests/threaded
 rest/test-runner
