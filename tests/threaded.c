@@ -103,6 +103,7 @@ main (int argc, char **argv)
     g_thread_join (threads[i]);
   }
 
+  soup_server_quit (server);
   g_free (url);
 
   return errors != 0;
