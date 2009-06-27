@@ -227,6 +227,8 @@ rest_proxy_init (RestProxy *self)
   if (REST_DEBUG_ENABLED(PROXY)) {
     soup_session_add_feature
       (priv->session, (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0));
+    soup_session_add_feature
+      (priv->session_sync, (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0));
   }
 }
 
