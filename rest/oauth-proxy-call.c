@@ -101,12 +101,13 @@ merge_hashes (GHashTable *hash, GHashTable *from)
 }
 
 static char *
-sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *params)
+sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
 {
   OAuthProxyPrivate *priv;
   RestProxyCallPrivate *callpriv;
   char *key, *signature, *ep, *eep;
   GString *text;
+  GHashTable *all_params;
 
   priv = PROXY_GET_PRIVATE (proxy);
   callpriv = call->priv;
@@ -118,13 +119,16 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *params)
   g_string_append_c (text, '&');
 
   /* Merge the OAuth parameters with the query parameters */
-  merge_hashes (params, callpriv->params);
+  all_params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+  merge_hashes (all_params, oauth_params);
+  merge_hashes (all_params, callpriv->params);
 
-  ep = encode_params (params);
+  ep = encode_params (all_params);
   eep = OAUTH_ENCODE_STRING (ep);
   g_string_append (text, eep);
   g_free (ep);
   g_free (eep);
+  g_hash_table_destroy (all_params);
 
   /* PLAINTEXT signature value is the HMAC-SHA1 key value */
   key = sign_plaintext (priv);
@@ -141,19 +145,19 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *params)
  * From the OAuth parameters in @params, construct a HTTP Authorized header.
  */
 static char *
-make_authorized_header (GHashTable *params)
+make_authorized_header (GHashTable *oauth_params)
 {
   GString *auth;
   GHashTableIter iter;
   const char *key, *value;
 
-  g_assert (params);
+  g_assert (oauth_params);
 
   /* TODO: is "" okay for the realm, or should this be magically calculated or a
      parameter? */
   auth = g_string_new ("OAuth realm=\"\"");
 
-  g_hash_table_iter_init (&iter, params);
+  g_hash_table_iter_init (&iter, oauth_params);
   while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
     g_string_append_printf (auth, ", %s=\"%s\"", key, OAUTH_ENCODE_STRING (value));
   }
@@ -167,43 +171,43 @@ _prepare (RestProxyCall *call, GError **error)
   OAuthProxy *proxy = NULL;
   OAuthProxyPrivate *priv;
   char *s;
-  GHashTable *params;
+  GHashTable *oauth_params;
 
   g_object_get (call, "proxy", &proxy, NULL);
   priv = PROXY_GET_PRIVATE (proxy);
 
-  params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+  oauth_params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
 
-  g_hash_table_insert (params, "oauth_version", g_strdup ("1.0"));
+  g_hash_table_insert (oauth_params, "oauth_version", g_strdup ("1.0"));
 
   s = g_strdup_printf ("%lli", (long long int) time (NULL));
-  g_hash_table_insert (params, "oauth_timestamp", s);
+  g_hash_table_insert (oauth_params, "oauth_timestamp", s);
 
   s = g_strdup_printf ("%u", g_random_int ());
-  g_hash_table_insert (params, "oauth_nonce", s);
+  g_hash_table_insert (oauth_params, "oauth_nonce", s);
 
-  g_hash_table_insert (params, "oauth_consumer_key",
+  g_hash_table_insert (oauth_params, "oauth_consumer_key",
                        g_strdup (priv->consumer_key));
 
   if (priv->token)
-    g_hash_table_insert (params, "oauth_token", g_strdup (priv->token));
+    g_hash_table_insert (oauth_params, "oauth_token", g_strdup (priv->token));
 
   switch (priv->method) {
   case PLAINTEXT:
-    g_hash_table_insert (params, "oauth_signature_method", g_strdup ("PLAINTEXT"));
+    g_hash_table_insert (oauth_params, "oauth_signature_method", g_strdup ("PLAINTEXT"));
     s = sign_plaintext (priv);
     break;
   case HMAC_SHA1:
-    g_hash_table_insert (params, "oauth_signature_method", g_strdup ("HMAC-SHA1"));
-    s = sign_hmac (proxy, call, params);
+    g_hash_table_insert (oauth_params, "oauth_signature_method", g_strdup ("HMAC-SHA1"));
+    s = sign_hmac (proxy, call, oauth_params);
     break;
   }
-  g_hash_table_insert (params, "oauth_signature", s);
+  g_hash_table_insert (oauth_params, "oauth_signature", s);
 
-  s = make_authorized_header (params);
+  s = make_authorized_header (oauth_params);
   rest_proxy_call_add_header (call, "Authorization", s);
   g_free (s);
-  g_hash_table_destroy (params);
+  g_hash_table_destroy (oauth_params);
 
   g_object_unref (proxy);
 
