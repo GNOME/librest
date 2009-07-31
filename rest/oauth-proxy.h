@@ -81,7 +81,10 @@ typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
                                            GObject       *weak_object,
                                            gpointer       userdata);
 
-gboolean oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error);
+G_GNUC_DEPRECATED
+gboolean oauth_proxy_auth_step (OAuthProxy *proxy,
+                                const char *function,
+                                GError    **error);
 
 gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
                              const char *function,
@@ -89,6 +92,21 @@ gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
                              GObject *weak_object,
                              gpointer user_data,
                              GError **error_out);
+
+
+gboolean oauth_proxy_request_token (OAuthProxy *proxy,
+                                    const char *function,
+                                    const char *callback,
+                                    GError    **error);
+
+
+void oauth_proxy_set_verifier (OAuthProxy *proxy, const char *verifier);
+
+gboolean oauth_proxy_access_token (OAuthProxy *proxy,
+                                   const char *function,
+                                   GError    **error);
+
+/* TODO async forms of request and access token */
 
 const char * oauth_proxy_get_token (OAuthProxy *proxy);
 

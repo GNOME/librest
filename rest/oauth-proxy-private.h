@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -31,4 +31,5 @@ typedef struct {
   char *token;
   char *token_secret;
   OAuthSignatureMethod method;
+  char *verifier;
 } OAuthProxyPrivate;

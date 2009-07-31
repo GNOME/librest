@@ -171,6 +171,7 @@ steal_oauth_params (RestProxyCall *call, GHashTable *oauth_params)
   GHashTable *params;
   GHashTableIter iter;
   char *key, *value;
+  GList *to_remove = NULL;
 
   params = rest_proxy_call_get_params (call);
 
@@ -178,9 +179,14 @@ steal_oauth_params (RestProxyCall *call, GHashTable *oauth_params)
   while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
     if (g_str_has_prefix (key, "oauth_")) {
       g_hash_table_insert (oauth_params, key, value);
-      g_hash_table_steal (params, key);
+      to_remove = g_list_prepend (to_remove, key);
       /* TODO: key will be leaked */
     }
+  }
+
+  while (to_remove) {
+    g_hash_table_steal (params, to_remove->data);
+    to_remove = g_list_delete_link (to_remove, to_remove);
   }
 
   g_hash_table_unref (params);

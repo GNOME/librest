@@ -113,6 +113,7 @@ oauth_proxy_finalize (GObject *object)
   g_free (priv->consumer_secret);
   g_free (priv->token);
   g_free (priv->token_secret);
+  g_free (priv->verifier);
 
   if (G_OBJECT_CLASS (oauth_proxy_parent_class)->finalize)
     G_OBJECT_CLASS (oauth_proxy_parent_class)->finalize (object);
@@ -371,4 +372,83 @@ oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
     g_free (priv->token_secret);
 
   priv->token_secret = g_strdup (token_secret);
+}
+
+
+
+gboolean
+oauth_proxy_request_token (OAuthProxy *proxy,
+                           const char *function,
+                           /* NULL: 1.0 only, "oob", or URL */
+                           const char *callback,
+                           GError    **error)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  RestProxyCall *call;
+  GHashTable *form;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function ? function : "request_token");
+
+  if (callback)
+    rest_proxy_call_add_param (call, "oauth_callback", callback);
+
+  if (!rest_proxy_call_run (call, NULL, error)) {
+    g_object_unref (call);
+    return FALSE;
+  }
+
+  /* TODO: sanity check response */
+  form = soup_form_decode (rest_proxy_call_get_payload (call));
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  /* TODO: check for oauth_callback_confirmed=true and set is-1.0a flag? */
+  g_hash_table_destroy (form);
+
+  g_object_unref (call);
+
+  return TRUE;
+}
+
+
+void
+oauth_proxy_set_verifier (OAuthProxy *proxy, const char *verifier)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+
+  if (priv->verifier)
+    g_free (priv->verifier);
+
+  priv->verifier = g_strdup (verifier);
+}
+
+gboolean
+oauth_proxy_access_token (OAuthProxy *proxy,
+                          const char *function,
+                          GError    **error)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  RestProxyCall *call;
+  GHashTable *form;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function ? function : "access_token");
+
+  if (priv->verifier)
+    rest_proxy_call_add_param (call, "oauth_verifier", priv->verifier);
+
+  if (!rest_proxy_call_run (call, NULL, error)) {
+    g_object_unref (call);
+    return FALSE;
+  }
+
+  /* TODO: sanity check response */
+  form = soup_form_decode (rest_proxy_call_get_payload (call));
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  g_hash_table_destroy (form);
+
+  g_object_unref (call);
+
+  return TRUE;
 }
