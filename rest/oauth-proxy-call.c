@@ -165,6 +165,27 @@ make_authorized_header (GHashTable *oauth_params)
   return g_string_free (auth, FALSE);
 }
 
+static void
+steal_oauth_params (RestProxyCall *call, GHashTable *oauth_params)
+{
+  GHashTable *params;
+  GHashTableIter iter;
+  char *key, *value;
+
+  params = rest_proxy_call_get_params (call);
+
+  g_hash_table_iter_init (&iter, params);
+  while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
+    if (g_str_has_prefix (key, "oauth_")) {
+      g_hash_table_insert (oauth_params, key, value);
+      g_hash_table_steal (params, key);
+      /* TODO: key will be leaked */
+    }
+  }
+
+  g_hash_table_unref (params);
+}
+
 static gboolean
 _prepare (RestProxyCall *call, GError **error)
 {
@@ -177,6 +198,9 @@ _prepare (RestProxyCall *call, GError **error)
   priv = PROXY_GET_PRIVATE (proxy);
 
   oauth_params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+
+  /* First, steal any OAuth properties in the regular params */
+  steal_oauth_params (call, oauth_params);
 
   g_hash_table_insert (oauth_params, "oauth_version", g_strdup ("1.0"));
 
