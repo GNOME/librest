@@ -37,6 +37,7 @@ examples/test-xml
 examples/dump-xml
 examples/test-flickr
 examples/test-facebook
+examples/post-twitter
 tests/oauth
 tests/proxy
 tests/flickr
