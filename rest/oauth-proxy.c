@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -44,7 +44,7 @@ _new_call (RestProxy *proxy)
   call = g_object_new (OAUTH_TYPE_PROXY_CALL,
                        "proxy", proxy,
                        NULL);
-  
+
   return call;
 }
 
@@ -77,7 +77,7 @@ oauth_proxy_set_property (GObject *object, guint property_id,
                               const GValue *value, GParamSpec *pspec)
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (object);
-  
+
   switch (property_id) {
   case PROP_CONSUMER_KEY:
     if (priv->consumer_key)
@@ -108,12 +108,12 @@ static void
 oauth_proxy_finalize (GObject *object)
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (object);
-  
+
   g_free (priv->consumer_key);
   g_free (priv->consumer_secret);
   g_free (priv->token);
   g_free (priv->token_secret);
-  
+
   if (G_OBJECT_CLASS (oauth_proxy_parent_class)->finalize)
     G_OBJECT_CLASS (oauth_proxy_parent_class)->finalize (object);
 }
@@ -140,28 +140,28 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
   pspec = g_param_spec_string ("consumer-key",  "consumer-key",
                                "The consumer key", NULL,
                                G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, 
+  g_object_class_install_property (object_class,
                                    PROP_CONSUMER_KEY,
                                    pspec);
 
   pspec = g_param_spec_string ("consumer-secret",  "consumer-secret",
                                "The consumer secret", NULL,
                                G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, 
+  g_object_class_install_property (object_class,
                                    PROP_CONSUMER_SECRET,
                                    pspec);
-  
+
   pspec = g_param_spec_string ("token",  "token",
                                "The request or access token", NULL,
                                G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, 
+  g_object_class_install_property (object_class,
                                    PROP_TOKEN,
                                    pspec);
 
   pspec = g_param_spec_string ("token-secret",  "token-secret",
                                "The request or access token secret", NULL,
                                G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, 
+  g_object_class_install_property (object_class,
                                    PROP_TOKEN_SECRET,
                                    pspec);
 
@@ -180,7 +180,7 @@ oauth_proxy_new (const char *consumer_key,
                  const gchar *url_format,
                  gboolean binding_required)
 {
-  return g_object_new (OAUTH_TYPE_PROXY, 
+  return g_object_new (OAUTH_TYPE_PROXY,
                        "consumer-key", consumer_key,
                        "consumer-secret", consumer_secret,
                        "url-format", url_format,
@@ -196,7 +196,7 @@ oauth_proxy_new_with_token (const char *consumer_key,
                  const gchar *url_format,
                  gboolean binding_required)
 {
-  return g_object_new (OAUTH_TYPE_PROXY, 
+  return g_object_new (OAUTH_TYPE_PROXY,
                        "consumer-key", consumer_key,
                        "consumer-secret", consumer_secret,
                        "token", token,
@@ -310,7 +310,7 @@ oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
  */
 const char *
 oauth_proxy_get_token (OAuthProxy *proxy)
-{  
+{
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   return priv->token;
 }
@@ -347,7 +347,7 @@ oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
  */
 const char *
 oauth_proxy_get_token_secret (OAuthProxy *proxy)
-{  
+{
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   return priv->token_secret;
 }
