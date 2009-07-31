@@ -292,7 +292,7 @@ main (int argc, char **argv)
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
   soup_server_run_async (server);
 
-  url = g_strdup_printf ("http://localhost:%d/", soup_server_get_port (server));
+  url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
   proxy = rest_proxy_new (url, FALSE);
   g_free (url);
 
