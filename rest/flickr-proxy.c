@@ -293,7 +293,6 @@ flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob)
   char *sig, *s;
 
   g_return_val_if_fail (FLICKR_IS_PROXY (proxy), NULL);
-  g_return_val_if_fail (frob, NULL);
 
   uri = soup_uri_new ("http://flickr.com/services/auth/");
   params = g_hash_table_new (g_str_hash, g_str_equal);
@@ -301,7 +300,8 @@ flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob)
   g_hash_table_insert (params, "api_key", proxy->priv->api_key);
   /* TODO: parameter */
   g_hash_table_insert (params, "perms", "read");
-  g_hash_table_insert (params, "frob", (gpointer)frob);
+  if (frob)
+    g_hash_table_insert (params, "frob", (gpointer)frob);
 
   sig = flickr_proxy_sign (proxy, params);
   g_hash_table_insert (params, "api_sig", sig);
