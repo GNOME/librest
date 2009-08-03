@@ -45,13 +45,13 @@ main (int argc, char **argv)
   priv = PROXY_GET_PRIVATE (oproxy);
 
   /* First stage authentication, this gets a request token */
-  oauth_proxy_auth_step (oproxy, "request_token.php", &error);
+  oauth_proxy_request_token (oproxy, "request_token.php", NULL, &error);
   g_assert_no_error (error);
   g_assert_cmpstr (priv->token, ==, "requestkey");
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_auth_step (OAUTH_PROXY (proxy), "access_token", &error);
+  oauth_proxy_access_token (OAUTH_PROXY (proxy), "access_token", NULL, &error);
   g_assert_no_error (error);
 
   g_assert_cmpstr (priv->token, ==, "accesskey");
