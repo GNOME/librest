@@ -39,6 +39,7 @@ examples/test-facebook
 examples/post-twitter
 examples/get-fireeagle-location
 tests/oauth
+tests/oauth-async
 tests/proxy
 tests/flickr
 tests/threaded
