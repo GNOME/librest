@@ -413,7 +413,7 @@ oauth_proxy_request_token (OAuthProxy *proxy,
  * oauth_proxy_access_token:
  * @proxy: an #OAuthProxy
  * @function: the function name to invoke
- * @callback: the verifier
+ * @verifier: the verifier
  * @error: a #GError, or %NULL
  *
  * Perform the Access Token phase of OAuth, invoking @function (defaulting to
