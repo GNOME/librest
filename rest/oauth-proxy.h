@@ -57,6 +57,15 @@ typedef struct {
   RestProxyClass parent_class;
 } OAuthProxyClass;
 
+/**
+ * OAuthSignatureMethod:
+ * @PLAINTEXT: plain text signatures (not recommended)
+ * @HMAC_SHA1: HMAC-SHA1 signatures (recommended)
+ *
+ * The signature method to use when signing method calls.  @PLAINTEXT is only
+ * recommended for testing, in general @HMAC_SHA1 is well supported and more
+ * secure.
+ */
 typedef enum {
   PLAINTEXT,
   HMAC_SHA1
@@ -76,10 +85,15 @@ RestProxy* oauth_proxy_new_with_token (const char *consumer_key,
                                        const gchar *url_format,
                                        gboolean binding_required);
 
+/**
+ * OAuthProxyAuthCallback:
+ *
+ * Callback from oauth_proxy_auth_step_async().
+ */
 typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
-                                           GError        *error,
-                                           GObject       *weak_object,
-                                           gpointer       userdata);
+                                       GError     *error,
+                                       GObject    *weak_object,
+                                       gpointer    userdata);
 
 G_GNUC_DEPRECATED
 gboolean oauth_proxy_auth_step (OAuthProxy *proxy,

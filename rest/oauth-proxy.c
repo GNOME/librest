@@ -175,6 +175,28 @@ oauth_proxy_init (OAuthProxy *self)
   PROXY_GET_PRIVATE (self)->method = HMAC_SHA1;
 }
 
+/**
+ * oauth_proxy_new:
+ * @consumer_key: the Consumer Key
+ * @consumer_secret: the Consumer Secret
+ * @url_format: the endpoint URL
+ * @binding_required: whether the URL needs to be bound before calling
+ *
+ * Create a new #OAuthProxy for the specified endpoint @url_format, using the
+ * specified API key and secret.
+ *
+ * This proxy won't have the Token or Token Secret set so as such will be
+ * unauthorised.  If the tokens are unknown then oauth_proxy_request_token() and
+ * oauth_proxy_access_token() should be called to do the OAuth authorisation, or
+ * the tokens should be set using oauth_proxy_set_token() and
+ * oauth_proxy_set_token_secret().
+ *
+ * Set @binding_required to %TRUE if the URL contains string formatting
+ * operations (for example "http://foo.com/%<!-- -->s".  These must be expanded
+ * using rest_proxy_bind() before invoking the proxy.
+ *
+ * Returns: A new #OAuthProxy.
+ */
 RestProxy *
 oauth_proxy_new (const char *consumer_key,
                  const char *consumer_secret,
@@ -189,6 +211,27 @@ oauth_proxy_new (const char *consumer_key,
                        NULL);
 }
 
+/**
+ * oauth_proxy_new_with_token:
+ * @consumer_key: the Consumer Key
+ * @consumer_secret: the Consumer Secret
+ * @token: the Access Token
+ * @token_secret: the Token Secret
+ * @url_format: the endpoint URL
+ * @binding_required: whether the URL needs to be bound before calling
+ *
+ * Create a new #OAuthProxy for the specified endpoint @url_format, using the
+ * specified API key and secret.
+ *
+ * @token and @token_secret are used for the Access Token and Token Secret, so
+ * if they are still valid then this proxy is authorised.
+ *
+ * Set @binding_required to %TRUE if the URL contains string formatting
+ * operations (for example "http://foo.com/%<!-- -->s".  These must be expanded
+ * using rest_proxy_bind() before invoking the proxy.
+ *
+ * Returns: A new #OAuthProxy.
+ */
 RestProxy *
 oauth_proxy_new_with_token (const char *consumer_key,
                  const char *consumer_secret,
@@ -241,6 +284,21 @@ auth_callback (RestProxyCall *call,
   g_object_unref (proxy);
 }
 
+/**
+ * oauth_proxy_auth_step_async:
+ * @proxy: an #OAuthProxy
+ * @function: the function to invoke on the proxy
+ * @callback: the callback to invoke when authorisation is complete
+ * @weak_object: the #GObject to weakly reference and tie the lifecycle too
+ * @user_data: data to pass to @callback
+ * @error_out: a #GError, or %NULL
+ *
+ * Perform an OAuth authorisation step.  This calls @function and then updates
+ * the token and token secret in the proxy.
+ *
+ * @proxy must not require binding, the function will be invoked using
+ * rest_proxy_call_set_function().
+ */
 gboolean
 oauth_proxy_auth_step_async (OAuthProxy *proxy,
                              const char *function,
@@ -283,6 +341,106 @@ oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function);
+
+  if (!rest_proxy_call_run (call, NULL, error)) {
+    g_object_unref (call);
+    return FALSE;
+  }
+
+  /* TODO: sanity check response */
+  form = soup_form_decode (rest_proxy_call_get_payload (call));
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  g_hash_table_destroy (form);
+
+  g_object_unref (call);
+
+  return TRUE;
+}
+
+/**
+ * oauth_proxy_request_token:
+ * @proxy: an #OAuthProxy
+ * @function: the function name to invoke
+ * @callback: the callback URI
+ * @error: a #GError, or %NULL
+ *
+ * Perform the Request Token phase of OAuth, invoking @function (defaulting to
+ * "request_token" if @function is NULL).
+ *
+ * The value of @callback depends on whether the server supports OAuth 1.0 or
+ * 1.0a.  If it only supports 1.0 then callback can be NULL.  If it supports
+ * 1.0a then @callback should either be your callback URI, or "oob"
+ * (out-of-band).
+ *
+ * Returns: %TRUE on success, or %FALSE on failure. On failure @error is set.
+ */
+gboolean
+oauth_proxy_request_token (OAuthProxy *proxy,
+                           const char *function,
+                           /* NULL: 1.0 only, "oob", or URL */
+                           const char *callback,
+                           GError    **error)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  RestProxyCall *call;
+  GHashTable *form;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function ? function : "request_token");
+
+  if (callback)
+    rest_proxy_call_add_param (call, "oauth_callback", callback);
+
+  if (!rest_proxy_call_run (call, NULL, error)) {
+    g_object_unref (call);
+    return FALSE;
+  }
+
+  /* TODO: sanity check response */
+  form = soup_form_decode (rest_proxy_call_get_payload (call));
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  /* TODO: check for oauth_callback_confirmed=true and set is-1.0a flag? */
+  g_hash_table_destroy (form);
+
+  g_object_unref (call);
+
+  return TRUE;
+}
+
+/**
+ * oauth_proxy_access_token:
+ * @proxy: an #OAuthProxy
+ * @function: the function name to invoke
+ * @callback: the verifier
+ * @error: a #GError, or %NULL
+ *
+ * Perform the Access Token phase of OAuth, invoking @function (defaulting to
+ * "access_token" if @function is NULL).
+ *
+ * @verifier is only used if the server supports OAuth 1.0a.  This is either the
+ * %oauth_verifier parameter that was passed to your callback URI, or a string
+ * that the user enters in some other manner (for example in a popup dialog) if
+ * "oob" was passed to oauth_proxy_request_token().
+ *
+ * Returns: %TRUE on success, or %FALSE on failure. On failure @error is set.
+ */
+gboolean
+oauth_proxy_access_token (OAuthProxy *proxy,
+                          const char *function,
+                          const char *verifier,
+                          GError    **error)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  RestProxyCall *call;
+  GHashTable *form;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function ? function : "access_token");
+
+  if (verifier)
+    rest_proxy_call_add_param (call, "oauth_verifier", verifier);
 
   if (!rest_proxy_call_run (call, NULL, error)) {
     g_object_unref (call);
@@ -372,73 +530,4 @@ oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
     g_free (priv->token_secret);
 
   priv->token_secret = g_strdup (token_secret);
-}
-
-
-
-gboolean
-oauth_proxy_request_token (OAuthProxy *proxy,
-                           const char *function,
-                           /* NULL: 1.0 only, "oob", or URL */
-                           const char *callback,
-                           GError    **error)
-{
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
-  RestProxyCall *call;
-  GHashTable *form;
-
-  call = rest_proxy_new_call (REST_PROXY (proxy));
-  rest_proxy_call_set_function (call, function ? function : "request_token");
-
-  if (callback)
-    rest_proxy_call_add_param (call, "oauth_callback", callback);
-
-  if (!rest_proxy_call_run (call, NULL, error)) {
-    g_object_unref (call);
-    return FALSE;
-  }
-
-  /* TODO: sanity check response */
-  form = soup_form_decode (rest_proxy_call_get_payload (call));
-  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
-  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
-  /* TODO: check for oauth_callback_confirmed=true and set is-1.0a flag? */
-  g_hash_table_destroy (form);
-
-  g_object_unref (call);
-
-  return TRUE;
-}
-
-
-gboolean
-oauth_proxy_access_token (OAuthProxy *proxy,
-                          const char *function,
-                          const char *verifier,
-                          GError    **error)
-{
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
-  RestProxyCall *call;
-  GHashTable *form;
-
-  call = rest_proxy_new_call (REST_PROXY (proxy));
-  rest_proxy_call_set_function (call, function ? function : "access_token");
-
-  if (verifier)
-    rest_proxy_call_add_param (call, "oauth_verifier", verifier);
-
-  if (!rest_proxy_call_run (call, NULL, error)) {
-    g_object_unref (call);
-    return FALSE;
-  }
-
-  /* TODO: sanity check response */
-  form = soup_form_decode (rest_proxy_call_get_payload (call));
-  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
-  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
-  g_hash_table_destroy (form);
-
-  g_object_unref (call);
-
-  return TRUE;
 }
