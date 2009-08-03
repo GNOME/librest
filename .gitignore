@@ -31,13 +31,13 @@ docs/reference/rest/rest.hierarchy
 docs/reference/rest/rest.interfaces
 docs/reference/rest/rest.prerequisites
 docs/reference/rest/rest.signals
-examples/test-oauth
 examples/test-raw
 examples/test-xml
 examples/dump-xml
 examples/test-flickr
 examples/test-facebook
 examples/post-twitter
+examples/get-fireeagle-location
 tests/oauth
 tests/proxy
 tests/flickr
