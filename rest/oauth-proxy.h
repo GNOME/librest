@@ -110,7 +110,7 @@ gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
 
 gboolean oauth_proxy_request_token (OAuthProxy *proxy,
                                     const char *function,
-                                    const char *callback,
+                                    const char *callback_uri,
                                     GError    **error);
 
 

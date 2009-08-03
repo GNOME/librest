@@ -362,7 +362,7 @@ oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
  * oauth_proxy_request_token:
  * @proxy: an #OAuthProxy
  * @function: the function name to invoke
- * @callback: the callback URI
+ * @callback_uri: the callback URI
  * @error: a #GError, or %NULL
  *
  * Perform the Request Token phase of OAuth, invoking @function (defaulting to
@@ -379,7 +379,7 @@ gboolean
 oauth_proxy_request_token (OAuthProxy *proxy,
                            const char *function,
                            /* NULL: 1.0 only, "oob", or URL */
-                           const char *callback,
+                           const char *callback_uri,
                            GError    **error)
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
@@ -389,8 +389,8 @@ oauth_proxy_request_token (OAuthProxy *proxy,
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
 
-  if (callback)
-    rest_proxy_call_add_param (call, "oauth_callback", callback);
+  if (callback_uri)
+    rest_proxy_call_add_param (call, "oauth_callback", callback_uri);
 
   if (!rest_proxy_call_run (call, NULL, error)) {
     g_object_unref (call);
