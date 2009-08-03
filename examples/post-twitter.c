@@ -56,10 +56,8 @@ main (int argc, char **argv)
   fgets (pin, sizeof (pin), stdin);
   g_strchomp (pin);
 
-  oauth_proxy_set_verifier (OAUTH_PROXY (proxy), pin);
-
   /* Second stage authentication, this gets an access token */
-  if (!oauth_proxy_access_token (OAUTH_PROXY (proxy), "oauth/access_token", &error))
+  if (!oauth_proxy_access_token (OAUTH_PROXY (proxy), "oauth/access_token", pin, &error))
     g_error ("Cannot request token: %s", error->message);
 
   /* We're now authenticated */
