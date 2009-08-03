@@ -100,10 +100,9 @@ gboolean oauth_proxy_request_token (OAuthProxy *proxy,
                                     GError    **error);
 
 
-void oauth_proxy_set_verifier (OAuthProxy *proxy, const char *verifier);
-
 gboolean oauth_proxy_access_token (OAuthProxy *proxy,
                                    const char *function,
+                                   const char *verifier,
                                    GError    **error);
 
 /* TODO async forms of request and access token */

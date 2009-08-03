@@ -411,20 +411,10 @@ oauth_proxy_request_token (OAuthProxy *proxy,
 }
 
 
-void
-oauth_proxy_set_verifier (OAuthProxy *proxy, const char *verifier)
-{
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
-
-  if (priv->verifier)
-    g_free (priv->verifier);
-
-  priv->verifier = g_strdup (verifier);
-}
-
 gboolean
 oauth_proxy_access_token (OAuthProxy *proxy,
                           const char *function,
+                          const char *verifier,
                           GError    **error)
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
@@ -434,8 +424,8 @@ oauth_proxy_access_token (OAuthProxy *proxy,
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
 
-  if (priv->verifier)
-    rest_proxy_call_add_param (call, "oauth_verifier", priv->verifier);
+  if (verifier)
+    rest_proxy_call_add_param (call, "oauth_verifier", verifier);
 
   if (!rest_proxy_call_run (call, NULL, error)) {
     g_object_unref (call);
