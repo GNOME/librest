@@ -410,6 +410,55 @@ oauth_proxy_request_token (OAuthProxy *proxy,
 }
 
 /**
+ * oauth_proxy_request_token_async:
+ * @proxy: an #OAuthProxy
+ * @function: the function name to invoke
+ * @callback_uri: the callback URI
+ * @callback: a #OAuthProxyAuthCallback to invoke on completion
+ * @weak_object: #GObject to weakly reference and tie the lifecycle of the method call too
+ * @user_data: user data to pass to @callback
+ * @error: a #GError, or %NULL
+ *
+ * Perform the Request Token phase of OAuth, invoking @function (defaulting to
+ * "request_token" if @function is NULL).
+ *
+ * The value of @callback depends on whether the server supports OAuth 1.0 or
+ * 1.0a.  If it only supports 1.0 then callback can be NULL.  If it supports
+ * 1.0a then @callback should either be your callback URI, or "oob"
+ * (out-of-band).
+ *
+ * This method will return once the method has been queued, @callback will be
+ * invoked when it has completed.
+ *
+ * Returns: %TRUE if the method was successfully queued, or %FALSE on
+ * failure. On failure @error is set.
+ */
+gboolean
+oauth_proxy_request_token_async (OAuthProxy            *proxy,
+                                 const char            *function,
+                                 const char            *callback_uri,
+                                 OAuthProxyAuthCallback callback,
+                                 GObject               *weak_object,
+                                 gpointer               user_data,
+                                 GError               **error)
+{
+  RestProxyCall *call;
+  AuthData *data;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function ? function : "request_token");
+
+  if (callback_uri)
+    rest_proxy_call_add_param (call, "oauth_callback", callback_uri);
+
+  data = g_slice_new0 (AuthData);
+  data->callback = callback;
+  data->user_data = user_data;
+
+  return rest_proxy_call_async (call, auth_callback, weak_object, data, error);
+}
+
+/**
  * oauth_proxy_access_token:
  * @proxy: an #OAuthProxy
  * @function: the function name to invoke
@@ -456,6 +505,55 @@ oauth_proxy_access_token (OAuthProxy *proxy,
   g_object_unref (call);
 
   return TRUE;
+}
+
+/**
+ * oauth_proxy_access_token_async:
+ * @proxy: an #OAuthProxy
+ * @function: the function name to invoke
+ * @verifier: the verifier
+ * @callback: a #OAuthProxyAuthCallback to invoke on completion
+ * @weak_object: #GObject to weakly reference and tie the lifecycle of the method call too
+ * @user_data: user data to pass to @callback
+ * @error: a #GError, or %NULL
+ *
+ * Perform the Access Token phase of OAuth, invoking @function (defaulting to
+ * "access_token" if @function is NULL).
+ *
+ * @verifier is only used if the server supports OAuth 1.0a.  This is either the
+ * %oauth_verifier parameter that was passed to your callback URI, or a string
+ * that the user enters in some other manner (for example in a popup dialog) if
+ * "oob" was passed to oauth_proxy_request_token().
+ *
+ * This method will return once the method has been queued, @callback will be
+ * invoked when it has completed.
+ *
+ * Returns: %TRUE if the method was successfully queued, or %FALSE on
+ * failure. On failure @error is set.
+ */
+gboolean
+oauth_proxy_access_token_async (OAuthProxy            *proxy,
+                                const char            *function,
+                                const char            *verifier,
+                                OAuthProxyAuthCallback callback,
+                                GObject               *weak_object,
+                                gpointer               user_data,
+                                GError               **error)
+{
+  RestProxyCall *call;
+  AuthData *data;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function ? function : "request_token");
+
+  if (verifier)
+    rest_proxy_call_add_param (call, "oauth_verifier", verifier);
+
+  data = g_slice_new0 (AuthData);
+  data->callback = callback;
+  data->user_data = user_data;
+
+  return rest_proxy_call_async (call, auth_callback, weak_object, data, error);
 }
 
 /**

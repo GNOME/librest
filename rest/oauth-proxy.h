@@ -88,7 +88,8 @@ RestProxy* oauth_proxy_new_with_token (const char *consumer_key,
 /**
  * OAuthProxyAuthCallback:
  *
- * Callback from oauth_proxy_auth_step_async().
+ * Callback from oauth_proxy_request_token_async() and
+ * oauth_proxy_access_token_async().
  */
 typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
                                        GError     *error,
@@ -100,6 +101,7 @@ gboolean oauth_proxy_auth_step (OAuthProxy *proxy,
                                 const char *function,
                                 GError    **error);
 
+G_GNUC_DEPRECATED
 gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
                              const char *function,
                              OAuthProxyAuthCallback callback,
@@ -113,11 +115,26 @@ gboolean oauth_proxy_request_token (OAuthProxy *proxy,
                                     const char *callback_uri,
                                     GError    **error);
 
+gboolean oauth_proxy_request_token_async (OAuthProxy            *proxy,
+                                          const char            *function,
+                                          const char            *callback_uri,
+                                          OAuthProxyAuthCallback callback,
+                                          GObject               *weak_object,
+                                          gpointer               user_data,
+                                          GError               **error);
 
 gboolean oauth_proxy_access_token (OAuthProxy *proxy,
                                    const char *function,
                                    const char *verifier,
                                    GError    **error);
+
+gboolean oauth_proxy_access_token_async (OAuthProxy            *proxy,
+                                         const char            *function,
+                                         const char            *verifier,
+                                         OAuthProxyAuthCallback callback,
+                                         GObject               *weak_object,
+                                         gpointer               user_data,
+                                         GError               **error);
 
 /* TODO async forms of request and access token */
 

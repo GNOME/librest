@@ -166,7 +166,9 @@ OAuthProxyAuthCallback
 oauth_proxy_auth_step
 oauth_proxy_auth_step_async
 oauth_proxy_request_token
+oauth_proxy_request_token_async
 oauth_proxy_access_token
+oauth_proxy_access_token_async
 oauth_proxy_get_token
 oauth_proxy_set_token
 oauth_proxy_get_token_secret
