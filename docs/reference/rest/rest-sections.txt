@@ -1,25 +1,38 @@
 <SECTION>
-<FILE>flickr-proxy</FILE>
-FlickrProxyPrivate
-<TITLE>FlickrProxy</TITLE>
-FlickrProxy
-flickr_proxy_new
-flickr_proxy_new_with_token
-flickr_proxy_get_api_key
-flickr_proxy_get_shared_secret
-flickr_proxy_get_token
-flickr_proxy_set_token
-flickr_proxy_sign
-flickr_proxy_build_login_url
+<FILE>flickr-proxy-call</FILE>
+<TITLE>FlickrProxyCall</TITLE>
+FlickrProxyCall
 <SUBSECTION Standard>
-FlickrProxyClass
-FLICKR_PROXY
-FLICKR_IS_PROXY
-FLICKR_TYPE_PROXY
-flickr_proxy_get_type
-FLICKR_PROXY_CLASS
-FLICKR_IS_PROXY_CLASS
-FLICKR_PROXY_GET_CLASS
+FlickrProxyCallClass
+FLICKR_PROXY_CALL
+FLICKR_IS_PROXY_CALL
+FLICKR_TYPE_PROXY_CALL
+flickr_proxy_call_get_type
+FLICKR_PROXY_CALL_CLASS
+FLICKR_IS_PROXY_CALL_CLASS
+FLICKR_PROXY_CALL_GET_CLASS
+</SECTION>
+
+<SECTION>
+<FILE>rest-xml-parser</FILE>
+<TITLE>RestXmlParser</TITLE>
+RestXmlParser
+RestXmlNode
+rest_xml_parser_new
+rest_xml_parser_parse_from_data
+rest_xml_node_ref
+rest_xml_node_unref
+rest_xml_node_get_attr
+rest_xml_node_find
+<SUBSECTION Standard>
+REST_XML_PARSER
+REST_IS_XML_PARSER
+REST_TYPE_XML_PARSER
+rest_xml_parser_get_type
+REST_XML_PARSER_CLASS
+REST_IS_XML_PARSER_CLASS
+REST_XML_PARSER_GET_CLASS
+REST_TYPE_XML_NODE
 </SECTION>
 
 <SECTION>
@@ -46,6 +59,7 @@ rest_proxy_call_run
 RestProxyCallAsyncCallback
 rest_proxy_call_async
 rest_proxy_call_cancel
+rest_proxy_call_sync
 rest_proxy_call_lookup_response_header
 rest_proxy_call_get_response_headers
 rest_proxy_call_get_payload_length
@@ -60,6 +74,45 @@ rest_proxy_call_get_type
 REST_PROXY_CALL_CLASS
 REST_IS_PROXY_CALL_CLASS
 REST_PROXY_CALL_GET_CLASS
+</SECTION>
+
+<SECTION>
+<FILE>flickr-proxy</FILE>
+FlickrProxyPrivate
+<TITLE>FlickrProxy</TITLE>
+FlickrProxy
+flickr_proxy_new
+flickr_proxy_new_with_token
+flickr_proxy_get_api_key
+flickr_proxy_get_shared_secret
+flickr_proxy_get_token
+flickr_proxy_set_token
+flickr_proxy_sign
+flickr_proxy_build_login_url
+<SUBSECTION Standard>
+FlickrProxyClass
+FLICKR_PROXY
+FLICKR_IS_PROXY
+FLICKR_TYPE_PROXY
+flickr_proxy_get_type
+FLICKR_PROXY_CLASS
+FLICKR_IS_PROXY_CLASS
+FLICKR_PROXY_GET_CLASS
+</SECTION>
+
+<SECTION>
+<FILE>facebook-proxy-call</FILE>
+<TITLE>FacebookProxyCall</TITLE>
+FacebookProxyCall
+<SUBSECTION Standard>
+FacebookProxyCallClass
+FACEBOOK_PROXY_CALL
+FACEBOOK_IS_PROXY_CALL
+FACEBOOK_TYPE_PROXY_CALL
+facebook_proxy_call_get_type
+FACEBOOK_PROXY_CALL_CLASS
+FACEBOOK_IS_PROXY_CALL_CLASS
+FACEBOOK_PROXY_CALL_GET_CLASS
 </SECTION>
 
 <SECTION>
@@ -88,25 +141,18 @@ REST_PROXY_GET_CLASS
 </SECTION>
 
 <SECTION>
-<FILE>rest-xml-parser</FILE>
-<TITLE>RestXmlParser</TITLE>
-RestXmlParser
-RestXmlNode
-rest_xml_parser_new
-rest_xml_parser_parse_from_data
-rest_xml_node_ref
-rest_xml_node_unref
-rest_xml_node_get_attr
-rest_xml_node_find
+<FILE>oauth-proxy-call</FILE>
+<TITLE>OAuthProxyCall</TITLE>
+OAuthProxyCall
 <SUBSECTION Standard>
-REST_XML_PARSER
-REST_IS_XML_PARSER
-REST_TYPE_XML_PARSER
-rest_xml_parser_get_type
-REST_XML_PARSER_CLASS
-REST_IS_XML_PARSER_CLASS
-REST_XML_PARSER_GET_CLASS
-REST_TYPE_XML_NODE
+OAuthProxyCallClass
+OAUTH_PROXY_CALL
+OAUTH_IS_PROXY_CALL
+OAUTH_TYPE_PROXY_CALL
+oauth_proxy_call_get_type
+OAUTH_PROXY_CALL_CLASS
+OAUTH_IS_PROXY_CALL_CLASS
+OAUTH_PROXY_CALL_GET_CLASS
 </SECTION>
 
 <SECTION>
@@ -119,6 +165,8 @@ oauth_proxy_new_with_token
 OAuthProxyAuthCallback
 oauth_proxy_auth_step
 oauth_proxy_auth_step_async
+oauth_proxy_request_token
+oauth_proxy_access_token
 oauth_proxy_get_token
 oauth_proxy_set_token
 oauth_proxy_get_token_secret
@@ -135,36 +183,6 @@ OAUTH_PROXY_GET_CLASS
 </SECTION>
 
 <SECTION>
-<FILE>flickr-proxy-call</FILE>
-<TITLE>FlickrProxyCall</TITLE>
-FlickrProxyCall
-<SUBSECTION Standard>
-FlickrProxyCallClass
-FLICKR_PROXY_CALL
-FLICKR_IS_PROXY_CALL
-FLICKR_TYPE_PROXY_CALL
-flickr_proxy_call_get_type
-FLICKR_PROXY_CALL_CLASS
-FLICKR_IS_PROXY_CALL_CLASS
-FLICKR_PROXY_CALL_GET_CLASS
-</SECTION>
-
-<SECTION>
-<FILE>oauth-proxy-call</FILE>
-<TITLE>OAuthProxyCall</TITLE>
-OAuthProxyCall
-<SUBSECTION Standard>
-OAuthProxyCallClass
-OAUTH_PROXY_CALL
-OAUTH_IS_PROXY_CALL
-OAUTH_TYPE_PROXY_CALL
-oauth_proxy_call_get_type
-OAUTH_PROXY_CALL_CLASS
-OAUTH_IS_PROXY_CALL_CLASS
-OAUTH_PROXY_CALL_GET_CLASS
-</SECTION>
-
-<SECTION>
 <FILE>facebook-proxy</FILE>
 FacebookProxyPrivate
 <TITLE>FacebookProxy</TITLE>
@@ -178,6 +196,7 @@ facebook_proxy_get_session_key
 facebook_proxy_set_session_key
 facebook_proxy_sign
 facebook_proxy_build_login_url
+facebook_proxy_build_permission_url
 <SUBSECTION Standard>
 FacebookProxyClass
 FACEBOOK_PROXY
@@ -187,19 +206,4 @@ facebook_proxy_get_type
 FACEBOOK_PROXY_CLASS
 FACEBOOK_IS_PROXY_CLASS
 FACEBOOK_PROXY_GET_CLASS
-</SECTION>
-
-<SECTION>
-<FILE>facebook-proxy-call</FILE>
-<TITLE>FacebookProxyCall</TITLE>
-FacebookProxyCall
-<SUBSECTION Standard>
-FacebookProxyCallClass
-FACEBOOK_PROXY_CALL
-FACEBOOK_IS_PROXY_CALL
-FACEBOOK_TYPE_PROXY_CALL
-facebook_proxy_call_get_type
-FACEBOOK_PROXY_CALL_CLASS
-FACEBOOK_IS_PROXY_CALL_CLASS
-FACEBOOK_PROXY_CALL_GET_CLASS
 </SECTION>
