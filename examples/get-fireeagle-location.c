@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -21,6 +21,7 @@
  */
 
 #include <rest/oauth-proxy.h>
+#include <rest/rest-xml-parser.h>
 #include <stdio.h>
 
 int
@@ -29,6 +30,9 @@ main (int argc, char **argv)
   RestProxy *proxy;
   RestProxyCall *call;
   GError *error = NULL;
+  char pin[256];
+  RestXmlParser *parser;
+  RestXmlNode *root, *node;
 
   g_thread_init (NULL);
   g_type_init ();
@@ -42,21 +46,27 @@ main (int argc, char **argv)
                            /* FireEagle endpoint */
                            "https://fireeagle.yahooapis.com/", FALSE);
 
-  /* First stage authentication, this gets a request token */
-  if (!oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/request_token", &error))
+  /* First stage authentication, this gets a request token. */
+  if (!oauth_proxy_request_token (OAUTH_PROXY (proxy),
+                                  "oauth/request_token",
+                                  "oob",
+                                  &error))
     g_error ("Cannot request token: %s", error->message);
 
   /* From the token construct a URL for the user to visit */
-  g_print ("Go to https://fireeagle.yahoo.net/oauth/authorize?oauth_token=%s then hit any key\n",
+  g_print ("Go to https://fireeagle.yahoo.net/oauth/authorize?oauth_token=%s then enter the verification code\n",
            oauth_proxy_get_token (OAUTH_PROXY (proxy)));
-  getchar ();
 
-  /* Second stage authentication, this gets an access token */
-  if (!oauth_proxy_auth_step (OAUTH_PROXY (proxy), "oauth/access_token", &error))
+  /* Read the PIN */
+  fgets (pin, sizeof (pin), stdin);
+  g_strchomp (pin);
+
+  /* Second stage authentication, this gets an access token. */
+  if (!oauth_proxy_access_token (OAUTH_PROXY (proxy),
+                                 "oauth/access_token",
+                                 pin,
+                                 &error))
     g_error ("Cannot request token: %s", error->message);
-
-  /* We're now authenticated */
-  g_print ("Got access token\n");
 
   /* Get the user's current location */
   call = rest_proxy_new_call (proxy);
@@ -65,11 +75,17 @@ main (int argc, char **argv)
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
 
-  g_print ("%s\n", rest_proxy_call_get_payload (call));
-
+  parser = rest_xml_parser_new ();
+  root = rest_xml_parser_parse_from_data (parser,
+                                          rest_proxy_call_get_payload (call),
+                                          rest_proxy_call_get_payload_length (call));
+  g_object_unref (parser);
   g_object_unref (call);
-
   g_object_unref (proxy);
+
+  node = rest_xml_node_find (root, "location");
+  node = rest_xml_node_find (node, "name");
+  g_print ("%s\n", node->content);
 
   return 0;
 }
