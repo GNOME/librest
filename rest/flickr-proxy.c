@@ -284,7 +284,7 @@ flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params)
 
     g_string_append_printf (s, "%s%s", key, value);
 
-    keys = keys->next;
+    keys = g_list_delete_link (keys, keys);
   }
 
   md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, s->str, s->len);
