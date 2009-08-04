@@ -368,10 +368,9 @@ oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
  * Perform the Request Token phase of OAuth, invoking @function (defaulting to
  * "request_token" if @function is NULL).
  *
- * The value of @callback depends on whether the server supports OAuth 1.0 or
- * 1.0a.  If it only supports 1.0 then callback can be NULL.  If it supports
- * 1.0a then @callback should either be your callback URI, or "oob"
- * (out-of-band).
+ * The value of @callback depends on whether you wish to use OAuth 1.0 or 1.0a.
+ * If you wish to use 1.0 then callback must be NULL.  To use 1.0a then
+ * @callback should either be your callback URI, or "oob" (out-of-band).
  *
  * Returns: %TRUE on success, or %FALSE on failure. On failure @error is set.
  */
@@ -422,10 +421,9 @@ oauth_proxy_request_token (OAuthProxy *proxy,
  * Perform the Request Token phase of OAuth, invoking @function (defaulting to
  * "request_token" if @function is NULL).
  *
- * The value of @callback depends on whether the server supports OAuth 1.0 or
- * 1.0a.  If it only supports 1.0 then callback can be NULL.  If it supports
- * 1.0a then @callback should either be your callback URI, or "oob"
- * (out-of-band).
+ * The value of @callback depends on whether you wish to use OAuth 1.0 or 1.0a.
+ * If you wish to use 1.0 then callback must be NULL.  To use 1.0a then
+ * @callback should either be your callback URI, or "oob" (out-of-band).
  *
  * This method will return once the method has been queued, @callback will be
  * invoked when it has completed.
