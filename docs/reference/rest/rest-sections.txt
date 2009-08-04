@@ -81,6 +81,7 @@ REST_PROXY_CALL_GET_CLASS
 FlickrProxyPrivate
 <TITLE>FlickrProxy</TITLE>
 FlickrProxy
+FLICKR_PROXY_ERROR
 flickr_proxy_new
 flickr_proxy_new_with_token
 flickr_proxy_get_api_key
@@ -89,6 +90,7 @@ flickr_proxy_get_token
 flickr_proxy_set_token
 flickr_proxy_sign
 flickr_proxy_build_login_url
+flickr_proxy_is_successful
 <SUBSECTION Standard>
 FlickrProxyClass
 FLICKR_PROXY
