@@ -40,14 +40,13 @@ main (int argc, char **argv)
   }
 
   /* Create the proxy */
-  proxy = oauth_proxy_new (
-                           "UfXFxDbUjk41scg0kmkFwA",
+  proxy = oauth_proxy_new ("UfXFxDbUjk41scg0kmkFwA",
                            "pYQlfI2ZQ1zVK0f01dnfhFTWzizBGDnhNJIw6xwto",
                            "https://twitter.com/", FALSE);
 
   /* First stage authentication, this gets a request token */
   if (!oauth_proxy_request_token (OAUTH_PROXY (proxy), "oauth/request_token", "oob", &error))
-    g_error ("Cannot request token: %s", error->message);
+    g_error ("Cannot get request token: %s", error->message);
 
   /* From the token construct a URL for the user to visit */
   g_print ("Go to http://twitter.com/oauth/authorize?oauth_token=%s then enter the PIN\n",
@@ -58,7 +57,7 @@ main (int argc, char **argv)
 
   /* Second stage authentication, this gets an access token */
   if (!oauth_proxy_access_token (OAUTH_PROXY (proxy), "oauth/access_token", pin, &error))
-    g_error ("Cannot request token: %s", error->message);
+    g_error ("Cannot get access token: %s", error->message);
 
   /* We're now authenticated */
 
@@ -68,7 +67,7 @@ main (int argc, char **argv)
   rest_proxy_call_set_method (call, "POST");
   rest_proxy_call_add_param (call, "status", argv[1]);
 
-  if (!rest_proxy_call_run (call, NULL, &error))
+  if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
 
   /* TODO: parse the XML and print something useful */
