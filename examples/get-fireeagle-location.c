@@ -38,8 +38,7 @@ main (int argc, char **argv)
   g_type_init ();
 
   /* Create the proxy */
-  proxy = oauth_proxy_new (
-                           /* Consumer Key */
+  proxy = oauth_proxy_new (/* Consumer Key */
                            "NmUm6hxQ9a4u",
                            /* Consumer Secret */
                            "t4FM7LiUeD4RBwKSPa6ichKPDh5Jx4kt",
