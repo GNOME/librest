@@ -367,3 +367,41 @@ flickr_proxy_is_successful (RestXmlNode *root, GError **error)
 
   return TRUE;
 }
+
+#if BUILD_TESTS
+void
+test_flickr_error (void)
+{
+  RestXmlParser *parser;
+  RestXmlNode *root;
+  GError *error;
+  const char test_1[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    "<rsp stat=\"ok\"><auth></auth></rsp>";
+  const char test_2[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    "<foobar/>";
+  const char test_3[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    "<rsp stat=\"fail\"><err code=\"108\" msg=\"Invalid frob\" /></rsp>";
+
+  parser = rest_xml_parser_new ();
+
+  root = rest_xml_parser_parse_from_data (parser, test_1, sizeof (test_1) - 1);
+  error = NULL;
+  flickr_proxy_is_successful (root, &error);
+  g_assert_no_error (error);
+  rest_xml_node_unref (root);
+
+  error = NULL;
+  root = rest_xml_parser_parse_from_data (parser, test_2, sizeof (test_2) - 1);
+  flickr_proxy_is_successful (root, &error);
+  g_assert_error (error, FLICKR_PROXY_ERROR, 0);
+  g_error_free (error);
+  rest_xml_node_unref (root);
+
+  error = NULL;
+  root = rest_xml_parser_parse_from_data (parser, test_3, sizeof (test_3) - 1);
+  flickr_proxy_is_successful (root, &error);
+  g_assert_error (error, FLICKR_PROXY_ERROR, 108);
+  g_error_free (error);
+  rest_xml_node_unref (root);
+}
+#endif
