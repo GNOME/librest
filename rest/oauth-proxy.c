@@ -466,10 +466,10 @@ oauth_proxy_request_token_async (OAuthProxy            *proxy,
  * Perform the Access Token phase of OAuth, invoking @function (defaulting to
  * "access_token" if @function is NULL).
  *
- * @verifier is only used if the server supports OAuth 1.0a.  This is either the
+ * @verifier is only used if you are using OAuth 1.0a.  This is either the
  * %oauth_verifier parameter that was passed to your callback URI, or a string
  * that the user enters in some other manner (for example in a popup dialog) if
- * "oob" was passed to oauth_proxy_request_token().
+ * "oob" was passed to oauth_proxy_request_token().  For OAuth 1.0, pass %NULL.
  *
  * Returns: %TRUE on success, or %FALSE on failure. On failure @error is set.
  */
@@ -518,10 +518,10 @@ oauth_proxy_access_token (OAuthProxy *proxy,
  * Perform the Access Token phase of OAuth, invoking @function (defaulting to
  * "access_token" if @function is NULL).
  *
- * @verifier is only used if the server supports OAuth 1.0a.  This is either the
+ * @verifier is only used if you are using OAuth 1.0a.  This is either the
  * %oauth_verifier parameter that was passed to your callback URI, or a string
  * that the user enters in some other manner (for example in a popup dialog) if
- * "oob" was passed to oauth_proxy_request_token().
+ * "oob" was passed to oauth_proxy_request_token().  For OAuth 1.0, pass %NULL.
  *
  * This method will return once the method has been queued, @callback will be
  * invoked when it has completed.
