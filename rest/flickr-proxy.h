@@ -60,6 +60,8 @@ typedef struct {
   RestProxyClass parent_class;
 } FlickrProxyClass;
 
+#define FLICKR_PROXY_ERROR flickr_proxy_error_quark()
+
 GType flickr_proxy_get_type (void);
 
 RestProxy* flickr_proxy_new (const char *api_key,

@@ -46,6 +46,12 @@ enum {
   PROP_TOKEN,
 };
 
+GQuark
+flickr_proxy_error_quark (void)
+{
+  return g_quark_from_static_string ("rest-flickr-proxy");
+}
+
 static RestProxyCall *
 _new_call (RestProxy *proxy)
 {
