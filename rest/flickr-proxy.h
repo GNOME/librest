@@ -24,6 +24,7 @@
 #define _FLICKR_PROXY
 
 #include <rest/rest-proxy.h>
+#include <rest/rest-xml-parser.h>
 
 G_BEGIN_DECLS
 
@@ -82,6 +83,8 @@ void flickr_proxy_set_token (FlickrProxy *proxy, const char *token);
 char * flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params);
 
 char * flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob);
+
+gboolean flickr_proxy_is_successful (RestXmlNode *root, GError **error);
 
 G_END_DECLS
 

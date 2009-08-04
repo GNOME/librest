@@ -30,6 +30,7 @@
  */
 
 #include <config.h>
+#include <stdlib.h>
 #include <string.h>
 #include <rest/rest-proxy.h>
 #include <libsoup/soup.h>
@@ -330,4 +331,39 @@ flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob)
   soup_uri_free (uri);
 
   return s;
+}
+
+/**
+ * flickr_proxy_is_successful:
+ * @root: The root node of a parsed Flickr response
+ * @error: #GError to set if the response was an error
+ *
+ * Examines the Flickr response and if it not a successful reply, set @error and
+ * return FALSE.
+ *
+ * Returns: %TRUE if this response is successful, %FALSE otherwise.
+ */
+gboolean
+flickr_proxy_is_successful (RestXmlNode *root, GError **error)
+{
+  RestXmlNode *node;
+
+  g_return_val_if_fail (root, FALSE);
+
+  if (strcmp (root->name, "rsp") != 0) {
+    g_set_error (error, FLICKR_PROXY_ERROR, 0,
+                 "Unexpected response from Flickr (root node %s)",
+                 root->name);
+    return FALSE;
+  }
+
+  if (strcmp (rest_xml_node_get_attr (root, "stat"), "ok") != 0) {
+    node = rest_xml_node_find (root, "err");
+    g_set_error_literal (error,FLICKR_PROXY_ERROR,
+                         atoi (rest_xml_node_get_attr (node, "code")),
+                         rest_xml_node_get_attr (node, "msg"));
+    return FALSE;
+  }
+
+  return TRUE;
 }
