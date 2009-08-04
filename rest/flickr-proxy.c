@@ -320,7 +320,7 @@ flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob)
   s = soup_uri_to_string (uri, FALSE);
 
   g_free (sig);
-  g_hash_table_unref (params);
+  g_hash_table_destroy (params);
   soup_uri_free (uri);
 
   return s;
