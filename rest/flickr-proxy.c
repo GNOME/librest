@@ -20,6 +20,15 @@
  *
  */
 
+/*
+ * TODO:
+ *
+ * Convenience API for authentication so that the user doesn't have to parse the
+ * XML themselves.
+ *
+ * Function to parse a payload and return either a xml document or a GError.
+ */
+
 #include <config.h>
 #include <string.h>
 #include <rest/rest-proxy.h>
