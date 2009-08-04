@@ -34,7 +34,7 @@ docs/reference/rest/rest.signals
 examples/test-raw
 examples/test-xml
 examples/dump-xml
-examples/test-flickr
+examples/get-flickr-favorites
 examples/test-facebook
 examples/post-twitter
 examples/get-fireeagle-location
