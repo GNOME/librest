@@ -358,6 +358,19 @@ oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
   return TRUE;
 }
 
+static void
+request_token_done (OAuthProxy *proxy, RestProxyCall *call)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  GHashTable *form;
+
+  form = soup_form_decode (rest_proxy_call_get_payload (call));
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  priv->oauth_10a = g_hash_table_lookup (form, "oauth_callback_confirmed") != NULL;
+  g_hash_table_destroy (form);
+}
+
 /**
  * oauth_proxy_request_token:
  * @proxy: an #OAuthProxy
@@ -381,9 +394,7 @@ oauth_proxy_request_token (OAuthProxy *proxy,
                            const char *callback_uri,
                            GError    **error)
 {
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   RestProxyCall *call;
-  GHashTable *form;
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
@@ -397,15 +408,34 @@ oauth_proxy_request_token (OAuthProxy *proxy,
   }
 
   /* TODO: sanity check response */
-  form = soup_form_decode (rest_proxy_call_get_payload (call));
-  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
-  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
-  /* TODO: check for oauth_callback_confirmed=true and set is-1.0a flag? */
-  g_hash_table_destroy (form);
+  request_token_done (proxy, call);
 
   g_object_unref (call);
 
   return TRUE;
+}
+
+static void
+request_token_cb (RestProxyCall *call,
+                  GError        *error,
+                  GObject       *weak_object,
+                  gpointer       user_data)
+{
+  AuthData *data = user_data;
+  OAuthProxy *proxy = NULL;
+
+  g_object_get (call, "proxy", &proxy, NULL);
+  g_assert (proxy);
+
+  if (!error) {
+    request_token_done (proxy, call);
+  }
+
+  data->callback (proxy, error, weak_object, data->user_data);
+
+  g_slice_free (AuthData, data);
+  g_object_unref (call);
+  g_object_unref (proxy);
 }
 
 /**
@@ -453,7 +483,19 @@ oauth_proxy_request_token_async (OAuthProxy            *proxy,
   data->callback = callback;
   data->user_data = user_data;
 
-  return rest_proxy_call_async (call, auth_callback, weak_object, data, error);
+  return rest_proxy_call_async (call, request_token_cb, weak_object, data, error);
+}
+
+static void
+access_token_done (OAuthProxy *proxy, RestProxyCall *call)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  GHashTable *form;
+
+  form = soup_form_decode (rest_proxy_call_get_payload (call));
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  g_hash_table_destroy (form);
 }
 
 /**
@@ -479,9 +521,7 @@ oauth_proxy_access_token (OAuthProxy *proxy,
                           const char *verifier,
                           GError    **error)
 {
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   RestProxyCall *call;
-  GHashTable *form;
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
@@ -495,14 +535,34 @@ oauth_proxy_access_token (OAuthProxy *proxy,
   }
 
   /* TODO: sanity check response */
-  form = soup_form_decode (rest_proxy_call_get_payload (call));
-  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
-  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
-  g_hash_table_destroy (form);
+  access_token_done (proxy, call);
 
   g_object_unref (call);
 
   return TRUE;
+}
+
+static void
+access_token_cb (RestProxyCall *call,
+                 GError        *error,
+                 GObject       *weak_object,
+                 gpointer       user_data)
+{
+  AuthData *data = user_data;
+  OAuthProxy *proxy = NULL;
+
+  g_object_get (call, "proxy", &proxy, NULL);
+  g_assert (proxy);
+
+  if (!error) {
+    access_token_done (proxy, call);
+  }
+
+  data->callback (proxy, error, weak_object, data->user_data);
+
+  g_slice_free (AuthData, data);
+  g_object_unref (call);
+  g_object_unref (proxy);
 }
 
 /**
@@ -551,7 +611,7 @@ oauth_proxy_access_token_async (OAuthProxy            *proxy,
   data->callback = callback;
   data->user_data = user_data;
 
-  return rest_proxy_call_async (call, auth_callback, weak_object, data, error);
+  return rest_proxy_call_async (call, access_token_cb, weak_object, data, error);
 }
 
 /**
@@ -626,4 +686,20 @@ oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
     g_free (priv->token_secret);
 
   priv->token_secret = g_strdup (token_secret);
+}
+
+/**
+ * oauth_proxy_is_oauth10a:
+ * @proxy: an #OAuthProxy
+ *
+ * Returns %TRUE if the server supports OAuth 1.0a with this proxy, %FALSE
+ * otherwise.  This is only valid after oauth_proxy_request_token() or
+ * oauth_proxy_request_token_async() has been called.
+ */
+gboolean
+oauth_proxy_is_oauth10a (OAuthProxy *proxy)
+{
+  g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
+
+  return PROXY_GET_PRIVATE (proxy)->oauth_10a;
 }

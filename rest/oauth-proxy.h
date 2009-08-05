@@ -123,6 +123,8 @@ gboolean oauth_proxy_request_token_async (OAuthProxy            *proxy,
                                           gpointer               user_data,
                                           GError               **error);
 
+gboolean oauth_proxy_is_oauth10a (OAuthProxy *proxy);
+
 gboolean oauth_proxy_access_token (OAuthProxy *proxy,
                                    const char *function,
                                    const char *verifier,

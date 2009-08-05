@@ -31,5 +31,6 @@ typedef struct {
   char *token;
   char *token_secret;
   OAuthSignatureMethod method;
+  gboolean oauth_10a;
   char *verifier;
 } OAuthProxyPrivate;
