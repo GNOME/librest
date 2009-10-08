@@ -7,6 +7,8 @@ m4_define([api_version], [0.6])
 AC_SUBST([API_VERSION],[api_version])
 AC_DEFINE_UNQUOTED(API_VERSION, [$API_VERSION], [API version])
 
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 AC_CANONICAL_HOST
 
 AC_PROG_CC

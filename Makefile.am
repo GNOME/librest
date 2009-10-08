@@ -1,7 +1,7 @@
 SUBDIRS = rest examples docs tests
 
 %-$(API_VERSION).pc: %.pc
-	cp $< $@
+	$(AM_V_GEN)cp $< $@
 
 pkgconfigdir   = $(libdir)/pkgconfig
 pkgconfig_DATA = rest-$(API_VERSION).pc
