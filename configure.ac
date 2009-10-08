@@ -3,6 +3,10 @@ AC_INIT(rest, 0.6)
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_CONFIG_HEADER(config.h)
 
+m4_define([api_version], [0.6])
+AC_SUBST([API_VERSION],[api_version])
+AC_DEFINE_UNQUOTED(API_VERSION, [$API_VERSION], [API version])
+
 AC_CANONICAL_HOST
 
 AC_PROG_CC
@@ -47,4 +51,3 @@ AC_OUTPUT([
         tests/Makefile
         rest.pc
 ])
-
