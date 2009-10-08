@@ -59,6 +59,9 @@ typedef struct {
 
 typedef struct {
   RestProxyClass parent_class;
+  /*< private >*/
+  /* padding for future expansion */
+  gpointer _padding_dummy[8];
 } FlickrProxyClass;
 
 #define FLICKR_PROXY_ERROR flickr_proxy_error_quark()

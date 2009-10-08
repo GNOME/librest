@@ -55,6 +55,9 @@ typedef struct {
 
 typedef struct {
   RestProxyCallClass parent_class;
+  /*< private >*/
+  /* padding for future expansion */
+  gpointer _padding_dummy[8];
 } FacebookProxyCallClass;
 
 GType facebook_proxy_call_get_type (void);
