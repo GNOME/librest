@@ -90,7 +90,7 @@ request_token_cb (OAuthProxy *proxy,
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_access_token_async (proxy, "access_token", NULL,
+  oauth_proxy_access_token_async (proxy, "access_token.php", NULL,
                                   access_token_cb, NULL, NULL, &error);
   g_assert_no_error (error);
 }
