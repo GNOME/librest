@@ -1,12 +1,12 @@
-lib_LTLIBRARIES = librest.la
+lib_LTLIBRARIES = librest-@API_VERSION@.la
 
-librest_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
+librest_@API_VERSION@_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
 		    $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
 		    $(XML_CFLAGS) \
 		    -I$(top_srcdir) -Wall -DG_LOG_DOMAIN=\"Rest\"
-librest_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
+librest_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
                     $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS)
-librest_la_SOURCES = rest-proxy.c 	\
+librest_@API_VERSION@_la_SOURCES = rest-proxy.c 	\
 		     rest-proxy-call.c	\
 		     rest-proxy-call-private.h	\
 		     rest-xml-parser.c	\
@@ -24,7 +24,7 @@ librest_la_SOURCES = rest-proxy.c 	\
 		     sha1.c	\
 		     sha1.h	\
 		     $(librest_la_HEADERS)
-librest_la_HEADERS = rest-proxy.h 	\
+librest_@API_VERSION@_la_HEADERS = rest-proxy.h 	\
 		     rest-proxy-call.h	\
 		     oauth-proxy.h	\
 		     oauth-proxy-call.h	\
@@ -33,7 +33,7 @@ librest_la_HEADERS = rest-proxy.h 	\
 		     facebook-proxy.h	\
 		     facebook-proxy-call.h	\
 		     rest-xml-parser.h
-librest_ladir = $(includedir)/rest/rest
+librest_@API_VERSION@_ladir = $(includedir)/rest-@API_VERSION@/rest
 
 
 # Test suite
