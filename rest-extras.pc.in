@@ -7,6 +7,6 @@ apiversion=@API_VERSION@
 Name: rest
 Description: RESTful web api query library
 Version: @VERSION@
-Libs: -L${libdir} -lrest-${apiversion}
+Libs: -L${libdir} -lrest-extras-${apiversion}
 Cflags: -I${includedir}/rest-${apiversion}
 Requires: glib-2.0 libsoup-2.4 libxml-2.0
