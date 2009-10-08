@@ -602,7 +602,7 @@ oauth_proxy_access_token_async (OAuthProxy            *proxy,
   AuthData *data;
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
-  rest_proxy_call_set_function (call, function ? function : "request_token");
+  rest_proxy_call_set_function (call, function ? function : "access_token");
 
   if (verifier)
     rest_proxy_call_add_param (call, "oauth_verifier", verifier);
