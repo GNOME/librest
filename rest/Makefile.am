@@ -1,38 +1,32 @@
-lib_LTLIBRARIES = librest-@API_VERSION@.la
+# For some reason I can't use $(librest_@API_VERSION@_la_SOURCES) in
+# test_runner_SOURCES, so we have to do this
+lib_sources = \
+	rest-proxy.c 			\
+	rest-proxy-call.c		\
+	rest-proxy-call-private.h	\
+	rest-xml-parser.c		\
+	rest-main.c			\
+	rest-private.h			\
+	oauth-proxy.c			\
+	oauth-proxy-call.c		\
+	oauth-proxy-private.h 		\
+	sha1.c				\
+	sha1.h
+lib_headers = rest-proxy.h 	\
+	rest-proxy-call.h	\
+	oauth-proxy.h		\
+	oauth-proxy-call.h	\
+	rest-xml-parser.h
 
+lib_LTLIBRARIES = librest-@API_VERSION@.la
 librest_@API_VERSION@_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
 		    $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
 		    $(XML_CFLAGS) \
 		    -I$(top_srcdir) -Wall -DG_LOG_DOMAIN=\"Rest\"
 librest_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
                     $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS)
-librest_@API_VERSION@_la_SOURCES = rest-proxy.c 	\
-		     rest-proxy-call.c	\
-		     rest-proxy-call-private.h	\
-		     rest-xml-parser.c	\
-		     rest-main.c	\
-		     rest-private.h	\
-		     oauth-proxy.c	\
-		     oauth-proxy-call.c	\
-		     oauth-proxy-private.h \
-		     flickr-proxy.c	\
-		     flickr-proxy-call.c	\
-		     flickr-proxy-private.h \
-		     facebook-proxy.c	\
-		     facebook-proxy-call.c	\
-		     facebook-proxy-private.h \
-		     sha1.c	\
-		     sha1.h	\
-		     $(librest_la_HEADERS)
-librest_@API_VERSION@_la_HEADERS = rest-proxy.h 	\
-		     rest-proxy-call.h	\
-		     oauth-proxy.h	\
-		     oauth-proxy-call.h	\
-		     flickr-proxy.h	\
-		     flickr-proxy-call.h	\
-		     facebook-proxy.h	\
-		     facebook-proxy-call.h	\
-		     rest-xml-parser.h
+librest_@API_VERSION@_la_SOURCES = $(lib_sources) $(lib_headers)
+librest_@API_VERSION@_la_HEADERS = 
 librest_@API_VERSION@_ladir = $(includedir)/rest-@API_VERSION@/rest
 
 
@@ -40,8 +34,8 @@ librest_@API_VERSION@_ladir = $(includedir)/rest-@API_VERSION@/rest
 TESTS = test-runner
 check_PROGRAMS = test-runner
 
-test_runner_SOURCES = test-runner.c $(librest_la_SOURCES)
-test_runner_CFLAGS = -DBUILD_TESTS $(librest_la_CFLAGS)
-test_runner_LDFLAGS = $(librest_la_LIBADD)
+test_runner_SOURCES = test-runner.c $(lib_sources) $(lib_headers)
+test_runner_CFLAGS = -DBUILD_TESTS $(librest_@API_VERSION@_la_CFLAGS)
+test_runner_LDFLAGS = $(librest_@API_VERSION@_la_LIBADD)
 
 # TODO: use gtester

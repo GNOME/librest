@@ -20,7 +20,7 @@
  *
  */
 
-#include <rest/flickr-proxy.h>
+#include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <stdio.h>
 

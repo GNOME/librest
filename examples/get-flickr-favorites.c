@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <rest/flickr-proxy.h>
+#include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
 
 /*

@@ -46,8 +46,8 @@ FIXXREF_OPTIONS=
 # Used for dependencies. The docs will be rebuilt if any of these change.
 # e.g. HFILE_GLOB=$(top_srcdir)/gtk/*.h
 # e.g. CFILE_GLOB=$(top_srcdir)/gtk/*.c
-HFILE_GLOB=$(top_srcdir)/rest/*.h
-CFILE_GLOB=$(top_srcdir)/rest/*.c
+HFILE_GLOB=$(top_srcdir)/rest/*.h $(top_srcdir)/rest-extras/*.h
+CFILE_GLOB=$(top_srcdir)/rest/*.c $(top_srcdir)/rest-extras/*.c
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
@@ -72,7 +72,7 @@ expand_content_files=
 # e.g. INCLUDES=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 INCLUDES=-I$(top_srcdir) -I$(top_builddir) $(GLIB_CFLAGS) $(SOUP_CFLAGS) $(XML_CFLAGS)
-GTKDOC_LIBS=$(top_builddir)/rest/librest-@API_VERSION@.la
+GTKDOC_LIBS=$(top_builddir)/rest/librest-@API_VERSION@.la $(top_builddir)/rest-extras/librest-extras-@API_VERSION@.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

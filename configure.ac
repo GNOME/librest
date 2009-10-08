@@ -46,10 +46,12 @@ AC_SUBST(localedir)
 AC_OUTPUT([
         Makefile
         rest/Makefile
+        rest-extras/Makefile
         examples/Makefile
         docs/Makefile
         docs/reference/Makefile
         docs/reference/rest/Makefile
         tests/Makefile
         rest.pc
+        rest-extras.pc
 ])

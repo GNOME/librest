@@ -25,8 +25,8 @@
 #include <rest/rest-proxy-call.h>
 #include "flickr-proxy-call.h"
 #include "flickr-proxy-private.h"
-#include "rest-proxy-call-private.h"
-#include "sha1.h"
+#include "rest/rest-proxy-call-private.h"
+#include "rest/sha1.h"
 
 G_DEFINE_TYPE (FlickrProxyCall, flickr_proxy_call, REST_TYPE_PROXY_CALL)
 

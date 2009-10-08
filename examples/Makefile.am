@@ -1,7 +1,7 @@
 noinst_PROGRAMS = test-raw test-xml dump-xml test-facebook get-fireeagle-location post-twitter get-flickr-favorites
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(SOUP_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(GLIB_LIBS) $(SOUP_LIBS) ../rest/librest-@API_VERSION@.la
+AM_LDFLAGS = $(GLIB_LIBS) $(SOUP_LIBS) ../rest/librest-@API_VERSION@.la ../rest-extras/librest-extras-@API_VERSION@.la
 
 test_raw_SOURCES = test-raw.c
 test_xml_SOURCES = test-xml.c

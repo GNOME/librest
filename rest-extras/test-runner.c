@@ -29,7 +29,7 @@ main (int argc, char *argv[])
   g_type_init ();
   g_test_init (&argc, &argv, NULL);
 
-  test_add ("/oauth/param-encoding", test_param_encoding);
+  test_add ("/flickr/error", test_flickr_error);
 
   return g_test_run ();
 }
