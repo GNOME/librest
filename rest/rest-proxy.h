@@ -69,10 +69,15 @@ typedef struct {
  */
 typedef struct {
   GObjectClass parent_class;
+  /*< public >*/
   gboolean (*bind_valist)(RestProxy *proxy, va_list params);
   RestProxyCall *(*new_call)(RestProxy *proxy);
-  gboolean (*simple_run_valist)(RestProxy *proxy, gchar **payload, 
+  gboolean (*simple_run_valist)(RestProxy *proxy, gchar **payload,
       goffset *len, GError **error, va_list params);
+
+  /*< private >*/
+  /* padding for future expansion */
+  gpointer _padding_dummy[8];
 } RestProxyClass;
 
 #define REST_PROXY_ERROR rest_proxy_error_quark ()

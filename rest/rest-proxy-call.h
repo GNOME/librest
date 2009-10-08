@@ -69,6 +69,10 @@ typedef struct {
   GObjectClass parent_class;
   /*< public >*/
   gboolean (*prepare)(RestProxyCall *call, GError **error);
+
+  /*< private >*/
+  /* padding for future expansion */
+  gpointer _padding_dummy[8];
 } RestProxyCallClass;
 
 #define REST_PROXY_CALL_ERROR rest_proxy_call_error_quark ()
