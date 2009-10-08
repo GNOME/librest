@@ -51,7 +51,7 @@ main (int argc, char **argv)
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_access_token (OAUTH_PROXY (proxy), "access_token", NULL, &error);
+  oauth_proxy_access_token (OAUTH_PROXY (proxy), "access_token.php", NULL, &error);
   g_assert_no_error (error);
 
   g_assert_cmpstr (priv->token, ==, "accesskey");
