@@ -26,7 +26,7 @@ librest_@API_VERSION@_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
 librest_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
                     $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS)
 librest_@API_VERSION@_la_SOURCES = $(lib_sources) $(lib_headers)
-librest_@API_VERSION@_la_HEADERS = 
+librest_@API_VERSION@_la_HEADERS = $(lib_headers)
 librest_@API_VERSION@_ladir = $(includedir)/rest-@API_VERSION@/rest
 
 
