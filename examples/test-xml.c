@@ -84,7 +84,7 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
 
 static void
 proxy_call_raw_async_cb (RestProxyCall *call,
-                         GError        *error,
+                         const GError  *error,
                          GObject       *weak_object,
                          gpointer       userdata)
 {

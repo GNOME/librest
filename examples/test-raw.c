@@ -25,7 +25,7 @@
 
 static void
 proxy_call_async_cb (RestProxyCall *call,
-                     GError        *error,
+                     const GError  *error,
                      GObject       *weak_object,
                      gpointer       userdata)
 {

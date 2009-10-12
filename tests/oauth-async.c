@@ -63,13 +63,13 @@ make_calls (OAuthProxy *oproxy)
 }
 
 static void
-access_token_cb (OAuthProxy *proxy,
-                 GError *error,
-                 GObject *weak_object,
-                 gpointer user_data)
+access_token_cb (OAuthProxy   *proxy,
+                 const GError *error,
+                 GObject      *weak_object,
+                 gpointer      user_data)
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
-  g_assert_no_error (error);
+  g_assert_no_error ((GError *)error);
 
   g_assert_cmpstr (priv->token, ==, "accesskey");
   g_assert_cmpstr (priv->token_secret, ==, "accesssecret");
@@ -78,21 +78,23 @@ access_token_cb (OAuthProxy *proxy,
 }
 
 static void
-request_token_cb (OAuthProxy *proxy,
-                  GError *error,
-                  GObject *weak_object,
-                  gpointer user_data)
+request_token_cb (OAuthProxy   *proxy,
+                  const GError *error,
+                  GObject      *weak_object,
+                  gpointer      user_data)
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
-  g_assert_no_error (error);
+  GError *err = NULL;
+
+  g_assert_no_error ((GError *)error);
 
   g_assert_cmpstr (priv->token, ==, "requestkey");
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
   oauth_proxy_access_token_async (proxy, "access_token.php", NULL,
-                                  access_token_cb, NULL, NULL, &error);
-  g_assert_no_error (error);
+                                  access_token_cb, NULL, NULL, &err);
+  g_assert_no_error (err);
 }
 
 int
