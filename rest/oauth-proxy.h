@@ -95,7 +95,7 @@ RestProxy* oauth_proxy_new_with_token (const char *consumer_key,
  * oauth_proxy_access_token_async().
  */
 typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
-                                       GError     *error,
+                                       const GError *error,
                                        GObject    *weak_object,
                                        gpointer    userdata);
 

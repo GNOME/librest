@@ -257,7 +257,7 @@ typedef struct {
 
 static void
 auth_callback (RestProxyCall *call,
-               GError        *error,
+               const GError  *error,
                GObject       *weak_object,
                gpointer       user_data)
 {
@@ -417,7 +417,7 @@ oauth_proxy_request_token (OAuthProxy *proxy,
 
 static void
 request_token_cb (RestProxyCall *call,
-                  GError        *error,
+                  const GError  *error,
                   GObject       *weak_object,
                   gpointer       user_data)
 {
@@ -544,7 +544,7 @@ oauth_proxy_access_token (OAuthProxy *proxy,
 
 static void
 access_token_cb (RestProxyCall *call,
-                 GError        *error,
+                 const GError  *error,
                  GObject       *weak_object,
                  gpointer       user_data)
 {

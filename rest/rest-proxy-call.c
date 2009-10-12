@@ -771,7 +771,7 @@ typedef struct
 
 static void
 _rest_proxy_call_async_cb (RestProxyCall *call,
-                           GError        *error,
+                           const GError  *error,
                            GObject       *weak_object,
                            gpointer       userdata)
 {
