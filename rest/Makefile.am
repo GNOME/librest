@@ -1,3 +1,5 @@
+CLEANFILES =
+
 # For some reason I can't use $(librest_@API_VERSION@_la_SOURCES) in
 # test_runner_SOURCES, so we have to do this
 lib_sources = \
@@ -39,3 +41,44 @@ test_runner_CFLAGS = -DBUILD_TESTS $(librest_@API_VERSION@_la_CFLAGS)
 test_runner_LDFLAGS = $(librest_@API_VERSION@_la_LIBADD)
 
 # TODO: use gtester
+
+if HAVE_INTROSPECTION
+BUILT_GIRSOURCES =
+
+Rest-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-@API_VERSION@.la
+	$(QUIET_GEN)$(INTROSPECTION_SCANNER) -v \
+		--namespace Rest --nsversion=@API_VERSION@ \
+		$(common_includes) \
+		--include=GObject-2.0 \
+		--include=Soup-2.4 \
+		--include=libxml2-2.0 \
+		--library=librest-@API_VERSION@.la \
+		--libtool="$(top_builddir)/libtool" \
+		--pkg gobject-2.0 \
+		--pkg soup-2.0 \
+		--pkg libxml-2.0 \
+		--output $@ \
+		$(lib_headers) \
+		$(lib_sources)
+
+BUILT_GIRSOURCES += Rest-@API_VERSION@.gir
+
+# INTROSPECTION_GIRDIR/INTROSPECTION_TYPELIBDIR aren't the right place to
+# install anything - we need to install inside our prefix.
+girdir = $(datadir)/gir-1.0
+gir_DATA = $(BUILT_GIRSOURCES)
+
+typelibsdir = $(libdir)/girepository-1.0/
+typelibs_DATA = $(BUILT_GIRSOURCES:.gir=.typelib)
+
+%.typelib: %.gir $(INTROSPECTION_COMPILER)
+	$(QUIET_GEN) \
+	LD_LIBRARY_PATH=.libs${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+	$(INTROSPECTION_COMPILER) \
+		--includedir=$(srcdir) \
+		--includedir=. \
+		$(INTROSPECTION_COMPILER_OPTS) $< -o $(@F)
+
+CLEANFILES += $(BUILT_GIRSOURCES) $(typelibs_DATA)
+
+endif #HAVE_INTROSPECTION

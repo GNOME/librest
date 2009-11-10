@@ -39,6 +39,7 @@ AS_IF(
 )
 
 GTK_DOC_CHECK(1.9)
+GOBJECT_INTROSPECTION_CHECK([0.6.4])
 
 localedir=${datadir}/locale
 AC_SUBST(localedir)
@@ -55,3 +56,13 @@ AC_OUTPUT([
         rest.pc
         rest-extras.pc
 ])
+
+echo ""
+echo "                 LibRest $VERSION"
+echo "                 ================"
+echo ""
+echo "                   prefix:   ${prefix}"
+echo ""
+echo "            Documentation:   ${enable_gtk_doc}"
+echo "       Introspection data:   ${enable_introspection}"
+echo ""
