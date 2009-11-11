@@ -46,7 +46,7 @@ if HAVE_INTROSPECTION
 BUILT_GIRSOURCES =
 
 Rest-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-@API_VERSION@.la
-	$(QUIET_GEN)$(INTROSPECTION_SCANNER) -v \
+	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
 		--namespace Rest --nsversion=@API_VERSION@ \
 		$(common_includes) \
 		--include=GObject-2.0 \
@@ -72,7 +72,7 @@ typelibsdir = $(libdir)/girepository-1.0/
 typelibs_DATA = $(BUILT_GIRSOURCES:.gir=.typelib)
 
 %.typelib: %.gir $(INTROSPECTION_COMPILER)
-	$(QUIET_GEN) \
+	$(AM_V_GEN) \
 	LD_LIBRARY_PATH=.libs${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
 	$(INTROSPECTION_COMPILER) \
 		--includedir=$(srcdir) \
