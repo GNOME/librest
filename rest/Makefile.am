@@ -55,7 +55,7 @@ Rest-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-@API_VERSION@.la
 		--library=librest-@API_VERSION@.la \
 		--libtool="$(top_builddir)/libtool" \
 		--pkg gobject-2.0 \
-		--pkg soup-2.0 \
+		--pkg libsoup-2.4 \
 		--pkg libxml-2.0 \
 		--output $@ \
 		$(lib_headers) \
