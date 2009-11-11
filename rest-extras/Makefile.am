@@ -54,6 +54,7 @@ RestExtras-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-extras-@API_VERSI
 		--pkg libsoup-2.4 \
 		--pkg libxml-2.0 \
 		--output $@ \
+		-I$(top_srcdir) \
 		$(lib_headers) \
 		$(lib_sources)
 
