@@ -48,7 +48,6 @@ BUILT_GIRSOURCES =
 Rest-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-@API_VERSION@.la
 	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
 		--namespace Rest --nsversion=@API_VERSION@ \
-		$(common_includes) \
 		--include=GObject-2.0 \
 		--include=Soup-2.4 \
 		--include=libxml2-2.0 \
@@ -58,6 +57,7 @@ Rest-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-@API_VERSION@.la
 		--pkg libsoup-2.4 \
 		--pkg libxml-2.0 \
 		--output $@ \
+		-I$(top_srcdir) \
 		$(lib_headers) \
 		$(lib_sources)
 
