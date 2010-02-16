@@ -41,6 +41,15 @@ struct _RestProxyCallAsyncClosure {
   SoupMessage *message;
 };
 
+struct _InvokeData {
+  RestProxyCall *call;
+  GAsyncReadyCallback callback;
+  GObject *weak_object;
+  gpointer user_data;
+  SoupMessage *message;
+  GCancellable *cancellable;
+};
+
 enum
 {
   PROP_0 = 0,
@@ -939,6 +948,147 @@ rest_proxy_call_sync (RestProxyCall *call,
 
   return ret;
 }
+
+static void
+_invoke_finished_cb (SoupSession *session,
+                     SoupMessage *message,
+                     gpointer     user_data)
+{
+  InvokeData *data;
+  RestProxyCall *call;
+  RestProxyCallPrivate *priv;
+  GError *error = NULL;
+  GSimpleAsyncResult *res;
+
+  data = (InvokeData *)user_data;
+  call = data->call;
+  priv = GET_PRIVATE (call);
+
+  finish_call (call, message, &error);
+
+  if (error == NULL) {
+    res = g_simple_async_result_new (G_OBJECT (data->call),
+                                     data->callback,
+                                     data->user_data,
+                                     rest_proxy_call_invoke);
+    g_simple_async_result_set_op_res_gpointer (res, data, NULL);
+    g_simple_async_result_complete (res);
+    g_object_unref (res);
+  } else {
+    res = g_simple_async_result_new_from_error (G_OBJECT (data->call),
+                                                data->callback,
+                                                data->user_data,
+                                                error);
+    g_simple_async_result_set_op_res_gpointer (res, data, NULL);
+    g_simple_async_result_complete (res);
+    g_error_free (error);
+    g_object_unref (res);
+  }
+}
+
+void
+rest_proxy_call_invoke (RestProxyCall       *call,
+                        GCancellable        *cancellable,
+                        GObject             *weak_object,
+                        GAsyncReadyCallback  callback,
+                        gpointer             user_data)
+{
+  RestProxyCallPrivate *priv;
+  RestProxyCallClass *call_class;
+  SoupMessage *message;
+  InvokeData *data = NULL;
+  GSimpleAsyncResult *result;
+  GError *error;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  priv = GET_PRIVATE (call);
+  call_class = REST_PROXY_CALL_GET_CLASS (call);
+
+  if (priv->cur_invoke) {
+    g_warning (G_STRLOC ": Call already in progress.");
+    error = g_error_new_literal (REST_PROXY_CALL_ERROR,
+                                 REST_PROXY_ERROR_FAILED,
+                                 "Call already in progress");
+    goto error;
+  }
+
+  message = prepare_message (call, &error);
+  if (message == NULL) {
+    error = g_error_new_literal (REST_PROXY_CALL_ERROR,
+                                 REST_PROXY_ERROR_FAILED,
+                                 "prepare_message failed");
+    goto error;
+  }
+
+  data = g_slice_new0 (InvokeData);
+  data->call = g_object_ref (call);
+  data->callback = callback;
+  data->weak_object = weak_object;
+  data->message = message;
+  data->user_data = user_data;
+
+  priv->cur_invoke = data;
+
+  /* Weakly reference this object. We remove our callback if it goes away. */
+  if (data->weak_object)
+  {
+    g_object_weak_ref (data->weak_object,
+        (GWeakNotify)_call_async_weak_notify_cb,
+        data);
+  }
+
+  _rest_proxy_queue_message (priv->proxy, message, _invoke_finished_cb, data);
+  g_free (priv->url);
+  priv->url = NULL;
+  return;
+
+error:
+  g_free (priv->url);
+  priv->url = NULL;
+
+  result = g_simple_async_result_new_from_error (G_OBJECT (call),
+                                                 callback,
+                                                 user_data,
+                                                 error);
+  g_simple_async_result_complete (result);
+  g_error_free (error);
+  g_object_unref (result);
+  if (data)
+    g_slice_free (InvokeData, data);
+}
+
+gboolean
+rest_proxy_call_invoke_finish (RestProxyCall *call,
+                               GAsyncResult  *result,
+                               GError       **error)
+{
+  GSimpleAsyncResult *simple;
+  InvokeData *data;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+  g_warn_if_fail (g_simple_async_result_is_valid (result, G_OBJECT (call), rest_proxy_call_invoke));
+  data = g_simple_async_result_get_op_res_gpointer (simple);
+
+  /* TOOD: do this here or in the callback? */
+  if (data->weak_object) {
+    g_object_weak_unref (data->weak_object,
+                         (GWeakNotify)_call_async_weak_notify_cb,
+                         data);
+  }
+
+  call->priv->cur_invoke = NULL;
+  g_object_unref (data->call);
+  g_slice_free (InvokeData, data);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return FALSE;
+  else
+    return TRUE;
+}
+
 
 /**
  * rest_proxy_call_lookup_response_header:

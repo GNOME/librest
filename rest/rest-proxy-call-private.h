@@ -30,6 +30,7 @@
 G_BEGIN_DECLS
 
 typedef struct _RestProxyCallAsyncClosure RestProxyCallAsyncClosure;
+typedef struct _InvokeData InvokeData;
 
 struct _RestProxyCallPrivate {
   gchar *method;
@@ -48,6 +49,7 @@ struct _RestProxyCallPrivate {
   RestProxy *proxy;
 
   RestProxyCallAsyncClosure *cur_call_closure;
+  InvokeData *cur_invoke;
 };
 
 G_END_DECLS
