@@ -257,6 +257,29 @@ oauth_proxy_call_init (OAuthProxyCall *self)
 {
 }
 
+void
+oauth_proxy_call_parse_token_reponse (OAuthProxyCall *call)
+{
+  OAuthProxyPrivate *priv;
+  GHashTable *form;
+
+  /* TODO: sanity checks, error handling, probably return gboolean */
+
+  g_return_if_fail (OAUTH_IS_PROXY_CALL (call));
+
+  priv = PROXY_GET_PRIVATE (REST_PROXY_CALL (call)->priv->proxy);
+  g_assert (priv);
+
+  form = soup_form_decode (rest_proxy_call_get_payload (REST_PROXY_CALL (call)));
+
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  /* This header should only exist for request_token replies, but its easier just to always check it */
+  priv->oauth_10a = g_hash_table_lookup (form, "oauth_callback_confirmed") != NULL;
+
+  g_hash_table_destroy (form);
+}
+
 #if BUILD_TESTS
 /* Test cases from http://wiki.oauth.net/TestCases */
 void
