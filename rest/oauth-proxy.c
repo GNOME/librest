@@ -358,19 +358,6 @@ oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
   return TRUE;
 }
 
-static void
-request_token_done (OAuthProxy *proxy, RestProxyCall *call)
-{
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
-  GHashTable *form;
-
-  form = soup_form_decode (rest_proxy_call_get_payload (call));
-  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
-  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
-  priv->oauth_10a = g_hash_table_lookup (form, "oauth_callback_confirmed") != NULL;
-  g_hash_table_destroy (form);
-}
-
 /**
  * oauth_proxy_request_token:
  * @proxy: an #OAuthProxy
@@ -408,7 +395,7 @@ oauth_proxy_request_token (OAuthProxy *proxy,
   }
 
   /* TODO: sanity check response */
-  request_token_done (proxy, call);
+  oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
 
   g_object_unref (call);
 
@@ -428,7 +415,7 @@ request_token_cb (RestProxyCall *call,
   g_assert (proxy);
 
   if (!error) {
-    request_token_done (proxy, call);
+    oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
   }
 
   data->callback (proxy, error, weak_object, data->user_data);
@@ -486,18 +473,6 @@ oauth_proxy_request_token_async (OAuthProxy            *proxy,
   return rest_proxy_call_async (call, request_token_cb, weak_object, data, error);
 }
 
-static void
-access_token_done (OAuthProxy *proxy, RestProxyCall *call)
-{
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
-  GHashTable *form;
-
-  form = soup_form_decode (rest_proxy_call_get_payload (call));
-  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
-  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
-  g_hash_table_destroy (form);
-}
-
 /**
  * oauth_proxy_access_token:
  * @proxy: an #OAuthProxy
@@ -535,7 +510,7 @@ oauth_proxy_access_token (OAuthProxy *proxy,
   }
 
   /* TODO: sanity check response */
-  access_token_done (proxy, call);
+  oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
 
   g_object_unref (call);
 
@@ -555,7 +530,7 @@ access_token_cb (RestProxyCall *call,
   g_assert (proxy);
 
   if (!error) {
-    access_token_done (proxy, call);
+    oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
   }
 
   data->callback (proxy, error, weak_object, data->user_data);
