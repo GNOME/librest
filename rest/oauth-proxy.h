@@ -141,8 +141,6 @@ gboolean oauth_proxy_access_token_async (OAuthProxy            *proxy,
                                          gpointer               user_data,
                                          GError               **error);
 
-/* TODO async forms of request and access token */
-
 const char * oauth_proxy_get_token (OAuthProxy *proxy);
 
 void oauth_proxy_set_token (OAuthProxy *proxy, const char *token);
