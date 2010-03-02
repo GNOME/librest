@@ -45,14 +45,17 @@ G_BEGIN_DECLS
 #define REST_PROXY_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), REST_TYPE_PROXY, RestProxyClass))
 
+typedef struct _RestProxy RestProxy;
+typedef struct _RestProxyClass RestProxyClass;
+
 /**
  * RestProxy:
  *
  * #RestProxy has no publicly available members.
  */
-typedef struct {
+struct _RestProxy {
   GObject parent;
-} RestProxy;
+};
 
 /**
  * RestProxyClass:
@@ -67,7 +70,7 @@ typedef struct {
  * Typically subclasses will override @new_call to construct a subclass of
  * #RestProxyCall.
  */
-typedef struct {
+struct _RestProxyClass {
   GObjectClass parent_class;
   /*< public >*/
   gboolean (*bind_valist)(RestProxy *proxy, va_list params);
@@ -78,7 +81,7 @@ typedef struct {
   /*< private >*/
   /* padding for future expansion */
   gpointer _padding_dummy[8];
-} RestProxyClass;
+};
 
 #define REST_PROXY_ERROR rest_proxy_error_quark ()
 
