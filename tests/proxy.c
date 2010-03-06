@@ -275,6 +275,45 @@ test_status_ok (RestProxy *proxy, const char *function)
   g_object_unref (call);
 }
 
+static void
+status_ok_cb (GObject *object, GAsyncResult *result, gpointer user_data)
+{
+  RestProxyCall *call = REST_PROXY_CALL (object);
+  GError *error = NULL;
+  int status = GPOINTER_TO_INT (user_data);
+
+  if (call == NULL) {
+    errors++;
+    return;
+  }
+
+  if (!rest_proxy_call_invoke_finish (call, result, &error)) {
+    g_printerr ("Call failed: %s\n", error->message);
+    errors++;
+  }
+
+  if (rest_proxy_call_get_status_code (call) != status) {
+    g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
+    errors++;
+    return;
+  }
+
+  /* TODO: arrange it so that call is unreffed after this callback? */
+  g_object_unref (call);
+}
+
+static void
+status_ok_test_async (RestProxy *proxy, int status)
+{
+  RestProxyCall *call;
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "status");
+  rest_proxy_call_add_param (call, "status", g_strdup_printf ("%d", status));
+
+  rest_proxy_call_invoke (call, NULL, NULL, status_ok_cb, GINT_TO_POINTER (status));
+}
+
 int
 main (int argc, char **argv)
 {
@@ -304,6 +343,9 @@ main (int argc, char **argv)
   /* status_ok_test (proxy, SOUP_STATUS_MULTIPLE_CHOICES); */
   status_error_test (proxy, SOUP_STATUS_BAD_REQUEST);
   status_error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
+
+  status_ok_test_async (proxy, SOUP_STATUS_OK);
+  status_ok_test_async (proxy, SOUP_STATUS_NO_CONTENT);
 
   test_status_ok (proxy, "useragent/none");
   rest_proxy_set_user_agent (proxy, "TestSuite-1.0");
