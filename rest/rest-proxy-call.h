@@ -150,12 +150,14 @@ typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
                                            GObject       *weak_object,
                                            gpointer       userdata);
 
+G_GNUC_DEPRECATED
 gboolean rest_proxy_call_async (RestProxyCall                *call,
                                 RestProxyCallAsyncCallback    callback,
                                 GObject                      *weak_object,
                                 gpointer                      userdata,
                                 GError                      **error);
 
+G_GNUC_DEPRECATED
 gboolean rest_proxy_call_cancel (RestProxyCall *call);
 
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
