@@ -1,10 +1,10 @@
 AC_PREREQ(2.53)
-AC_INIT(rest, 0.6.1)
+AC_INIT(rest, 0.7)
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([.])
 
-m4_define([api_version], [0.6])
+m4_define([api_version], [0.7])
 AC_SUBST([API_VERSION],[api_version])
 AC_DEFINE_UNQUOTED(API_VERSION, [$API_VERSION], [API version])
 
