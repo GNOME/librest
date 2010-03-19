@@ -255,6 +255,109 @@ typedef struct {
   gpointer user_data;
 } AuthData;
 
+static void
+auth_callback (RestProxyCall *call,
+               const GError  *error,
+               GObject       *weak_object,
+               gpointer       user_data)
+{
+  AuthData *data = user_data;
+  OAuthProxy *proxy = NULL;
+  OAuthProxyPrivate *priv;
+  GHashTable *form;
+
+  g_object_get (call, "proxy", &proxy, NULL);
+  priv = PROXY_GET_PRIVATE (proxy);
+
+  if (!error) {
+    /* TODO: sanity check response */
+    form = soup_form_decode (rest_proxy_call_get_payload (call));
+    priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+    priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+    g_hash_table_destroy (form);
+  }
+
+  data->callback (proxy, error, weak_object, data->user_data);
+
+  g_slice_free (AuthData, data);
+  g_object_unref (call);
+  g_object_unref (proxy);
+}
+
+/**
+ * oauth_proxy_auth_step_async:
+ * @proxy: an #OAuthProxy
+ * @function: the function to invoke on the proxy
+ * @callback: the callback to invoke when authorisation is complete
+ * @weak_object: the #GObject to weakly reference and tie the lifecycle too
+ * @user_data: data to pass to @callback
+ * @error_out: a #GError, or %NULL
+ *
+ * Perform an OAuth authorisation step.  This calls @function and then updates
+ * the token and token secret in the proxy.
+ *
+ * @proxy must not require binding, the function will be invoked using
+ * rest_proxy_call_set_function().
+ */
+gboolean
+oauth_proxy_auth_step_async (OAuthProxy *proxy,
+                             const char *function,
+                             OAuthProxyAuthCallback callback,
+                             GObject *weak_object,
+                             gpointer user_data,
+                             GError **error_out)
+{
+  RestProxyCall *call;
+  AuthData *data;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function);
+
+  data = g_slice_new0 (AuthData);
+  data->callback = callback;
+  data->user_data = user_data;
+
+  return rest_proxy_call_async (call, auth_callback, weak_object, data, error_out);
+  /* TODO: if call_async fails, the call is leaked */
+}
+
+/**
+ * oauth_proxy_auth_step:
+ * @proxy: an #OAuthProxy
+ * @function: the function to invoke on the proxy
+ *
+ * Perform an OAuth authorisation step.  This calls @function and then updates
+ * the token and token secret in the proxy.
+ *
+ * @proxy must not require binding, the function will be invoked using
+ * rest_proxy_call_set_function().
+ */
+gboolean
+oauth_proxy_auth_step (OAuthProxy *proxy, const char *function, GError **error)
+{
+  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  RestProxyCall *call;
+  GHashTable *form;
+
+  call = rest_proxy_new_call (REST_PROXY (proxy));
+  rest_proxy_call_set_function (call, function);
+
+  if (!rest_proxy_call_run (call, NULL, error)) {
+    g_object_unref (call);
+    return FALSE;
+  }
+
+  /* TODO: sanity check response */
+  form = soup_form_decode (rest_proxy_call_get_payload (call));
+  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
+  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  g_hash_table_destroy (form);
+
+  g_object_unref (call);
+
+  return TRUE;
+}
+
 /**
  * oauth_proxy_request_token:
  * @proxy: an #OAuthProxy
