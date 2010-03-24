@@ -459,5 +459,6 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   }
 
   xmlTextReaderClose (priv->reader);
+  xmlFreeTextReader (priv->reader);
   return root_node;
 }
