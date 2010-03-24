@@ -159,7 +159,9 @@ make_authorized_header (GHashTable *oauth_params)
 
   g_hash_table_iter_init (&iter, oauth_params);
   while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
-    g_string_append_printf (auth, ", %s=\"%s\"", key, OAUTH_ENCODE_STRING (value));
+    gchar *encoded_value = OAUTH_ENCODE_STRING (value);
+    g_string_append_printf (auth, ", %s=\"%s\"", key, encoded_value);
+    g_free (encoded_value);
   }
 
   return g_string_free (auth, FALSE);
