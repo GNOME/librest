@@ -52,7 +52,7 @@ sign_plaintext (OAuthProxyPrivate *priv)
 static char *
 encode_params (GHashTable *hash)
 {
-  GList *keys;
+  GList *l, *keys;
   GString *s;
 
   s = g_string_new (NULL);
@@ -60,12 +60,12 @@ encode_params (GHashTable *hash)
   keys = g_hash_table_get_keys (hash);
   keys = g_list_sort (keys, (GCompareFunc)strcmp);
 
-  while (keys) {
+  for (l = keys; l; l = l->next) {
     const char *key;
     const char *value;
     char *k, *v;
 
-    key = keys->data;
+    key = l->data;
     value = g_hash_table_lookup (hash, key);
 
     k = OAUTH_ENCODE_STRING (key);
@@ -78,9 +78,9 @@ encode_params (GHashTable *hash)
 
     g_free (k);
     g_free (v);
-
-    keys = keys->next;
   }
+
+  g_list_free (keys);
 
   return g_string_free (s, FALSE);
 }
