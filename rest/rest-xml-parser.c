@@ -70,8 +70,6 @@ rest_xml_parser_finalize (GObject *object)
 {
   RestXmlParserPrivate *priv = GET_PRIVATE (object);
 
-  xmlFreeTextReader (priv->reader);
-
   if (G_OBJECT_CLASS (rest_xml_parser_parent_class)->finalize)
     G_OBJECT_CLASS (rest_xml_parser_parent_class)->finalize (object);
 }
