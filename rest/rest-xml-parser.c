@@ -30,48 +30,8 @@ G_DEFINE_TYPE (RestXmlParser, rest_xml_parser, G_TYPE_OBJECT)
 #define G(x) (gchar *)x
 
 static void
-rest_xml_parser_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
-{
-  switch (property_id) {
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-  }
-}
-
-static void
-rest_xml_parser_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
-{
-  switch (property_id) {
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-  }
-}
-
-static void
-rest_xml_parser_dispose (GObject *object)
-{
-  if (G_OBJECT_CLASS (rest_xml_parser_parent_class)->dispose)
-    G_OBJECT_CLASS (rest_xml_parser_parent_class)->dispose (object);
-}
-
-static void
-rest_xml_parser_finalize (GObject *object)
-{
-  if (G_OBJECT_CLASS (rest_xml_parser_parent_class)->finalize)
-    G_OBJECT_CLASS (rest_xml_parser_parent_class)->finalize (object);
-}
-
-static void
 rest_xml_parser_class_init (RestXmlParserClass *klass)
 {
-  GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  object_class->get_property = rest_xml_parser_get_property;
-  object_class->set_property = rest_xml_parser_set_property;
-  object_class->dispose = rest_xml_parser_dispose;
-  object_class->finalize = rest_xml_parser_finalize;
 }
 
 static void
