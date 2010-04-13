@@ -27,16 +27,7 @@
 
 G_DEFINE_TYPE (RestXmlParser, rest_xml_parser, G_TYPE_OBJECT)
 
-#define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_XML_PARSER, RestXmlParserPrivate))
-
 #define G(x) (gchar *)x
-
-typedef struct _RestXmlParserPrivate RestXmlParserPrivate;
-
-struct _RestXmlParserPrivate {
-  xmlTextReaderPtr reader;
-};
 
 static void
 rest_xml_parser_get_property (GObject *object, guint property_id,
@@ -68,8 +59,6 @@ rest_xml_parser_dispose (GObject *object)
 static void
 rest_xml_parser_finalize (GObject *object)
 {
-  RestXmlParserPrivate *priv = GET_PRIVATE (object);
-
   if (G_OBJECT_CLASS (rest_xml_parser_parent_class)->finalize)
     G_OBJECT_CLASS (rest_xml_parser_parent_class)->finalize (object);
 }
@@ -78,8 +67,6 @@ static void
 rest_xml_parser_class_init (RestXmlParserClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  g_type_class_add_private (klass, sizeof (RestXmlParserPrivate));
 
   object_class->get_property = rest_xml_parser_get_property;
   object_class->set_property = rest_xml_parser_set_property;
@@ -321,11 +308,11 @@ rest_xml_parser_new (void)
  * Returns: a new #RestXmlNode, or %NULL if the XML was invalid.
  */
 RestXmlNode *
-rest_xml_parser_parse_from_data (RestXmlParser *parser, 
+rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                  const gchar   *data,
                                  goffset        len)
 {
-  RestXmlParserPrivate *priv = GET_PRIVATE (parser);
+  xmlTextReaderPtr reader;
   RestXmlNode *cur_node = NULL;
   RestXmlNode *new_node = NULL;
   RestXmlNode *tmp_node = NULL;
@@ -340,19 +327,19 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
 
   _rest_setup_debugging ();
 
-  priv->reader = xmlReaderForMemory (data,
-                                     len,
-                                     NULL, /* URL? */
-                                     NULL, /* encoding */
-                                     XML_PARSE_RECOVER | XML_PARSE_NOCDATA);
+  reader = xmlReaderForMemory (data,
+                               len,
+                               NULL, /* URL? */
+                               NULL, /* encoding */
+                               XML_PARSE_RECOVER | XML_PARSE_NOCDATA);
 
-  while ((res = xmlTextReaderRead (priv->reader)) == 1)
+  while ((res = xmlTextReaderRead (reader)) == 1)
   {
-    switch (xmlTextReaderNodeType (priv->reader))
+    switch (xmlTextReaderNodeType (reader))
     {
       case XML_READER_TYPE_ELEMENT:
         /* Lookup the "name" for the tag */
-        name = G(xmlTextReaderConstName (priv->reader));
+        name = G(xmlTextReaderConstName (reader));
         REST_DEBUG (XML_PARSER, "Opening tag: %s", name);
 
         /* Create our new node for this tag */
@@ -392,7 +379,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
          * Check for empty element. If empty we needn't worry about children
          * or text and thus we don't need to update the stack or state
          */
-        if (xmlTextReaderIsEmptyElement (priv->reader)) 
+        if (xmlTextReaderIsEmptyElement (reader)) 
         {
           REST_DEBUG (XML_PARSER, "We have an empty element. No children or text.");
         } else {
@@ -406,13 +393,13 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
          * Check if we have attributes. These get stored in the node's attrs
          * hash table.
          */
-        if (xmlTextReaderHasAttributes (priv->reader))
+        if (xmlTextReaderHasAttributes (reader))
         {
-          xmlTextReaderMoveToFirstAttribute (priv->reader);
+          xmlTextReaderMoveToFirstAttribute (reader);
 
           do {
-            attr_name = G(xmlTextReaderConstLocalName (priv->reader));
-            attr_value = G(xmlTextReaderConstValue (priv->reader));
+            attr_name = G(xmlTextReaderConstLocalName (reader));
+            attr_value = G(xmlTextReaderConstValue (reader));
             g_hash_table_insert (new_node->attrs,
                                  g_strdup (attr_name),
                                  g_strdup (attr_value));
@@ -421,13 +408,13 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                      attr_name, 
                      attr_value);
 
-          } while ((res = xmlTextReaderMoveToNextAttribute (priv->reader)) == 1);
+          } while ((res = xmlTextReaderMoveToNextAttribute (reader)) == 1);
         }
 
         break;
       case XML_READER_TYPE_END_ELEMENT:
-        REST_DEBUG (XML_PARSER, "Closing tag: %s", 
-                 xmlTextReaderConstLocalName (priv->reader));
+        REST_DEBUG (XML_PARSER, "Closing tag: %s",
+                 xmlTextReaderConstLocalName (reader));
 
         REST_DEBUG (XML_PARSER, "Popping from stack and updating state.");
 
@@ -446,17 +433,17 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         }
         break;
       case XML_READER_TYPE_TEXT:
-        cur_node->content = g_strdup (G(xmlTextReaderConstValue (priv->reader)));
+        cur_node->content = g_strdup (G(xmlTextReaderConstValue (reader)));
         REST_DEBUG (XML_PARSER, "Text content found: %s",
                  cur_node->content);
       default:
         REST_DEBUG (XML_PARSER, "Found unknown content with type: 0x%x", 
-                 xmlTextReaderNodeType (priv->reader));
+                 xmlTextReaderNodeType (reader));
         break;
     }
   }
 
-  xmlTextReaderClose (priv->reader);
-  xmlFreeTextReader (priv->reader);
+  xmlTextReaderClose (reader);
+  xmlFreeTextReader (reader);
   return root_node;
 }
