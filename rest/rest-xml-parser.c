@@ -221,6 +221,9 @@ rest_xml_node_find (RestXmlNode *start,
   GList *children, *l;
   const char *tag_interned;
 
+  g_return_val_if_fail (start, NULL);
+  g_return_val_if_fail (start->ref_count > 0, NULL);
+
   tag_interned = g_intern_string (tag);
 
   g_queue_push_head (&stack, start);
@@ -284,6 +287,8 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   const gchar *attr_value = NULL;
   GQueue nodes = G_QUEUE_INIT;
   gint res = 0;
+
+  g_return_val_if_fail (REST_IS_XML_PARSER (parser), NULL);
 
   _rest_setup_debugging ();
 

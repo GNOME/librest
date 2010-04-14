@@ -189,7 +189,10 @@ void
 rest_proxy_call_set_method (RestProxyCall *call,
                             const gchar   *method)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  priv = GET_PRIVATE (call);
 
   g_free (priv->method);
 
@@ -208,7 +211,10 @@ rest_proxy_call_set_method (RestProxyCall *call,
 const char *
 rest_proxy_call_get_method (RestProxyCall *call)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+  priv = GET_PRIVATE (call);
 
   return priv->method;
 }
@@ -228,7 +234,10 @@ void
 rest_proxy_call_set_function (RestProxyCall *call,
                               const gchar   *function)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  priv = GET_PRIVATE (call);
 
   g_free (priv->function);
 
@@ -249,7 +258,10 @@ rest_proxy_call_add_header (RestProxyCall *call,
                             const gchar   *header,
                             const gchar   *value)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  priv = GET_PRIVATE (call);
 
   g_hash_table_insert (priv->headers,
                        g_strdup (header),
@@ -271,6 +283,8 @@ rest_proxy_call_add_headers (RestProxyCall *call,
 {
   va_list headers;
 
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+
   va_start (headers, call);
   rest_proxy_call_add_headers_from_valist (call, headers);
   va_end (headers);
@@ -290,6 +304,8 @@ rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
 {
   const gchar *header = NULL;
   const gchar *value = NULL;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
 
   while ((header = va_arg (headers, const gchar *)) != NULL)
   {
@@ -312,7 +328,10 @@ const gchar *
 rest_proxy_call_lookup_header (RestProxyCall *call,
                                const gchar   *header)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+  priv = GET_PRIVATE (call);
 
   return g_hash_table_lookup (priv->headers, header);
 }
@@ -328,7 +347,10 @@ void
 rest_proxy_call_remove_header (RestProxyCall *call,
                                const gchar   *header)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  priv = GET_PRIVATE (call);
 
   g_hash_table_remove (priv->headers, header);
 }
@@ -347,7 +369,10 @@ rest_proxy_call_add_param (RestProxyCall *call,
                            const gchar   *param,
                            const gchar   *value)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  priv = GET_PRIVATE (call);
 
   g_hash_table_insert (priv->params,
                        g_strdup (param),
@@ -369,6 +394,8 @@ rest_proxy_call_add_params (RestProxyCall *call,
 {
   va_list params;
 
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+
   va_start (params, call);
   rest_proxy_call_add_params_from_valist (call, params);
   va_end (params);
@@ -388,6 +415,8 @@ rest_proxy_call_add_params_from_valist (RestProxyCall *call,
 {
   const gchar *param = NULL;
   const gchar *value = NULL;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
 
   while ((param = va_arg (params, const gchar *)) != NULL)
   {
@@ -410,7 +439,11 @@ const gchar *
 rest_proxy_call_lookup_param (RestProxyCall *call,
                               const gchar   *param)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+
+  priv = GET_PRIVATE (call);
 
   return g_hash_table_lookup (priv->params, param);
 }
@@ -426,7 +459,11 @@ void
 rest_proxy_call_remove_param (RestProxyCall *call,
                               const gchar   *param)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+
+  priv = GET_PRIVATE (call);
 
   g_hash_table_remove (priv->params, param);
 }
@@ -443,7 +480,11 @@ rest_proxy_call_remove_param (RestProxyCall *call,
 GHashTable *
 rest_proxy_call_get_params (RestProxyCall *call)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+
+  priv = GET_PRIVATE (call);
 
   return g_hash_table_ref (priv->params);
 }
@@ -743,6 +784,8 @@ rest_proxy_call_cancel (RestProxyCall *call)
   RestProxyCallPrivate *priv;
   RestProxyCallAsyncClosure *closure;
 
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+
   priv = GET_PRIVATE (call);
   closure = priv->cur_call_closure;
 
@@ -793,6 +836,8 @@ rest_proxy_call_run (RestProxyCall *call,
   GError *error = NULL;
   RestProxyCallRunClosure closure = { NULL, NULL};
 
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+
   closure.loop = g_main_loop_new (NULL, FALSE);
 
   if (loop_out)
@@ -838,6 +883,8 @@ rest_proxy_call_sync (RestProxyCall *call,
   guint status;
   gboolean ret;
 
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+
   priv = GET_PRIVATE (call);
 
   message = prepare_message (call, error_out);
@@ -866,7 +913,11 @@ const gchar *
 rest_proxy_call_lookup_response_header (RestProxyCall *call,
                                         const gchar   *header)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+
+  priv = GET_PRIVATE (call);
 
   if (!priv->response_headers)
   {
@@ -888,7 +939,11 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
 GHashTable *
 rest_proxy_call_get_response_headers (RestProxyCall *call)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+
+  priv = GET_PRIVATE (call);
 
   if (!priv->response_headers)
   {
@@ -909,7 +964,12 @@ rest_proxy_call_get_response_headers (RestProxyCall *call)
 goffset
 rest_proxy_call_get_payload_length (RestProxyCall *call)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), 0);
+
+  priv = GET_PRIVATE (call);
+
   return priv->length;
 }
 
@@ -925,7 +985,12 @@ rest_proxy_call_get_payload_length (RestProxyCall *call)
 const gchar *
 rest_proxy_call_get_payload (RestProxyCall *call)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+
+  priv = GET_PRIVATE (call);
+
   return priv->payload;
 }
 
@@ -938,7 +1003,12 @@ rest_proxy_call_get_payload (RestProxyCall *call)
 guint
 rest_proxy_call_get_status_code (RestProxyCall *call)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), 0);
+
+  priv = GET_PRIVATE (call);
+
   return priv->status_code;
 }
 
@@ -954,6 +1024,11 @@ rest_proxy_call_get_status_code (RestProxyCall *call)
 const gchar *
 rest_proxy_call_get_status_message (RestProxyCall *call)
 {
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+
+  priv = GET_PRIVATE (call);
+
   return priv->status_message;
 }

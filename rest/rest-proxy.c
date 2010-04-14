@@ -279,12 +279,15 @@ rest_proxy_bind_valist (RestProxy *proxy,
                         va_list    params)
 {
   RestProxyClass *proxy_class = REST_PROXY_GET_CLASS (proxy);
+
   return proxy_class->bind_valist (proxy, params);
 }
 
 gboolean
 rest_proxy_bind (RestProxy *proxy, ...)
 {
+  g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
+
   gboolean res;
   va_list params;
 
@@ -296,15 +299,22 @@ rest_proxy_bind (RestProxy *proxy, ...)
 }
 
 void
-rest_proxy_set_user_agent (RestProxy *proxy, const char *user_agent)
+rest_proxy_set_user_agent (RestProxy  *proxy,
+                           const char *user_agent)
 {
+  g_return_if_fail (REST_IS_PROXY (proxy));
+
   g_object_set (proxy, "user-agent", user_agent, NULL);
 }
 
 const gchar *
 rest_proxy_get_user_agent (RestProxy *proxy)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
+
+  priv = GET_PRIVATE (proxy);
 
   return priv->user_agent;
 }
@@ -331,7 +341,11 @@ rest_proxy_new_call (RestProxy *proxy)
 gboolean
 _rest_proxy_get_binding_required (RestProxy *proxy)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
+
+  priv = GET_PRIVATE (proxy);
 
   return priv->binding_required;
 }
@@ -339,7 +353,11 @@ _rest_proxy_get_binding_required (RestProxy *proxy)
 const gchar *
 _rest_proxy_get_bound_url (RestProxy *proxy)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
+
+  priv = GET_PRIVATE (proxy);
 
   if (!priv->url && !priv->binding_required)
   {
@@ -419,7 +437,12 @@ void
 _rest_proxy_queue_message (RestProxy   *proxy,
                            SoupMessage *message)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY (proxy));
+  g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+  priv = GET_PRIVATE (proxy);
 
   soup_session_queue_message (priv->session,
       message,
@@ -431,8 +454,12 @@ void
 _rest_proxy_cancel_message (RestProxy   *proxy,
                             SoupMessage *message)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv;
 
+  g_return_if_fail (REST_IS_PROXY (proxy));
+  g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+  priv = GET_PRIVATE (proxy);
   soup_session_cancel_message (priv->session,
                                message,
                                SOUP_STATUS_CANCELLED);
@@ -440,9 +467,14 @@ _rest_proxy_cancel_message (RestProxy   *proxy,
 
 guint
 _rest_proxy_send_message (RestProxy   *proxy,
-                            SoupMessage *message)
+                          SoupMessage *message)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY (proxy), 0);
+  g_return_val_if_fail (SOUP_IS_MESSAGE (message), 0);
+
+  priv = GET_PRIVATE (proxy);
 
   return soup_session_send_message (priv->session_sync, message);
 }
