@@ -58,8 +58,8 @@ Rest-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-@API_VERSION@.la
 		--pkg libxml-2.0 \
 		--output $@ \
 		-I$(top_srcdir) \
-		$(lib_headers) \
-		$(lib_sources)
+		$(addprefix $(top_srcdir)/rest/, $(lib_headers)) \
+		$(addprefix $(top_srcdir)/rest/, $(lib_sources))
 
 BUILT_GIRSOURCES += Rest-@API_VERSION@.gir
 

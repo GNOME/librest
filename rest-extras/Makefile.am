@@ -55,8 +55,8 @@ RestExtras-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-extras-@API_VERSI
 		--pkg libxml-2.0 \
 		--output $@ \
 		-I$(top_srcdir) \
-		$(lib_headers) \
-		$(lib_sources)
+		$(addprefix $(top_srcdir)/rest-extras/, $(lib_headers)) \
+		$(addprefix $(top_srcdir)/rest-extras/, $(lib_sources))
 
 BUILT_GIRSOURCES += RestExtras-@API_VERSION@.gir
 
