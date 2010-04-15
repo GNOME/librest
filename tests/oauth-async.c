@@ -23,6 +23,7 @@
 #include <rest/oauth-proxy.h>
 #include <rest/oauth-proxy-private.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static GMainLoop *loop;
 
@@ -97,6 +98,14 @@ request_token_cb (OAuthProxy   *proxy,
   g_assert_no_error (err);
 }
 
+static gboolean
+on_timeout (gpointer data)
+{
+  g_message ("timed out!");
+  exit (1);
+  return FALSE;
+}
+
 int
 main (int argc, char **argv)
 {
@@ -106,6 +115,9 @@ main (int argc, char **argv)
 
   g_thread_init (NULL);
   g_type_init ();
+
+  /* Install a timeout so that we don't hang or infinite loop */
+  g_timeout_add_seconds (10, on_timeout, NULL);
 
   loop = g_main_loop_new (NULL, TRUE);
 
