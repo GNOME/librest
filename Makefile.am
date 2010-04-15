@@ -6,6 +6,8 @@ SUBDIRS = rest rest-extras examples docs tests
 pkgconfigdir   = $(libdir)/pkgconfig
 pkgconfig_DATA = rest-$(API_VERSION).pc rest-extras-$(API_VERSION).pc
 
+CLEANFILES = $(pkgconfig_DATA)
+
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
 ACLOCAL_AMFLAGS = -I .
