@@ -54,6 +54,7 @@ rest-extras/RestExtras-0.6.typelib
 rest-extras/test-runner
 tests/oauth
 tests/oauth-async
+tests/oauth2
 tests/proxy
 tests/flickr
 tests/threaded
