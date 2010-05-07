@@ -103,21 +103,6 @@ FLICKR_PROXY_GET_CLASS
 </SECTION>
 
 <SECTION>
-<FILE>facebook-proxy-call</FILE>
-<TITLE>FacebookProxyCall</TITLE>
-FacebookProxyCall
-<SUBSECTION Standard>
-FacebookProxyCallClass
-FACEBOOK_PROXY_CALL
-FACEBOOK_IS_PROXY_CALL
-FACEBOOK_TYPE_PROXY_CALL
-facebook_proxy_call_get_type
-FACEBOOK_PROXY_CALL_CLASS
-FACEBOOK_IS_PROXY_CALL_CLASS
-FACEBOOK_PROXY_CALL_GET_CLASS
-</SECTION>
-
-<SECTION>
 <FILE>rest-proxy</FILE>
 <TITLE>RestProxy</TITLE>
 RestProxy
@@ -185,30 +170,4 @@ oauth_proxy_get_type
 OAUTH_PROXY_CLASS
 OAUTH_IS_PROXY_CLASS
 OAUTH_PROXY_GET_CLASS
-</SECTION>
-
-<SECTION>
-<FILE>facebook-proxy</FILE>
-FacebookProxyPrivate
-<TITLE>FacebookProxy</TITLE>
-FacebookProxy
-facebook_proxy_new
-facebook_proxy_new_with_session
-facebook_proxy_get_api_key
-facebook_proxy_set_app_secret
-facebook_proxy_get_app_secret
-facebook_proxy_get_session_key
-facebook_proxy_set_session_key
-facebook_proxy_sign
-facebook_proxy_build_login_url
-facebook_proxy_build_permission_url
-<SUBSECTION Standard>
-FacebookProxyClass
-FACEBOOK_PROXY
-FACEBOOK_IS_PROXY
-FACEBOOK_TYPE_PROXY
-facebook_proxy_get_type
-FACEBOOK_PROXY_CLASS
-FACEBOOK_IS_PROXY_CLASS
-FACEBOOK_PROXY_GET_CLASS
 </SECTION>

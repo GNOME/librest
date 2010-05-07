@@ -41,7 +41,6 @@ examples/test-raw
 examples/test-xml
 examples/dump-xml
 examples/get-flickr-favorites
-examples/test-facebook
 examples/post-twitter
 examples/get-fireeagle-location
 rest/test-runner
