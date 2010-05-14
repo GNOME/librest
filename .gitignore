@@ -55,3 +55,4 @@ tests/oauth-async
 tests/proxy
 tests/flickr
 tests/threaded
+tests/lastfm
