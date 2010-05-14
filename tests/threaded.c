@@ -28,6 +28,7 @@
 #include <rest/rest-proxy.h>
 
 static volatile int errors = 0;
+static const gboolean verbose = FALSE;
 
 static void
 server_callback (SoupServer *server, SoupMessage *msg,
@@ -66,7 +67,8 @@ func (gpointer data)
     goto done;
   }
 
-  g_print ("Thread %p done\n", g_thread_self ());
+  if (verbose)
+    g_print ("Thread %p done\n", g_thread_self ());
 
  done:
   g_object_unref (call);
@@ -96,7 +98,8 @@ main (int argc, char **argv)
 
   for (i = 0; i < G_N_ELEMENTS (threads); i++) {
     threads[i] = g_thread_create (func, url, TRUE, NULL);
-    g_print ("Starting thread %p\n", threads[i]);
+    if (verbose)
+      g_print ("Starting thread %p\n", threads[i]);
   }
 
   for (i = 0; i < G_N_ELEMENTS (threads); i++) {
