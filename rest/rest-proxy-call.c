@@ -115,8 +115,7 @@ rest_proxy_call_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
-  if (G_OBJECT_CLASS (rest_proxy_call_parent_class)->dispose)
-    G_OBJECT_CLASS (rest_proxy_call_parent_class)->dispose (object);
+  G_OBJECT_CLASS (rest_proxy_call_parent_class)->dispose (object);
 }
 
 static void
@@ -130,8 +129,7 @@ rest_proxy_call_finalize (GObject *object)
   g_free (priv->payload);
   g_free (priv->status_message);
 
-  if (G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize)
-    G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize (object);
+  G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize (object);
 }
 
 static void

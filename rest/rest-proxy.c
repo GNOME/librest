@@ -133,9 +133,6 @@ rest_proxy_dispose (GObject *object)
 {
   RestProxyPrivate *priv = GET_PRIVATE (object);
 
-  if (G_OBJECT_CLASS (rest_proxy_parent_class)->dispose)
-    G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
-
   if (priv->session)
   {
     g_object_unref (priv->session);
@@ -147,6 +144,8 @@ rest_proxy_dispose (GObject *object)
     g_object_unref (priv->session_sync);
     priv->session_sync = NULL;
   }
+
+  G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
 }
 
 static void
@@ -158,8 +157,7 @@ rest_proxy_finalize (GObject *object)
   g_free (priv->url_format);
   g_free (priv->user_agent);
 
-  if (G_OBJECT_CLASS (rest_proxy_parent_class)->finalize)
-    G_OBJECT_CLASS (rest_proxy_parent_class)->finalize (object);
+  G_OBJECT_CLASS (rest_proxy_parent_class)->finalize (object);
 }
 
 static void
