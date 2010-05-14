@@ -30,6 +30,7 @@ main (int argc, char *argv[])
   g_test_init (&argc, &argv, NULL);
 
   test_add ("/flickr/error", test_flickr_error);
+  test_add ("/lastfm/error", test_flickr_error);
 
   return g_test_run ();
 }
