@@ -51,7 +51,9 @@ void _rest_setup_debugging (void);
 gboolean _rest_proxy_get_binding_required (RestProxy *proxy);
 const gchar *_rest_proxy_get_bound_url (RestProxy *proxy);
 void _rest_proxy_queue_message (RestProxy   *proxy,
-                                SoupMessage *message);
+                                SoupMessage *message,
+                                SoupSessionCallback callback,
+                                gpointer user_data);
 void _rest_proxy_cancel_message (RestProxy   *proxy,
                                  SoupMessage *message);
 guint _rest_proxy_send_message (RestProxy   *proxy,

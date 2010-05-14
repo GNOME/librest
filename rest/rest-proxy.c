@@ -433,7 +433,9 @@ rest_proxy_simple_run (RestProxy *proxy,
 
 void
 _rest_proxy_queue_message (RestProxy   *proxy,
-                           SoupMessage *message)
+                           SoupMessage *message,
+                           SoupSessionCallback callback,
+                           gpointer user_data)
 {
   RestProxyPrivate *priv;
 
@@ -443,9 +445,9 @@ _rest_proxy_queue_message (RestProxy   *proxy,
   priv = GET_PRIVATE (proxy);
 
   soup_session_queue_message (priv->session,
-      message,
-      NULL,
-      NULL);
+                              message,
+                              callback,
+                              user_data);
 }
 
 void

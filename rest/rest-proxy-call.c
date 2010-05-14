@@ -492,7 +492,8 @@ rest_proxy_call_get_params (RestProxyCall *call)
 static void _call_async_weak_notify_cb (gpointer *data,
                                         GObject  *dead_object);
 
-static void _call_async_finished_cb (SoupMessage *message,
+static void _call_async_finished_cb (SoupSession *session,
+                                     SoupMessage *message,
                                      gpointer     userdata);
 
 static void
@@ -579,7 +580,8 @@ finish_call (RestProxyCall *call, SoupMessage *message, GError **error)
 }
 
 static void
-_call_async_finished_cb (SoupMessage *message,
+_call_async_finished_cb (SoupSession *session,
+                         SoupMessage *message,
                          gpointer     userdata)
 {
   RestProxyCallAsyncClosure *closure;
@@ -753,12 +755,10 @@ rest_proxy_call_async (RestProxyCall                *call,
         closure);
   }
 
-  g_signal_connect (message,
-      "finished",
-      (GCallback)_call_async_finished_cb,
-      closure);
-
-  _rest_proxy_queue_message (priv->proxy, message);
+  _rest_proxy_queue_message (priv->proxy,
+                             message,
+                             _call_async_finished_cb,
+                             closure);
   g_free (priv->url);
   priv->url = NULL;
   return TRUE;
