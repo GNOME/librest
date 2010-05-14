@@ -3,10 +3,15 @@ CLEANFILES =
 lib_sources = \
 		     flickr-proxy.c	\
 		     flickr-proxy-call.c	\
-		     flickr-proxy-private.h
+		     flickr-proxy-private.h \
+		     lastfm-proxy.c	\
+		     lastfm-proxy-call.c	\
+		     lastfm-proxy-private.h
 lib_headers = \
 		     flickr-proxy.h	\
-		     flickr-proxy-call.h
+		     flickr-proxy-call.h \
+		     lastfm-proxy.h	\
+		     lastfm-proxy-call.h
 
 
 lib_LTLIBRARIES = librest-extras-@API_VERSION@.la
