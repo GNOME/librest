@@ -51,7 +51,7 @@ CFILE_GLOB=$(top_srcdir)/rest/*.c
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=rest-private.h sha1.h
+IGNORE_HFILES=rest-private.h rest-proxy-call-private.h sha1.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
