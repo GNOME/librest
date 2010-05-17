@@ -53,6 +53,7 @@ AC_OUTPUT([
         docs/Makefile
         docs/reference/Makefile
         docs/reference/rest/Makefile
+        docs/reference/rest-extras/Makefile
         tests/Makefile
         rest.pc
         rest-extras.pc

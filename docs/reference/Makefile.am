@@ -1,1 +1,1 @@
-SUBDIRS = rest
+SUBDIRS = rest rest-extras
