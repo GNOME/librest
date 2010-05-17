@@ -703,7 +703,7 @@ prepare_message (RestProxyCall *call, GError **error_out)
  * @callback: a #RestProxyCallAsyncCallback to invoke on completion of the call
  * @weak_object: The #GObject to weakly reference and tie the lifecycle too
  * @userdata: data to pass to @callback
- * @error_out: a #GError, or %NULL
+ * @error: a #GError, or %NULL
  *
  * Asynchronously invoke @call.
  *
@@ -715,7 +715,7 @@ rest_proxy_call_async (RestProxyCall                *call,
                        RestProxyCallAsyncCallback    callback,
                        GObject                      *weak_object,
                        gpointer                      userdata,
-                       GError                      **error_out)
+                       GError                      **error)
 {
   RestProxyCallPrivate *priv;
   RestProxyCallClass *call_class;
@@ -734,7 +734,7 @@ rest_proxy_call_async (RestProxyCall                *call,
     return FALSE;
   }
 
-  message = prepare_message (call, error_out);
+  message = prepare_message (call, error);
   if (message == NULL)
     goto error;
 

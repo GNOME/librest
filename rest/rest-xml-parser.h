@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -91,7 +91,7 @@ G_GNUC_DEPRECATED void rest_xml_node_free (RestXmlNode *node);
 
 const gchar *rest_xml_node_get_attr (RestXmlNode *node,
                                      const gchar *attr_name);
-RestXmlNode *rest_xml_node_find (RestXmlNode *node,
+RestXmlNode *rest_xml_node_find (RestXmlNode *start,
                                  const gchar *tag);
 
 G_END_DECLS
