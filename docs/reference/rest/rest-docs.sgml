@@ -3,17 +3,19 @@
                "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <book id="index" xmlns:xi="http://www.w3.org/2003/XInclude">
   <bookinfo>
-    <title>Rest Reference Manual</title>
+    <title>librest Reference Manual</title>
  </bookinfo>
 
   <chapter>
-    <title>Rest API Reference</title>
+    <title>REST Proxies</title>
     <xi:include href="xml/rest-proxy.xml"/>
     <xi:include href="xml/rest-proxy-call.xml"/>
     <xi:include href="xml/oauth-proxy.xml"/>
     <xi:include href="xml/oauth-proxy-call.xml"/>
-    <xi:include href="xml/flickr-proxy.xml"/>
-    <xi:include href="xml/flickr-proxy-call.xml"/>
+  </chapter>
+
+  <chapter>
+    <title>XML Parsing</title>
     <xi:include href="xml/rest-xml-parser.xml"/>
   </chapter>
 </book>
