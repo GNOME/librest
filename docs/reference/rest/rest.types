@@ -3,3 +3,5 @@ rest_proxy_get_type
 rest_proxy_call_get_type
 oauth_proxy_get_type
 oauth_proxy_call_get_type
+oauth2_proxy_get_type
+oauth2_proxy_call_get_type

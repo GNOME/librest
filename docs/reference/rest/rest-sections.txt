@@ -65,6 +65,44 @@ rest_proxy_call_error_quark
 </SECTION>
 
 <SECTION>
+<FILE>oauth2-proxy</FILE>
+<TITLE>OAuth2Proxy</TITLE>
+OAuth2ProxyPrivate
+OAuth2Proxy
+OAuth2ProxyClass
+oauth2_proxy_new
+oauth2_proxy_new_with_token
+oauth2_proxy_build_login_url_full
+oauth2_proxy_build_login_url
+oauth2_proxy_get_access_token
+oauth2_proxy_set_access_token
+oauth2_proxy_extract_access_token
+<SUBSECTION Standard>
+OAUTH2_PROXY
+OAUTH2_IS_PROXY
+OAUTH2_TYPE_PROXY
+oauth2_proxy_get_type
+OAUTH2_PROXY_CLASS
+OAUTH2_IS_PROXY_CLASS
+OAUTH2_PROXY_GET_CLASS
+</SECTION>
+
+<SECTION>
+<FILE>oauth2-proxy-call</FILE>
+<TITLE>OAuth2ProxyCall</TITLE>
+OAuth2ProxyCall
+OAuth2ProxyCallClass
+<SUBSECTION Standard>
+OAUTH2_PROXY_CALL
+OAUTH2_IS_PROXY_CALL
+OAUTH2_TYPE_PROXY_CALL
+oauth2_proxy_call_get_type
+OAUTH2_PROXY_CALL_CLASS
+OAUTH2_IS_PROXY_CALL_CLASS
+OAUTH2_PROXY_CALL_GET_CLASS
+</SECTION>
+
+<SECTION>
 <FILE>rest-proxy</FILE>
 <TITLE>RestProxy</TITLE>
 RestProxy

@@ -12,6 +12,8 @@
     <xi:include href="xml/rest-proxy-call.xml"/>
     <xi:include href="xml/oauth-proxy.xml"/>
     <xi:include href="xml/oauth-proxy-call.xml"/>
+    <xi:include href="xml/oauth2-proxy.xml"/>
+    <xi:include href="xml/oauth2-proxy-call.xml"/>
   </chapter>
 
   <chapter>
