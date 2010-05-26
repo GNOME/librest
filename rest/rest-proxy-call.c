@@ -776,14 +776,12 @@ rest_proxy_call_async (RestProxyCall                *call,
                        GError                      **error)
 {
   RestProxyCallPrivate *priv;
-  RestProxyCallClass *call_class;
   SoupMessage *message;
   RestProxyCallAsyncClosure *closure;
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
   priv = GET_PRIVATE (call);
   g_assert (priv->proxy);
-  call_class = REST_PROXY_CALL_GET_CLASS (call);
 
   if (priv->cur_call_closure)
   {
@@ -994,15 +992,14 @@ rest_proxy_call_invoke_async (RestProxyCall       *call,
                               gpointer             user_data)
 {
   RestProxyCallPrivate *priv;
-  RestProxyCallClass *call_class;
   SoupMessage *message;
   InvokeData *data = NULL;
   GSimpleAsyncResult *result;
   GError *error;
 
   g_return_if_fail (REST_IS_PROXY_CALL (call));
+
   priv = GET_PRIVATE (call);
-  call_class = REST_PROXY_CALL_GET_CLASS (call);
 
   if (priv->cur_invoke) {
     g_warning (G_STRLOC ": Call already in progress.");
