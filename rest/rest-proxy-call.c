@@ -970,7 +970,7 @@ _invoke_finished_cb (SoupSession *session,
     res = g_simple_async_result_new (G_OBJECT (data->call),
                                      data->callback,
                                      data->user_data,
-                                     rest_proxy_call_invoke);
+                                     rest_proxy_call_invoke_async);
     g_simple_async_result_set_op_res_gpointer (res, data, NULL);
     g_simple_async_result_complete (res);
     g_object_unref (res);
@@ -987,11 +987,11 @@ _invoke_finished_cb (SoupSession *session,
 }
 
 void
-rest_proxy_call_invoke (RestProxyCall       *call,
-                        GCancellable        *cancellable,
-                        GObject             *weak_object,
-                        GAsyncReadyCallback  callback,
-                        gpointer             user_data)
+rest_proxy_call_invoke_async (RestProxyCall       *call,
+                              GCancellable        *cancellable,
+                              GObject             *weak_object,
+                              GAsyncReadyCallback  callback,
+                              gpointer             user_data)
 {
   RestProxyCallPrivate *priv;
   RestProxyCallClass *call_class;
@@ -1069,7 +1069,7 @@ rest_proxy_call_invoke_finish (RestProxyCall *call,
   g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
 
   simple = G_SIMPLE_ASYNC_RESULT (result);
-  g_warn_if_fail (g_simple_async_result_is_valid (result, G_OBJECT (call), rest_proxy_call_invoke));
+  g_warn_if_fail (g_simple_async_result_is_valid (result, G_OBJECT (call), rest_proxy_call_invoke_async));
   data = g_simple_async_result_get_op_res_gpointer (simple);
 
   /* TOOD: do this here or in the callback? */

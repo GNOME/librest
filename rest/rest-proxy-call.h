@@ -162,11 +162,11 @@ gboolean rest_proxy_call_cancel (RestProxyCall *call);
 
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
 
-void rest_proxy_call_invoke (RestProxyCall       *call,
-                             GCancellable        *cancellable,
-                             GObject             *weak_object,
-                             GAsyncReadyCallback  callback,
-                             gpointer             user_data);
+void rest_proxy_call_invoke_async (RestProxyCall       *call,
+                                   GCancellable        *cancellable,
+                                   GObject             *weak_object,
+                                   GAsyncReadyCallback  callback,
+                                   gpointer             user_data);
 
 gboolean rest_proxy_call_invoke_finish (RestProxyCall *call,
                                         GAsyncResult  *result,

@@ -311,7 +311,7 @@ status_ok_test_async (RestProxy *proxy, int status)
   rest_proxy_call_set_function (call, "status");
   rest_proxy_call_add_param (call, "status", g_strdup_printf ("%d", status));
 
-  rest_proxy_call_invoke (call, NULL, NULL, status_ok_cb, GINT_TO_POINTER (status));
+  rest_proxy_call_invoke_async (call, NULL, NULL, status_ok_cb, GINT_TO_POINTER (status));
 }
 
 int
