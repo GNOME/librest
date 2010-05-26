@@ -39,7 +39,7 @@ make_calls (OAuthProxy *oproxy)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo_api.php");
   rest_proxy_call_add_param (call, "foo", "bar");
-  if (!rest_proxy_call_run (call, NULL, &error))
+  if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "foo=bar");
   g_object_unref (call);
@@ -47,7 +47,7 @@ make_calls (OAuthProxy *oproxy)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo_api.php");
   rest_proxy_call_add_param (call, "numbers", "1234567890");
-  if (!rest_proxy_call_run (call, NULL, &error))
+  if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "numbers=1234567890");
   g_object_unref (call);
@@ -55,7 +55,7 @@ make_calls (OAuthProxy *oproxy)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo_api.php");
   rest_proxy_call_add_param (call, "escape", "!£$%^&*()");
-  if (!rest_proxy_call_run (call, NULL, &error))
+  if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "escape=%21%C2%A3%24%25%5E%26%2A%28%29");
   g_object_unref (call);
