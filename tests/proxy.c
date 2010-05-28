@@ -276,6 +276,44 @@ test_status_ok (RestProxy *proxy, const char *function)
 }
 
 static void
+status_error_cb (GObject *object, GAsyncResult *result, gpointer user_data)
+{
+  RestProxyCall *call = REST_PROXY_CALL (object);
+  GError *error = NULL;
+  int status = GPOINTER_TO_INT (user_data);
+
+  if (call == NULL) {
+    errors++;
+    return;
+  }
+
+  if (rest_proxy_call_invoke_finish (call, result, &error)) {
+    g_printerr ("Call succeeded incorrectly\n");
+    errors++;
+    return;
+  }
+
+  /* TODO: check error code/domain */
+}
+
+static void
+test_async_cancelled (RestProxy *proxy)
+{
+  RestProxyCall *call;
+  GCancellable *cancel;
+
+  cancel = g_cancellable_new ();
+  g_cancellable_cancel (cancel);
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "ping");
+
+  rest_proxy_call_invoke_async (call, cancel, NULL, status_error_cb, NULL);
+
+  g_object_unref (cancel);
+}
+
+static void
 status_ok_cb (GObject *object, GAsyncResult *result, gpointer user_data)
 {
   RestProxyCall *call = REST_PROXY_CALL (object);
@@ -346,6 +384,8 @@ main (int argc, char **argv)
 
   status_ok_test_async (proxy, SOUP_STATUS_OK);
   status_ok_test_async (proxy, SOUP_STATUS_NO_CONTENT);
+
+  test_async_cancelled (proxy);
 
   test_status_ok (proxy, "useragent/none");
   rest_proxy_set_user_agent (proxy, "TestSuite-1.0");
