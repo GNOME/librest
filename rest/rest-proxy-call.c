@@ -995,11 +995,14 @@ rest_proxy_call_invoke_async (RestProxyCall       *call,
   SoupMessage *message;
   InvokeData *data = NULL;
   GSimpleAsyncResult *result;
-  GError *error;
+  GError *error = NULL;
 
   g_return_if_fail (REST_IS_PROXY_CALL (call));
 
   priv = GET_PRIVATE (call);
+
+  if (g_cancellable_set_error_if_cancelled (cancellable, &error))
+    goto error;
 
   if (priv->cur_invoke) {
     g_warning (G_STRLOC ": Call already in progress.");
@@ -1066,7 +1069,11 @@ rest_proxy_call_invoke_finish (RestProxyCall *call,
   g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
 
   simple = G_SIMPLE_ASYNC_RESULT (result);
-  g_warn_if_fail (g_simple_async_result_is_valid (result, G_OBJECT (call), rest_proxy_call_invoke_async));
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return FALSE;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result, G_OBJECT (call), rest_proxy_call_invoke_async), FALSE);
   data = g_simple_async_result_get_op_res_gpointer (simple);
 
   /* TOOD: do this here or in the callback? */
