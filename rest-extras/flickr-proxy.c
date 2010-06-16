@@ -300,7 +300,9 @@ flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params)
 }
 
 char *
-flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob)
+flickr_proxy_build_login_url (FlickrProxy *proxy,
+                              const char  *frob,
+                              const char  *perms)
 {
   SoupURI *uri;
   GHashTable *params;
@@ -312,8 +314,8 @@ flickr_proxy_build_login_url (FlickrProxy *proxy, const char *frob)
   params = g_hash_table_new (g_str_hash, g_str_equal);
 
   g_hash_table_insert (params, "api_key", proxy->priv->api_key);
-  /* TODO: parameter */
-  g_hash_table_insert (params, "perms", "read");
+  g_hash_table_insert (params, "perms", (gpointer)perms);
+
   if (frob)
     g_hash_table_insert (params, "frob", (gpointer)frob);
 

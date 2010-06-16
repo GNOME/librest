@@ -124,7 +124,7 @@ main (int argc, char **argv)
     frob = g_strdup (rest_xml_node_find (root, "frob")->content);
     rest_xml_node_unref (root);
 
-    url = flickr_proxy_build_login_url (FLICKR_PROXY (proxy), frob);
+    url = flickr_proxy_build_login_url (FLICKR_PROXY (proxy), frob, "read");
     g_print ("Go to %s to authorise me and then press any key.\n", url);
     getchar ();
 
