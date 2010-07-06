@@ -149,6 +149,11 @@ const char * oauth_proxy_get_token_secret (OAuthProxy *proxy);
 
 void oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret);
 
+RestProxy *oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
+                                       const char  *service_url,
+                                       const gchar *url_format,
+                                       gboolean     binding_required);
+
 G_END_DECLS
 
 #endif /* _OAUTH_PROXY */

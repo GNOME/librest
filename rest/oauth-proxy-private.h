@@ -26,11 +26,18 @@
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), OAUTH_TYPE_PROXY, OAuthProxyPrivate))
 
 typedef struct {
+  /* Application "consumer" keys */
   char *consumer_key;
   char *consumer_secret;
+  /* Authorisation "user" tokens */
   char *token;
   char *token_secret;
+  /* How we're signing */
   OAuthSignatureMethod method;
+  /* OAuth 1.0a */
   gboolean oauth_10a;
   char *verifier;
+  /* OAuth Echo */
+  gboolean oauth_echo;
+  char *service_url;
 } OAuthProxyPrivate;

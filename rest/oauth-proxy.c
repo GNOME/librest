@@ -114,9 +114,9 @@ oauth_proxy_finalize (GObject *object)
   g_free (priv->token);
   g_free (priv->token_secret);
   g_free (priv->verifier);
+  g_free (priv->service_url);
 
-  if (G_OBJECT_CLASS (oauth_proxy_parent_class)->finalize)
-    G_OBJECT_CLASS (oauth_proxy_parent_class)->finalize (object);
+  G_OBJECT_CLASS (oauth_proxy_parent_class)->finalize (object);
 }
 
 #ifndef G_PARAM_STATIC_STRINGS
@@ -677,4 +677,37 @@ oauth_proxy_is_oauth10a (OAuthProxy *proxy)
   g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
 
   return PROXY_GET_PRIVATE (proxy)->oauth_10a;
+}
+
+RestProxy *
+oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
+                            /* TODO: should this be a function on the base url? */
+                            const char  *service_url,
+                            const gchar *url_format,
+                            gboolean     binding_required)
+{
+  OAuthProxy *echo_proxy;
+  OAuthProxyPrivate *priv, *echo_priv;
+
+  g_return_val_if_fail (OAUTH_IS_PROXY (proxy), NULL);
+  g_return_val_if_fail (service_url, NULL);
+  g_return_val_if_fail (url_format, NULL);
+
+  priv = PROXY_GET_PRIVATE (proxy);
+
+  echo_proxy = g_object_new (OAUTH_TYPE_PROXY,
+                             "url-format", url_format,
+                             "binding-required", binding_required,
+                             "user-agent", rest_proxy_get_user_agent ((RestProxy *)proxy),
+                             "consumer-key", priv->consumer_key,
+                             "consumer-secret", priv->consumer_secret,
+                             "token", priv->token,
+                             "token-secret", priv->token_secret,
+                             NULL);
+  echo_priv = PROXY_GET_PRIVATE (echo_proxy);
+
+  echo_priv->oauth_echo = TRUE;
+  echo_priv->service_url = g_strdup (service_url);
+
+  return (RestProxy *)echo_proxy;
 }
