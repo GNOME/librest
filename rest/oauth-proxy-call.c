@@ -129,13 +129,17 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   text = g_string_new (NULL);
   g_string_append (text, rest_proxy_call_get_method (REST_PROXY_CALL (call)));
   g_string_append_c (text, '&');
-  g_string_append_uri_escaped (text, callpriv->url, NULL, FALSE);
+  if (priv->oauth_echo)
+    g_string_append_uri_escaped (text, priv->service_url, NULL, FALSE);
+  else
+    g_string_append_uri_escaped (text, callpriv->url, NULL, FALSE);
   g_string_append_c (text, '&');
 
   /* Merge the OAuth parameters with the query parameters */
   all_params = g_hash_table_new (g_str_hash, g_str_equal);
   merge_hashes (all_params, oauth_params);
-  merge_params (all_params, callpriv->params);
+  if (!priv->oauth_echo)
+    merge_params (all_params, callpriv->params);
 
   ep = encode_params (all_params);
   eep = OAUTH_ENCODE_STRING (ep);
@@ -253,7 +257,12 @@ _prepare (RestProxyCall *call, GError **error)
   g_hash_table_insert (oauth_params, "oauth_signature", s);
 
   s = make_authorized_header (oauth_params);
-  rest_proxy_call_add_header (call, "Authorization", s);
+  if (priv->oauth_echo) {
+    rest_proxy_call_add_header (call, "X-Verify-Credentials-Authorization", s);
+    rest_proxy_call_add_param (call, "X-Auth-Service-Provider", priv->service_url);
+  } else {
+    rest_proxy_call_add_header (call, "Authorization", s);
+  }
   g_free (s);
   g_hash_table_destroy (oauth_params);
 
