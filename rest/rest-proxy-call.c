@@ -22,6 +22,7 @@
 
 #include <rest/rest-proxy.h>
 #include <rest/rest-proxy-call.h>
+#include <rest/rest-params.h>
 #include <libsoup/soup.h>
 
 #include "rest-private.h"
@@ -93,7 +94,7 @@ rest_proxy_call_dispose (GObject *object)
 
   if (priv->params)
   {
-    g_hash_table_unref (priv->params);
+    rest_params_free (priv->params);
     priv->params = NULL;
   }
 
@@ -162,10 +163,8 @@ rest_proxy_call_init (RestProxyCall *self)
 
   priv->method = g_strdup ("GET");
 
-  priv->params = g_hash_table_new_full (g_str_hash,
-                                        g_str_equal,
-                                        g_free,
-                                        g_free);
+  priv->params = rest_params_new ();
+
   priv->headers = g_hash_table_new_full (g_str_hash,
                                          g_str_equal,
                                          g_free,
@@ -356,26 +355,39 @@ rest_proxy_call_remove_header (RestProxyCall *call,
 /**
  * rest_proxy_call_add_param:
  * @call: The #RestProxyCall
- * @param: The name of the parameter to set
+ * @name: The name of the parameter to set
  * @value: The value of the parameter
  *
- * Add a query parameter called @param with the value @value to the call.  If a
- * parameter with this name already exists, the new value will replace the old.
+ * Add a query parameter called @param with the string value @value to the call.
+ * If a parameter with this name already exists, the new value will replace the
+ * old.
  */
 void
 rest_proxy_call_add_param (RestProxyCall *call,
-                           const gchar   *param,
+                           const gchar   *name,
                            const gchar   *value)
 {
   RestProxyCallPrivate *priv;
+  RestParam *param;
 
   g_return_if_fail (REST_IS_PROXY_CALL (call));
   priv = GET_PRIVATE (call);
 
-  g_hash_table_insert (priv->params,
-                       g_strdup (param),
-                       g_strdup (value));
+  param = rest_param_new_string (name, REST_MEMORY_COPY, value);
+  rest_params_add (priv->params, param);
+}
 
+void
+rest_proxy_call_add_param_full (RestProxyCall *call, RestParam *param)
+{
+  RestProxyCallPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (param);
+
+  priv = GET_PRIVATE (call);
+
+  rest_params_add (priv->params, param);
 }
 
 /**
@@ -426,16 +438,16 @@ rest_proxy_call_add_params_from_valist (RestProxyCall *call,
 /**
  * rest_proxy_call_lookup_param:
  * @call: The #RestProxyCall
- * @param: The paramter name
+ * @name: The paramter name
  *
  * Get the value of the parameter called @name.
  *
  * Returns: The parameter value, or %NULL if it does not exist. This string is
  * owned by the #RestProxyCall and should not be freed.
  */
-const gchar *
+RestParam *
 rest_proxy_call_lookup_param (RestProxyCall *call,
-                              const gchar   *param)
+                              const gchar   *name)
 {
   RestProxyCallPrivate *priv;
 
@@ -443,19 +455,19 @@ rest_proxy_call_lookup_param (RestProxyCall *call,
 
   priv = GET_PRIVATE (call);
 
-  return g_hash_table_lookup (priv->params, param);
+  return rest_params_get (priv->params, name);
 }
 
 /**
  * rest_proxy_call_remove_param:
  * @call: The #RestProxyCall
- * @param: The paramter name
+ * @name: The paramter name
  *
- * Remove the parameter named @param from the call.
+ * Remove the parameter named @name from the call.
  */
 void
 rest_proxy_call_remove_param (RestProxyCall *call,
-                              const gchar   *param)
+                              const gchar   *name)
 {
   RestProxyCallPrivate *priv;
 
@@ -463,7 +475,7 @@ rest_proxy_call_remove_param (RestProxyCall *call,
 
   priv = GET_PRIVATE (call);
 
-  g_hash_table_remove (priv->params, param);
+  rest_params_remove (priv->params, name);
 }
 
 /**
@@ -475,7 +487,7 @@ rest_proxy_call_remove_param (RestProxyCall *call,
  *
  * Returns: A #GHashTable.
  */
-GHashTable *
+RestParams *
 rest_proxy_call_get_params (RestProxyCall *call)
 {
   RestProxyCallPrivate *priv;
@@ -484,7 +496,7 @@ rest_proxy_call_get_params (RestProxyCall *call)
 
   priv = GET_PRIVATE (call);
 
-  return g_hash_table_ref (priv->params);
+  return priv->params;
 }
 
 
@@ -681,9 +693,46 @@ prepare_message (RestProxyCall *call, GError **error_out)
     }
   }
 
-  message = soup_form_request_new_from_hash (priv->method,
-                                             priv->url,
-                                             priv->params);
+  if (rest_params_are_strings (priv->params)) {
+    GHashTable *hash;
+
+    hash = rest_params_as_string_hash_table (priv->params);
+
+    message = soup_form_request_new_from_hash (priv->method,
+                                               priv->url,
+                                               hash);
+
+    g_hash_table_unref (hash);
+  } else {
+    SoupMultipart *mp;
+    RestParamsIter iter;
+    const char *name;
+    RestParam *param;
+
+    mp = soup_multipart_new (SOUP_FORM_MIME_TYPE_MULTIPART);
+
+    rest_params_iter_init (&iter, priv->params);
+
+    while (rest_params_iter_next (&iter, &name, &param)) {
+      if (rest_param_is_string (param)) {
+        soup_multipart_append_form_string (mp, name, rest_param_get_content (param));
+      } else {
+        SoupBuffer *sb;
+
+        sb = soup_buffer_new_with_owner (rest_param_get_content (param),
+                                         rest_param_get_content_length (param),
+                                         rest_param_ref (param),
+                                         (GDestroyNotify)rest_param_unref);
+
+        soup_multipart_append_form_file (mp, name,
+                                         rest_param_get_file_name (param),
+                                         rest_param_get_content_type (param),
+                                         sb);
+      }
+    }
+
+    message = soup_form_request_new_from_multipart (priv->url, mp);
+  }
 
   /* Set the user agent, if one was set in the proxy */
   user_agent = rest_proxy_get_user_agent (priv->proxy);

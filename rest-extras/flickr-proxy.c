@@ -281,8 +281,7 @@ flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params)
   keys = g_list_sort (keys, (GCompareFunc)strcmp);
 
   while (keys) {
-    const char *key;
-    const char *value;
+    const char *key, *value;
 
     key = keys->data;
     value = g_hash_table_lookup (params, key);

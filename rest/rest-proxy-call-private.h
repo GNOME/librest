@@ -25,6 +25,7 @@
 
 #include <rest/rest-proxy.h>
 #include <rest/rest-proxy-call.h>
+#include <rest/rest-params.h>
 
 G_BEGIN_DECLS
 
@@ -34,7 +35,7 @@ struct _RestProxyCallPrivate {
   gchar *method;
   gchar *function;
   GHashTable *headers;
-  GHashTable *params;
+  RestParams *params;
   /* The real URL we're about to invoke */
   gchar *url;
 

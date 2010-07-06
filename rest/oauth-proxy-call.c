@@ -96,7 +96,21 @@ merge_hashes (GHashTable *hash, GHashTable *from)
 
   g_hash_table_iter_init (&iter, from);
   while (g_hash_table_iter_next (&iter, &key, &value)) {
-    g_hash_table_insert (hash, key, g_strdup (value));
+    g_hash_table_insert (hash, key, value);
+  }
+}
+
+static void
+merge_params (GHashTable *hash, RestParams *params)
+{
+  RestParamsIter iter;
+  const char *name;
+  RestParam *param;
+
+  rest_params_iter_init (&iter, params);
+  while (rest_params_iter_next (&iter, &name, &param)) {
+    if (rest_param_is_string (param))
+      g_hash_table_insert (hash, (gpointer)name, (gpointer)rest_param_get_content (param));
   }
 }
 
@@ -119,9 +133,9 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   g_string_append_c (text, '&');
 
   /* Merge the OAuth parameters with the query parameters */
-  all_params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+  all_params = g_hash_table_new (g_str_hash, g_str_equal);
   merge_hashes (all_params, oauth_params);
-  merge_hashes (all_params, callpriv->params);
+  merge_params (all_params, callpriv->params);
 
   ep = encode_params (all_params);
   eep = OAUTH_ENCODE_STRING (ep);
@@ -167,31 +181,33 @@ make_authorized_header (GHashTable *oauth_params)
   return g_string_free (auth, FALSE);
 }
 
+/*
+ * Remove any OAuth parameters from the @call parameters and add them to
+ * @oauth_params for building an Authorized header with.
+ */
 static void
 steal_oauth_params (RestProxyCall *call, GHashTable *oauth_params)
 {
-  GHashTable *params;
-  GHashTableIter iter;
-  char *key, *value;
+  RestParams *params;
+  RestParamsIter iter;
+  const char *name;
+  RestParam *param;
   GList *to_remove = NULL;
 
   params = rest_proxy_call_get_params (call);
 
-  g_hash_table_iter_init (&iter, params);
-  while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
-    if (g_str_has_prefix (key, "oauth_")) {
-      g_hash_table_insert (oauth_params, key, value);
-      to_remove = g_list_prepend (to_remove, key);
-      /* TODO: key will be leaked */
+  rest_params_iter_init (&iter, params);
+  while (rest_params_iter_next (&iter, &name, &param)) {
+    if (rest_param_is_string (param) && g_str_has_prefix (name, "oauth_")) {
+      g_hash_table_insert (oauth_params, g_strdup (name), (gpointer)rest_param_get_content (param));
+      to_remove = g_list_prepend (to_remove, g_strdup (name));
     }
   }
 
   while (to_remove) {
-    g_hash_table_steal (params, to_remove->data);
+    rest_params_remove (params, to_remove->data);
     to_remove = g_list_delete_link (to_remove, to_remove);
   }
-
-  g_hash_table_unref (params);
 }
 
 static gboolean

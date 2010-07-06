@@ -36,6 +36,7 @@ _prepare (RestProxyCall *call, GError **error)
   FlickrProxy *proxy = NULL;
   FlickrProxyPrivate *priv;
   RestProxyCallPrivate *call_priv;
+  GHashTable *params;
   char *s;
 
   g_object_get (call, "proxy", &proxy, NULL);
@@ -53,7 +54,11 @@ _prepare (RestProxyCall *call, GError **error)
   if (priv->token)
     rest_proxy_call_add_param (call, "auth_token", priv->token);
 
-  s = flickr_proxy_sign (proxy, call_priv->params);
+  /* Get the string params as a hash for signing */
+  params = rest_params_as_string_hash_table (call_priv->params);
+  s = flickr_proxy_sign (proxy, params);
+  g_hash_table_unref (params);
+
   rest_proxy_call_add_param (call, "api_sig", s);
   g_free (s);
 

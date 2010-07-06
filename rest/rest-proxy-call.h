@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -24,6 +24,7 @@
 #define _REST_PROXY_CALL
 
 #include <glib-object.h>
+#include <rest/rest-params.h>
 
 G_BEGIN_DECLS
 
@@ -112,8 +113,11 @@ void rest_proxy_call_remove_header (RestProxyCall *call,
                                     const gchar   *header);
 
 void rest_proxy_call_add_param (RestProxyCall *call,
-                                const gchar   *param,
+                                const gchar   *name,
                                 const gchar   *value);
+
+void rest_proxy_call_add_param_full (RestProxyCall            *call,
+                                     RestParam                *param);
 
 G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_params (RestProxyCall *call,
@@ -122,13 +126,13 @@ void rest_proxy_call_add_params (RestProxyCall *call,
 void rest_proxy_call_add_params_from_valist (RestProxyCall *call,
                                              va_list        params);
 
-const gchar *rest_proxy_call_lookup_param (RestProxyCall *call,
-                                           const gchar   *param);
+RestParam *rest_proxy_call_lookup_param (RestProxyCall *call,
+                                           const gchar *name);
 
 void rest_proxy_call_remove_param (RestProxyCall *call,
-                                   const gchar   *param);
+                                   const gchar   *name);
 
-GHashTable *rest_proxy_call_get_params (RestProxyCall *call);
+RestParams *rest_proxy_call_get_params (RestProxyCall *call);
 
 gboolean rest_proxy_call_run (RestProxyCall *call,
                               GMainLoop    **loop,

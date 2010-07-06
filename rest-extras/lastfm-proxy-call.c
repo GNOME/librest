@@ -37,6 +37,7 @@ _prepare (RestProxyCall *call, GError **error)
   LastfmProxy *proxy = NULL;
   LastfmProxyPrivate *priv;
   RestProxyCallPrivate *call_priv;
+  GHashTable *params;
   char *s;
 
   g_object_get (call, "proxy", &proxy, NULL);
@@ -54,7 +55,9 @@ _prepare (RestProxyCall *call, GError **error)
   if (priv->session_key)
     rest_proxy_call_add_param (call, "sk", priv->session_key);
 
-  s = lastfm_proxy_sign (proxy, call_priv->params);
+  params = rest_params_as_string_hash_table (call_priv->params);
+  s = lastfm_proxy_sign (proxy, params);
+  g_hash_table_unref (params);
   rest_proxy_call_add_param (call, "api_sig", s);
   g_free (s);
 
