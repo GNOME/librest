@@ -8,6 +8,8 @@
 
   <chapter>
     <title>REST Proxies</title>
+    <xi:include href="xml/rest-param.xml"/>
+    <xi:include href="xml/rest-params.xml"/>
     <xi:include href="xml/rest-proxy.xml"/>
     <xi:include href="xml/rest-proxy-call.xml"/>
     <xi:include href="xml/oauth-proxy.xml"/>

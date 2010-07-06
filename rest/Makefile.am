@@ -3,6 +3,8 @@ CLEANFILES =
 # For some reason I can't use $(librest_@API_VERSION@_la_SOURCES) in
 # test_runner_SOURCES, so we have to do this
 lib_sources = \
+	rest-param.c			\
+	rest-params.c			\
 	rest-proxy.c 			\
 	rest-proxy-call.c		\
 	rest-proxy-call-private.h	\
@@ -17,7 +19,10 @@ lib_sources = \
 	oauth2-proxy-private.h 		\
 	sha1.c				\
 	sha1.h
-lib_headers = rest-proxy.h 	\
+lib_headers = \
+	rest-param.h		\
+	rest-params.h		\
+	rest-proxy.h		\
 	rest-proxy-call.h	\
 	oauth-proxy.h		\
 	oauth-proxy-call.h	\
