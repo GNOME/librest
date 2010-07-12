@@ -927,7 +927,6 @@ rest_proxy_call_sync (RestProxyCall *call,
 {
   RestProxyCallPrivate *priv;
   SoupMessage *message;
-  guint status;
   gboolean ret;
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
@@ -938,7 +937,7 @@ rest_proxy_call_sync (RestProxyCall *call,
   if (!message)
     return FALSE;
 
-  status = _rest_proxy_send_message (priv->proxy, message);
+  _rest_proxy_send_message (priv->proxy, message);
 
   ret = finish_call (call, message, error_out);
 
@@ -1093,6 +1092,55 @@ rest_proxy_call_invoke_finish (RestProxyCall *call,
     return TRUE;
 }
 
+static void
+on_invoke_cancelled (GCancellable *cancellable, gpointer user_data)
+{
+  SoupMessage *message = SOUP_MESSAGE (user_data);
+  RestProxyCall *call;
+
+  call = g_object_get_data (G_OBJECT (message), "rest-proxy-call");
+  g_assert (call);
+
+  _rest_proxy_cancel_message (GET_PRIVATE (call)->proxy, message);
+}
+
+gboolean
+rest_proxy_call_invoke (RestProxyCall *call,
+                        GCancellable  *cancellable,
+                        GError       **error)
+{
+  RestProxyCallPrivate *priv;
+  SoupMessage *message;
+  gboolean ret;
+  gulong cancel_id = 0;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  priv = GET_PRIVATE (call);
+
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    return FALSE;
+
+  message = prepare_message (call, error);
+  if (!message)
+    return FALSE;
+
+  /* Proxy GCancellable to the SoupSession */
+  if (cancellable) {
+    g_object_set_data (G_OBJECT (message), "rest-proxy-call", call);
+    cancel_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (on_invoke_cancelled), message);
+  }
+
+  _rest_proxy_send_message (priv->proxy, message);
+
+  ret = finish_call (call, message, error);
+
+  if (cancel_id)
+    g_signal_handler_disconnect (cancellable, cancel_id);
+
+  g_object_unref (message);
+
+  return ret;
+}
 
 /**
  * rest_proxy_call_lookup_response_header:

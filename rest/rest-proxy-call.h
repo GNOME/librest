@@ -162,6 +162,11 @@ gboolean rest_proxy_call_cancel (RestProxyCall *call);
 
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
 
+gboolean
+rest_proxy_call_invoke (RestProxyCall *call,
+                        GCancellable  *cancellable,
+                        GError       **error);
+
 void rest_proxy_call_invoke_async (RestProxyCall       *call,
                                    GCancellable        *cancellable,
                                    GObject             *weak_object,
