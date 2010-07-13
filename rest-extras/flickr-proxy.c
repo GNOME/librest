@@ -266,16 +266,17 @@ char *
 flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params)
 {
   FlickrProxyPrivate *priv;
-  GString *s;
   GList *keys;
   char *md5;
+  GChecksum *checksum;
 
   g_return_val_if_fail (FLICKR_IS_PROXY (proxy), NULL);
   g_return_val_if_fail (params, NULL);
 
   priv = PROXY_GET_PRIVATE (proxy);
 
-  s = g_string_new (priv->shared_secret);
+  checksum = g_checksum_new (G_CHECKSUM_MD5);
+  g_checksum_update (checksum, (guchar *)priv->shared_secret, -1);
 
   keys = g_hash_table_get_keys (params);
   keys = g_list_sort (keys, (GCompareFunc)strcmp);
@@ -286,14 +287,14 @@ flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params)
     key = keys->data;
     value = g_hash_table_lookup (params, key);
 
-    g_string_append_printf (s, "%s%s", key, value);
+    g_checksum_update (checksum, (guchar *)key, -1);
+    g_checksum_update (checksum, (guchar *)value, -1);
 
     keys = g_list_delete_link (keys, keys);
   }
 
-  md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, s->str, s->len);
-
-  g_string_free (s, TRUE);
+  md5 = g_strdup (g_checksum_get_string (checksum));
+  g_checksum_free (checksum);
 
   return md5;
 }
