@@ -1,3 +1,5 @@
+*.gir
+*.typelib
 *.la
 *.lo
 *.o
@@ -47,10 +49,6 @@ examples/post-twitter
 examples/get-fireeagle-location
 examples/lastfm-shout
 rest/test-runner
-rest/Rest-0.6.gir
-rest/Rest-0.6.typelib
-rest-extras/RestExtras-0.6.gir
-rest-extras/RestExtras-0.6.typelib
 rest-extras/test-runner
 tests/oauth
 tests/oauth-async
