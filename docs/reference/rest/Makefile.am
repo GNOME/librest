@@ -51,7 +51,7 @@ CFILE_GLOB=$(top_srcdir)/rest/*.c $(top_srcdir)/rest-extras/*.c
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=rest-private.h rest-proxy-call-private.h sha1.h
+IGNORE_HFILES=sha1.h rest-private.h rest-proxy-call-private.h oauth-proxy-private.h oauth2-proxy-private.h flickr-proxy-private.h lastfm-proxy-private.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -88,4 +88,3 @@ EXTRA_DIST +=
 
 # Comment this out if you want your docs-status tested during 'make check'
 #TESTS = $(GTKDOC_CHECK)
-

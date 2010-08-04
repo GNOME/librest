@@ -151,6 +151,7 @@ OAUTH_PROXY_CALL_GET_CLASS
 OAuthProxy
 OAuthSignatureMethod
 oauth_proxy_new
+oauth_proxy_new_echo_proxy
 oauth_proxy_new_with_token
 OAuthProxyAuthCallback
 oauth_proxy_auth_step
@@ -290,16 +291,3 @@ LASTFM_PROXY_CLASS
 LASTFM_IS_PROXY_CLASS
 LASTFM_PROXY_GET_CLASS
 </SECTION>
-
-<SECTION>
-<FILE>lastfm-proxy-private</FILE>
-PROXY_GET_PRIVATE
-LastfmProxyPrivate
-</SECTION>
-
-<SECTION>
-<FILE>flickr-proxy-private</FILE>
-PROXY_GET_PRIVATE
-FlickrProxyPrivate
-</SECTION>
-
