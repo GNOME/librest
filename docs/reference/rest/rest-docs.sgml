@@ -7,17 +7,28 @@
  </bookinfo>
 
   <chapter>
-    <title>REST Proxies</title>
+    <title>Generic Proxies</title>
     <xi:include href="xml/rest-param.xml"/>
     <xi:include href="xml/rest-params.xml"/>
     <xi:include href="xml/rest-proxy.xml"/>
     <xi:include href="xml/rest-proxy-call.xml"/>
+  </chapter>
+
+  <chapter>
+    <title>OAuth Proxies</title>
     <xi:include href="xml/oauth-proxy.xml"/>
     <xi:include href="xml/oauth-proxy-call.xml"/>
     <xi:include href="xml/oauth2-proxy.xml"/>
     <xi:include href="xml/oauth2-proxy-call.xml"/>
   </chapter>
 
+  <chapter>
+    <title>Service-specific Proxies</title>
+    <xi:include href="xml/flickr-proxy.xml"/>
+    <xi:include href="xml/flickr-proxy-call.xml"/>
+    <xi:include href="xml/lastfm-proxy.xml"/>
+    <xi:include href="xml/lastfm-proxy-call.xml"/>
+  </chapter>
   <chapter>
     <title>XML Parsing</title>
     <xi:include href="xml/rest-xml-parser.xml"/>
