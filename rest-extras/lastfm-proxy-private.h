@@ -22,7 +22,7 @@
 
 #include "lastfm-proxy.h"
 
-#define PROXY_GET_PRIVATE(o) \
+#define LASTFM_PROXY_GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), LASTFM_TYPE_PROXY, LastfmProxyPrivate))
 
 struct _LastfmProxyPrivate {

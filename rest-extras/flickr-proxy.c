@@ -67,7 +67,7 @@ static void
 flickr_proxy_get_property (GObject *object, guint property_id,
                               GValue *value, GParamSpec *pspec)
 {
-  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  FlickrProxyPrivate *priv = FLICKR_PROXY_GET_PRIVATE (object);
 
   switch (property_id) {
   case PROP_API_KEY:
@@ -88,7 +88,7 @@ static void
 flickr_proxy_set_property (GObject *object, guint property_id,
                               const GValue *value, GParamSpec *pspec)
 {
-  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  FlickrProxyPrivate *priv = FLICKR_PROXY_GET_PRIVATE (object);
 
   switch (property_id) {
   case PROP_API_KEY:
@@ -114,7 +114,7 @@ flickr_proxy_set_property (GObject *object, guint property_id,
 static void
 flickr_proxy_finalize (GObject *object)
 {
-  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  FlickrProxyPrivate *priv = FLICKR_PROXY_GET_PRIVATE (object);
 
   g_free (priv->api_key);
   g_free (priv->shared_secret);
@@ -167,7 +167,7 @@ flickr_proxy_class_init (FlickrProxyClass *klass)
 static void
 flickr_proxy_init (FlickrProxy *self)
 {
-  self->priv = PROXY_GET_PRIVATE (self);
+  self->priv = FLICKR_PROXY_GET_PRIVATE (self);
 }
 
 RestProxy *
@@ -205,7 +205,7 @@ flickr_proxy_new_with_token (const char *api_key,
 const char *
 flickr_proxy_get_api_key (FlickrProxy *proxy)
 {
-  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  FlickrProxyPrivate *priv = FLICKR_PROXY_GET_PRIVATE (proxy);
   return priv->api_key;
 }
 
@@ -221,7 +221,7 @@ flickr_proxy_get_api_key (FlickrProxy *proxy)
 const char *
 flickr_proxy_get_shared_secret (FlickrProxy *proxy)
 {
-  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  FlickrProxyPrivate *priv = FLICKR_PROXY_GET_PRIVATE (proxy);
   return priv->shared_secret;
 }
 
@@ -237,7 +237,7 @@ flickr_proxy_get_shared_secret (FlickrProxy *proxy)
 const char *
 flickr_proxy_get_token (FlickrProxy *proxy)
 {
-  FlickrProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  FlickrProxyPrivate *priv = FLICKR_PROXY_GET_PRIVATE (proxy);
   return priv->token;
 }
 
@@ -254,7 +254,7 @@ flickr_proxy_set_token (FlickrProxy *proxy, const char *token)
   FlickrProxyPrivate *priv;
 
   g_return_if_fail (FLICKR_IS_PROXY (proxy));
-  priv = PROXY_GET_PRIVATE (proxy);
+  priv = FLICKR_PROXY_GET_PRIVATE (proxy);
 
   if (priv->token)
     g_free (priv->token);
@@ -273,7 +273,7 @@ flickr_proxy_sign (FlickrProxy *proxy, GHashTable *params)
   g_return_val_if_fail (FLICKR_IS_PROXY (proxy), NULL);
   g_return_val_if_fail (params, NULL);
 
-  priv = PROXY_GET_PRIVATE (proxy);
+  priv = FLICKR_PROXY_GET_PRIVATE (proxy);
 
   checksum = g_checksum_new (G_CHECKSUM_MD5);
   g_checksum_update (checksum, (guchar *)priv->shared_secret, -1);

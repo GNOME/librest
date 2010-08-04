@@ -60,7 +60,7 @@ static void
 lastfm_proxy_get_property (GObject *object, guint property_id,
                            GValue *value, GParamSpec *pspec)
 {
-  LastfmProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (object);
 
   switch (property_id) {
   case PROP_API_KEY:
@@ -81,7 +81,7 @@ static void
 lastfm_proxy_set_property (GObject *object, guint property_id,
                            const GValue *value, GParamSpec *pspec)
 {
-  LastfmProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (object);
 
   switch (property_id) {
   case PROP_API_KEY:
@@ -107,7 +107,7 @@ lastfm_proxy_set_property (GObject *object, guint property_id,
 static void
 lastfm_proxy_finalize (GObject *object)
 {
-  LastfmProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (object);
 
   g_free (priv->api_key);
   g_free (priv->secret);
@@ -160,7 +160,7 @@ lastfm_proxy_class_init (LastfmProxyClass *klass)
 static void
 lastfm_proxy_init (LastfmProxy *self)
 {
-  self->priv = PROXY_GET_PRIVATE (self);
+  self->priv = LASTFM_PROXY_GET_PRIVATE (self);
 }
 
 RestProxy *
@@ -198,7 +198,7 @@ lastfm_proxy_new_with_session (const char *api_key,
 const char *
 lastfm_proxy_get_api_key (LastfmProxy *proxy)
 {
-  LastfmProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (proxy);
   return priv->api_key;
 }
 
@@ -214,7 +214,7 @@ lastfm_proxy_get_api_key (LastfmProxy *proxy)
 const char *
 lastfm_proxy_get_secret (LastfmProxy *proxy)
 {
-  LastfmProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (proxy);
   return priv->secret;
 }
 
@@ -230,7 +230,7 @@ lastfm_proxy_get_secret (LastfmProxy *proxy)
 const char *
 lastfm_proxy_get_session_key (LastfmProxy *proxy)
 {
-  LastfmProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (proxy);
   return priv->session_key;
 }
 
@@ -247,7 +247,7 @@ lastfm_proxy_set_session_key (LastfmProxy *proxy, const char *session_key)
   LastfmProxyPrivate *priv;
 
   g_return_if_fail (LASTFM_IS_PROXY (proxy));
-  priv = PROXY_GET_PRIVATE (proxy);
+  priv = LASTFM_PROXY_GET_PRIVATE (proxy);
 
   if (priv->session_key)
     g_free (priv->session_key);
@@ -266,7 +266,7 @@ lastfm_proxy_sign (LastfmProxy *proxy, GHashTable *params)
   g_return_val_if_fail (LASTFM_IS_PROXY (proxy), NULL);
   g_return_val_if_fail (params, NULL);
 
-  priv = PROXY_GET_PRIVATE (proxy);
+  priv = LASTFM_PROXY_GET_PRIVATE (proxy);
 
   s = g_string_new (NULL);
 

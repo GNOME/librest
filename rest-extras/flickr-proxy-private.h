@@ -22,7 +22,7 @@
 
 #include "flickr-proxy.h"
 
-#define PROXY_GET_PRIVATE(o) \
+#define FLICKR_PROXY_GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), FLICKR_TYPE_PROXY, FlickrProxyPrivate))
 
 struct _FlickrProxyPrivate {

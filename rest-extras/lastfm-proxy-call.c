@@ -41,7 +41,7 @@ _prepare (RestProxyCall *call, GError **error)
   char *s;
 
   g_object_get (call, "proxy", &proxy, NULL);
-  priv = PROXY_GET_PRIVATE (proxy);
+  priv = LASTFM_PROXY_GET_PRIVATE (proxy);
   call_priv = call->priv;
 
   /* First reset the URL because Lastfm puts the function in the parameters */
