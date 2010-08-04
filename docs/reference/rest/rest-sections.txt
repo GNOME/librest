@@ -70,7 +70,6 @@ rest_proxy_call_error_quark
 <TITLE>OAuth2Proxy</TITLE>
 OAuth2ProxyPrivate
 OAuth2Proxy
-OAuth2ProxyClass
 oauth2_proxy_new
 oauth2_proxy_new_with_token
 oauth2_proxy_build_login_url_full
@@ -79,6 +78,7 @@ oauth2_proxy_get_access_token
 oauth2_proxy_set_access_token
 oauth2_proxy_extract_access_token
 <SUBSECTION Standard>
+OAuth2ProxyClass
 OAUTH2_PROXY
 OAUTH2_IS_PROXY
 OAUTH2_TYPE_PROXY
@@ -92,8 +92,8 @@ OAUTH2_PROXY_GET_CLASS
 <FILE>oauth2-proxy-call</FILE>
 <TITLE>OAuth2ProxyCall</TITLE>
 OAuth2ProxyCall
-OAuth2ProxyCallClass
 <SUBSECTION Standard>
+OAuth2ProxyCallClass
 OAUTH2_PROXY_CALL
 OAUTH2_IS_PROXY_CALL
 OAUTH2_TYPE_PROXY_CALL
@@ -210,12 +210,13 @@ rest_param_get_content_length
 rest_param_ref
 rest_param_unref
 </SECTION>
+
 <SECTION>
 <FILE>flickr-proxy-call</FILE>
 <TITLE>FlickrProxyCall</TITLE>
 FlickrProxyCall
-FlickrProxyCallClass
 <SUBSECTION Standard>
+FlickrProxyCallClass
 FLICKR_PROXY_CALL
 FLICKR_IS_PROXY_CALL
 FLICKR_TYPE_PROXY_CALL
@@ -230,7 +231,6 @@ FLICKR_PROXY_CALL_GET_CLASS
 <TITLE>FlickrProxy</TITLE>
 FlickrProxyPrivate
 FlickrProxy
-FlickrProxyClass
 FLICKR_PROXY_ERROR
 flickr_proxy_new
 flickr_proxy_new_with_token
@@ -242,6 +242,7 @@ flickr_proxy_sign
 flickr_proxy_build_login_url
 flickr_proxy_is_successful
 <SUBSECTION Standard>
+FlickrProxyClass
 FLICKR_PROXY
 FLICKR_IS_PROXY
 FLICKR_TYPE_PROXY
@@ -255,8 +256,8 @@ FLICKR_PROXY_GET_CLASS
 <FILE>lastfm-proxy-call</FILE>
 <TITLE>LastfmProxyCall</TITLE>
 LastfmProxyCall
-LastfmProxyCallClass
 <SUBSECTION Standard>
+LastfmProxyCallClass
 LASTFM_PROXY_CALL
 LASTFM_IS_PROXY_CALL
 LASTFM_TYPE_PROXY_CALL
@@ -271,7 +272,6 @@ LASTFM_PROXY_CALL_GET_CLASS
 <TITLE>LastfmProxy</TITLE>
 LastfmProxyPrivate
 LastfmProxy
-LastfmProxyClass
 LASTFM_PROXY_ERROR
 lastfm_proxy_new
 lastfm_proxy_new_with_session
@@ -283,6 +283,7 @@ lastfm_proxy_sign
 lastfm_proxy_build_login_url
 lastfm_proxy_is_successful
 <SUBSECTION Standard>
+LastfmProxyClass
 LASTFM_PROXY
 LASTFM_IS_PROXY
 LASTFM_TYPE_PROXY
