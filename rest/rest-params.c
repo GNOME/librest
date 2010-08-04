@@ -196,7 +196,7 @@ rest_params_as_string_hash_table (RestParams *params)
 
 /**
  * rest_params_iter_init:
- * @iter: an uninitialized #RestParamIter
+ * @iter: an uninitialized #RestParamsIter
  * @params: a valid #RestParams
  *
  * Initialize a parameter iterator over @params. Modifying @params after calling

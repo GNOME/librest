@@ -78,6 +78,12 @@ typedef struct {
 
 #define REST_PROXY_CALL_ERROR rest_proxy_call_error_quark ()
 
+/**
+ * RestProxyCallError:
+ * @REST_PROXY_CALL_FAILED: the method call failed
+ *
+ * Error domain used when returning errors from #RestProxyCall.
+ */
 typedef enum {
   REST_PROXY_CALL_FAILED
 } RestProxyCallError;

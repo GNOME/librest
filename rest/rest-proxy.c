@@ -239,7 +239,7 @@ rest_proxy_init (RestProxy *self)
  * @binding_required: whether the URL needs to be bound before calling
  *
  * Create a new #RestProxy for the specified endpoint @url_format, using the
- * %GET method.
+ * "GET" method.
  *
  * Set @binding_required to %TRUE if the URL contains string formatting
  * operations (for example "http://foo.com/%<!-- -->s".  These must be expanded

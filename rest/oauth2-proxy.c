@@ -354,7 +354,7 @@ oauth2_proxy_get_access_token (OAuth2Proxy *proxy)
 /**
  * oauth2_proxy_set_access_token:
  * @proxy: an #OAuth2Proxy
- * @token: the access token
+ * @access_token: the access token
  *
  * Set the access token.
  */

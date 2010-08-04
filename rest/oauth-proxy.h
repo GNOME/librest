@@ -90,14 +90,18 @@ RestProxy* oauth_proxy_new_with_token (const char *consumer_key,
 
 /**
  * OAuthProxyAuthCallback:
+ * @proxy: the #OAuthProxy
+ * @error: a #GError if the authentication failed, otherwise %NULL
+ * @weak_object: the weak object passed to the caller
+ * @userdata: the user data passed to the caller
  *
  * Callback from oauth_proxy_request_token_async() and
  * oauth_proxy_access_token_async().
  */
-typedef void (*OAuthProxyAuthCallback)(OAuthProxy *proxy,
+typedef void (*OAuthProxyAuthCallback)(OAuthProxy   *proxy,
                                        const GError *error,
-                                       GObject    *weak_object,
-                                       gpointer    userdata);
+                                       GObject      *weak_object,
+                                       gpointer      userdata);
 
 G_GNUC_DEPRECATED
 gboolean oauth_proxy_auth_step (OAuthProxy *proxy,

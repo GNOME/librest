@@ -325,6 +325,7 @@ oauth_proxy_auth_step_async (OAuthProxy *proxy,
  * oauth_proxy_auth_step:
  * @proxy: an #OAuthProxy
  * @function: the function to invoke on the proxy
+ * @error: return location for a #GError
  *
  * Perform an OAuth authorisation step.  This calls @function and then updates
  * the token and token secret in the proxy.
@@ -484,7 +485,7 @@ oauth_proxy_request_token_async (OAuthProxy            *proxy,
  * "access_token" if @function is NULL).
  *
  * @verifier is only used if you are using OAuth 1.0a.  This is either the
- * %oauth_verifier parameter that was passed to your callback URI, or a string
+ * "oauth_verifier" parameter that was passed to your callback URI, or a string
  * that the user enters in some other manner (for example in a popup dialog) if
  * "oob" was passed to oauth_proxy_request_token().  For OAuth 1.0, pass %NULL.
  *
@@ -554,7 +555,7 @@ access_token_cb (RestProxyCall *call,
  * "access_token" if @function is NULL).
  *
  * @verifier is only used if you are using OAuth 1.0a.  This is either the
- * %oauth_verifier parameter that was passed to your callback URI, or a string
+ * "oauth_verifier" parameter that was passed to your callback URI, or a string
  * that the user enters in some other manner (for example in a popup dialog) if
  * "oob" was passed to oauth_proxy_request_token().  For OAuth 1.0, pass %NULL.
  *
@@ -665,11 +666,13 @@ oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
 
 /**
  * oauth_proxy_is_oauth10a:
- * @proxy: an #OAuthProxy
+ * @proxy: a valid #OAuthProxy
  *
- * Returns %TRUE if the server supports OAuth 1.0a with this proxy, %FALSE
- * otherwise.  This is only valid after oauth_proxy_request_token() or
- * oauth_proxy_request_token_async() has been called.
+ * Determines if the server supports OAuth 1.0a with this proxy. This is only
+ * valid after oauth_proxy_request_token() or oauth_proxy_request_token_async()
+ * has been called.
+ *
+ * Returns: %TRUE if the server supports OAuth 1.0a, %FALSE otherwise.
  */
 gboolean
 oauth_proxy_is_oauth10a (OAuthProxy *proxy)

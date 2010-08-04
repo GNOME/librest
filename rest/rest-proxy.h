@@ -59,7 +59,6 @@ struct _RestProxy {
 
 /**
  * RestProxyClass:
- *
  * @bind_valist: Virtual function called to bind parameters.
  * @new_call: Virtual function called to construct a new #RestProxyCall.
  * @simple_run_valist: Virtual function called when making a "simple" call.
@@ -71,6 +70,7 @@ struct _RestProxy {
  * #RestProxyCall.
  */
 struct _RestProxyClass {
+  /*< private >*/
   GObjectClass parent_class;
   /*< public >*/
   gboolean (*bind_valist)(RestProxy *proxy, va_list params);
@@ -85,6 +85,11 @@ struct _RestProxyClass {
 
 #define REST_PROXY_ERROR rest_proxy_error_quark ()
 
+/**
+ * RestProxyError:
+ *
+ * Error domain used when returning errors from a #RestProxy.
+ */
 typedef enum {
   REST_PROXY_ERROR_CANCELLED = 1,
   REST_PROXY_ERROR_RESOLUTION,

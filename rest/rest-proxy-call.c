@@ -949,7 +949,6 @@ rest_proxy_call_sync (RestProxyCall *call,
 
 /**
  * rest_proxy_call_lookup_response_header
- *
  * @call: The #RestProxyCall
  * @header: The name of the header to lookup.
  *
@@ -976,7 +975,6 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
 
 /**
  * rest_proxy_call_get_response_headers
- *
  * @call: The #RestProxyCall
  *
  * Returns: A pointer to a hash table of headers. This hash table must not be
