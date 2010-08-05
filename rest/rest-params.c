@@ -181,14 +181,14 @@ rest_params_as_string_hash_table (RestParams *params)
   RestParam *param = NULL;
 
   g_return_val_if_fail (params, NULL);
-  g_return_val_if_fail (rest_params_are_strings (params), NULL);
 
   hash = (GHashTable *)params;
   strings = g_hash_table_new (g_str_hash, g_str_equal);
 
   g_hash_table_iter_init (&iter, hash);
   while (g_hash_table_iter_next (&iter, (gpointer)&name, (gpointer)&param)) {
-    g_hash_table_insert (strings, (gpointer)name, (gpointer)rest_param_get_content (param));
+    if (rest_param_is_string (param))
+      g_hash_table_insert (strings, (gpointer)name, (gpointer)rest_param_get_content (param));
   }
 
   return strings;
