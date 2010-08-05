@@ -91,6 +91,8 @@ char * flickr_proxy_build_login_url (FlickrProxy *proxy,
 
 gboolean flickr_proxy_is_successful (RestXmlNode *root, GError **error);
 
+RestProxyCall * flickr_proxy_new_upload (FlickrProxy *proxy);
+
 G_END_DECLS
 
 #endif /* _FLICKR_PROXY */

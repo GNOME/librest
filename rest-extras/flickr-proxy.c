@@ -368,6 +368,24 @@ flickr_proxy_is_successful (RestXmlNode *root, GError **error)
   return TRUE;
 }
 
+/**
+ * flickr_proxy_new_upload:
+ * @proxy: a valid #FlickrProxy
+ *
+ * Create a new #RestProxyCall that can be used for uploading.
+ *
+ * See http://www.flickr.com/services/api/upload.api.html for details on
+ * uploading to Flickr.
+ */
+RestProxyCall *
+flickr_proxy_new_upload (FlickrProxy *proxy)
+{
+  return g_object_new (FLICKR_TYPE_PROXY_CALL,
+                       "proxy", proxy,
+                       "upload", TRUE,
+                       NULL);
+}
+
 #if BUILD_TESTS
 void
 test_flickr_error (void)

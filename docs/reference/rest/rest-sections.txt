@@ -241,6 +241,7 @@ flickr_proxy_set_token
 flickr_proxy_sign
 flickr_proxy_build_login_url
 flickr_proxy_is_successful
+flickr_proxy_new_upload
 <SUBSECTION Standard>
 FlickrProxyClass
 FLICKR_PROXY

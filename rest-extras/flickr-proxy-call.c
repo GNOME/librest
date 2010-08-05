@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -30,6 +30,33 @@
 
 G_DEFINE_TYPE (FlickrProxyCall, flickr_proxy_call, REST_TYPE_PROXY_CALL)
 
+#define GET_PRIVATE(o) \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), FLICKR_TYPE_PROXY_CALL, FlickrProxyCallPrivate))
+
+typedef struct {
+  gboolean upload;
+} FlickrProxyCallPrivate;
+
+enum {
+  PROP_0,
+  PROP_UPLOAD
+};
+
+static void
+flickr_proxy_call_set_property (GObject      *object,
+                                guint         property_id,
+                                const GValue *value,
+                                GParamSpec   *pspec)
+{
+   switch (property_id) {
+   case PROP_UPLOAD:
+     GET_PRIVATE (object)->upload = g_value_get_boolean (value);
+     break;
+   default:
+     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+   }
+}
+
 static gboolean
 _prepare (RestProxyCall *call, GError **error)
 {
@@ -43,13 +70,16 @@ _prepare (RestProxyCall *call, GError **error)
   priv = FLICKR_PROXY_GET_PRIVATE (proxy);
   call_priv = call->priv;
 
-  /* First reset the URL because Flickr puts the function in the parameters */
-  call_priv->url = g_strdup ("http://api.flickr.com/services/rest/");
+  /* We need to reset the URL because Flickr puts the function in the parameters */
 
-  rest_proxy_call_add_params (call,
-                              "method", call_priv->function,
-                              "api_key", priv->api_key,
-                              NULL);
+  if (GET_PRIVATE (call)->upload) {
+    call_priv->url = g_strdup ("http://api.flickr.com/services/upload/");
+  } else {
+    call_priv->url = g_strdup ("http://api.flickr.com/services/rest/");
+    rest_proxy_call_add_param (call, "method", call_priv->function);
+  }
+
+  rest_proxy_call_add_param (call, "api_key", priv->api_key);
 
   if (priv->token)
     rest_proxy_call_add_param (call, "auth_token", priv->token);
@@ -71,8 +101,17 @@ static void
 flickr_proxy_call_class_init (FlickrProxyCallClass *klass)
 {
   RestProxyCallClass *call_class = REST_PROXY_CALL_CLASS (klass);
+  GObjectClass *obj_class = G_OBJECT_CLASS (klass);
+  GParamSpec *pspec;
+
+  g_type_class_add_private (klass, sizeof (FlickrProxyCallPrivate));
 
   call_class->prepare = _prepare;
+  obj_class->set_property = flickr_proxy_call_set_property;
+
+  pspec = g_param_spec_boolean ("upload", "upload", NULL,
+                                FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (obj_class, PROP_UPLOAD, pspec);
 }
 
 static void
