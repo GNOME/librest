@@ -93,6 +93,8 @@ gboolean flickr_proxy_is_successful (RestXmlNode *root, GError **error);
 
 RestProxyCall * flickr_proxy_new_upload (FlickrProxy *proxy);
 
+RestProxyCall * flickr_proxy_new_upload_for_file (FlickrProxy *proxy, const char *filename, GError **error);
+
 G_END_DECLS
 
 #endif /* _FLICKR_PROXY */

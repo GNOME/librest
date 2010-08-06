@@ -380,10 +380,87 @@ flickr_proxy_is_successful (RestXmlNode *root, GError **error)
 RestProxyCall *
 flickr_proxy_new_upload (FlickrProxy *proxy)
 {
+  g_return_val_if_fail (FLICKR_IS_PROXY (proxy), NULL);
+
   return g_object_new (FLICKR_TYPE_PROXY_CALL,
                        "proxy", proxy,
                        "upload", TRUE,
                        NULL);
+}
+
+/**
+ * flickr_proxy_new_upload_for_file:
+ * @proxy: a valid #FlickrProxy
+ * @filename: the file to upload
+ * @error: #GError to set on error
+
+ * Create a new #RestProxyCall that can be used for uploading.  @filename will
+ * be set as the "photo" parameter for you, avoiding you from having to open the
+ * file and determine the MIME type.
+ *
+ * Note that this function can in theory block.
+ *
+ * See http://www.flickr.com/services/api/upload.api.html for details on
+ * uploading to Flickr.
+ */
+RestProxyCall *
+flickr_proxy_new_upload_for_file (FlickrProxy *proxy, const char *filename, GError **error)
+{
+  GMappedFile *map;
+  GFile *file = NULL;
+  GFileInfo *fi = NULL;
+  GError *err = NULL;
+  const char *content_type;
+  char *basename = NULL;
+  RestParam *param;
+  RestProxyCall *call = NULL;
+
+  g_return_val_if_fail (FLICKR_IS_PROXY (proxy), NULL);
+  g_return_val_if_fail (filename, NULL);
+
+  /* Open the file */
+  map = g_mapped_file_new (filename, FALSE, &err);
+  if (err) {
+    g_propagate_error (error, err);
+    return NULL;
+  }
+
+  /* Get the file information */
+  file = g_file_new_for_path (filename);
+  basename = g_file_get_basename (file);
+
+  fi = g_file_query_info (file,
+                          G_FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE,
+                          G_FILE_QUERY_INFO_NONE,
+                          NULL,
+                          &err);
+
+  if (fi == NULL) {
+    g_propagate_error (error, err);
+    goto done;
+  }
+
+  content_type = g_file_info_get_attribute_string (fi, G_FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE);
+
+  /* Make the call */
+  call = flickr_proxy_new_upload (proxy);
+
+  /* Now construct the param */
+  param = rest_param_new_with_owner ("photo",
+                                     g_mapped_file_get_contents (map),
+                                     g_mapped_file_get_length (map),
+                                     content_type,
+                                     basename,
+                                     map,
+                                     (GDestroyNotify)g_mapped_file_unref);
+  rest_proxy_call_add_param_full (call, param);
+
+ done:
+  g_free (basename);
+  g_object_unref (file);
+  g_object_unref (fi);
+
+  return call;
 }
 
 #if BUILD_TESTS
