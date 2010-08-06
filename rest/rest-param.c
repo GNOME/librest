@@ -182,6 +182,12 @@ rest_param_new_string (const char    *name,
                        RestMemoryUse  use,
                        const char    *string)
 {
+
+  if (string == NULL) {
+    use = REST_MEMORY_STATIC;
+    string = "";
+  }
+
   return rest_param_new_full (name,
                               use, string, strlen (string) + 1,
                               g_intern_static_string ("text/plain"),
