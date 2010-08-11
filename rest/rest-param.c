@@ -237,6 +237,14 @@ rest_param_get_file_name (RestParam *param)
   return param->filename;
 }
 
+/**
+ * rest_param_is_string:
+ * @param: a valid #RestParam
+ *
+ * Determine if the parameter is a string value, i.e. the content type is "text/plain".
+ *
+ * Returns: %TRUE if the parameter is a string, %FALSE otherwise.
+ */
 gboolean
 rest_param_is_string (RestParam *param)
 {

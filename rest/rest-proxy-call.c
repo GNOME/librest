@@ -948,12 +948,12 @@ rest_proxy_call_sync (RestProxyCall *call,
 }
 
 /**
- * rest_proxy_call_lookup_response_header
+ * rest_proxy_call_lookup_response_header:
  * @call: The #RestProxyCall
  * @header: The name of the header to lookup.
  *
- * Returns: The string value of the header @header or NULL if that header is
- * not present or there are no headers.
+ * Get the string value of the header @header or %NULL if that header is not
+ * present or there are no headers.
  */
 const gchar *
 rest_proxy_call_lookup_response_header (RestProxyCall *call,
@@ -974,10 +974,10 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
 }
 
 /**
- * rest_proxy_call_get_response_headers
+ * rest_proxy_call_get_response_headers:
  * @call: The #RestProxyCall
  *
- * Returns: A pointer to a hash table of headers. This hash table must not be
+ * Returns:  pointer to a hash table of headers. This hash table must not be
  * changed. You should call g_hash_table_unref() when you have finished with
  * it.
  */

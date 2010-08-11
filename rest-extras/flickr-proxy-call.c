@@ -109,7 +109,13 @@ flickr_proxy_call_class_init (FlickrProxyCallClass *klass)
   call_class->prepare = _prepare;
   obj_class->set_property = flickr_proxy_call_set_property;
 
-  pspec = g_param_spec_boolean ("upload", "upload", NULL,
+  /**
+   * FlickrProxyCall:upload:
+   *
+   * Set if the call should be sent to the photo upload endpoint and not the
+   * general-purpose endpoint.
+   */
+  pspec = g_param_spec_boolean ("upload", "upload", "upload",
                                 FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (obj_class, PROP_UPLOAD, pspec);
 }
