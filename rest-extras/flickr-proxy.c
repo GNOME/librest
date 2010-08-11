@@ -407,11 +407,8 @@ RestProxyCall *
 flickr_proxy_new_upload_for_file (FlickrProxy *proxy, const char *filename, GError **error)
 {
   GMappedFile *map;
-  GFile *file = NULL;
-  GFileInfo *fi = NULL;
   GError *err = NULL;
-  const char *content_type;
-  char *basename = NULL;
+  char *basename = NULL, *content_type = NULL;
   RestParam *param;
   RestProxyCall *call = NULL;
 
@@ -426,26 +423,14 @@ flickr_proxy_new_upload_for_file (FlickrProxy *proxy, const char *filename, GErr
   }
 
   /* Get the file information */
-  file = g_file_new_for_path (filename);
-  basename = g_file_get_basename (file);
-
-  fi = g_file_query_info (file,
-                          G_FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE,
-                          G_FILE_QUERY_INFO_NONE,
-                          NULL,
-                          &err);
-
-  if (fi == NULL) {
-    g_propagate_error (error, err);
-    goto done;
-  }
-
-  content_type = g_file_info_get_attribute_string (fi, G_FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE);
+  basename = g_path_get_basename (filename);
+  content_type = g_content_type_guess (filename,
+                                       (const guchar*) g_mapped_file_get_contents (map),
+                                       g_mapped_file_get_length (map),
+                                       NULL);
 
   /* Make the call */
   call = flickr_proxy_new_upload (proxy);
-
-  /* Now construct the param */
   param = rest_param_new_with_owner ("photo",
                                      g_mapped_file_get_contents (map),
                                      g_mapped_file_get_length (map),
@@ -455,10 +440,8 @@ flickr_proxy_new_upload_for_file (FlickrProxy *proxy, const char *filename, GErr
                                      (GDestroyNotify)g_mapped_file_unref);
   rest_proxy_call_add_param_full (call, param);
 
- done:
   g_free (basename);
-  g_object_unref (file);
-  g_object_unref (fi);
+  g_free (content_type);
 
   return call;
 }
