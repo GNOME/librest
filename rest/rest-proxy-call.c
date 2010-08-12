@@ -504,9 +504,9 @@ rest_proxy_call_get_params (RestProxyCall *call)
 static void _call_async_weak_notify_cb (gpointer *data,
                                         GObject  *dead_object);
 
-static void _call_async_finished_cb (SoupSession *session,
-                                     SoupMessage *message,
-                                     gpointer     userdata);
+static void _call_message_completed_cb (SoupSession *session,
+                                        SoupMessage *message,
+                                        gpointer     userdata);
 
 static void
 _populate_headers_hash_table (const gchar *name,
@@ -592,9 +592,9 @@ finish_call (RestProxyCall *call, SoupMessage *message, GError **error)
 }
 
 static void
-_call_async_finished_cb (SoupSession *session,
-                         SoupMessage *message,
-                         gpointer     userdata)
+_call_message_completed_cb (SoupSession *session,
+                               SoupMessage *message,
+                               gpointer     userdata)
 {
   RestProxyCallAsyncClosure *closure;
   RestProxyCall *call;
@@ -806,7 +806,7 @@ rest_proxy_call_async (RestProxyCall                *call,
 
   _rest_proxy_queue_message (priv->proxy,
                              message,
-                             _call_async_finished_cb,
+                             _call_message_completed_cb,
                              closure);
   g_free (priv->url);
   priv->url = NULL;
@@ -838,18 +838,11 @@ rest_proxy_call_cancel (RestProxyCall *call)
 
   if (closure)
   {
-    /* Remove the "finished" signal handler on the message */
-    g_signal_handlers_disconnect_by_func (closure->message,
-        _call_async_finished_cb,
-        closure);
-
+    /* This will cause the _call_message_completed_cb to be fired which will
+     * tidy up the closure and so forth */
     _rest_proxy_cancel_message (priv->proxy, closure->message);
-
-    g_object_unref (closure->call);
-    g_slice_free (RestProxyCallAsyncClosure, closure);
   }
 
-  priv->cur_call_closure = NULL;
   return TRUE;
 }
 
