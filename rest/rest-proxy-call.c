@@ -135,6 +135,7 @@ rest_proxy_call_finalize (GObject *object)
 
   g_free (priv->method);
   g_free (priv->function);
+  g_free (priv->url);
 
   g_free (priv->payload);
   g_free (priv->status_message);
@@ -720,6 +721,7 @@ prepare_message (RestProxyCall *call, GError **error_out)
     return FALSE;
   }
 
+  g_free (priv->url);
   /* FIXME: Perhaps excessive memory duplication */
   if (priv->function)
   {
@@ -839,7 +841,7 @@ rest_proxy_call_async (RestProxyCall                *call,
 
   message = prepare_message (call, error);
   if (message == NULL)
-    goto error;
+    return FALSE;
 
   closure = g_slice_new0 (RestProxyCallAsyncClosure);
   closure->call = g_object_ref (call);
@@ -862,14 +864,7 @@ rest_proxy_call_async (RestProxyCall                *call,
                              message,
                              _call_message_completed_cb,
                              closure);
-  g_free (priv->url);
-  priv->url = NULL;
   return TRUE;
-
-error:
-  g_free (priv->url);
-  priv->url = NULL;
-  return FALSE;
 }
 
 static void
