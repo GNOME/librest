@@ -277,6 +277,29 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                  const gchar   *data,
                                  goffset        len)
 {
+  return rest_xml_parser_parse_from_data_full (parser, data, len, NULL, NULL);
+}
+
+/**
+ * rest_xml_parser_parse_from_data_full:
+ * @parser: a #RestXmlParser
+ * @data: the XML content to parse
+ * @len: the length of @data
+ * @base_url: the base URL, or %NULL if unknown
+ * @encoding: the character encoding, or %NULL if unknown
+ *
+ * Parse the XML in @data, and return a new #RestXmlNode.  If @data is invalid
+ * XML, %NULL is returned.
+ *
+ * Returns: a new #RestXmlNode, or %NULL if the XML was invalid.
+ */
+RestXmlNode *
+rest_xml_parser_parse_from_data_full (RestXmlParser *parser,
+                                      const gchar   *data,
+                                      goffset        len,
+                                      const gchar   *base_url,
+                                      const gchar   *encoding)
+{
   xmlTextReaderPtr reader;
   RestXmlNode *cur_node = NULL;
   RestXmlNode *new_node = NULL;
@@ -295,8 +318,8 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
 
   reader = xmlReaderForMemory (data,
                                len,
-                               NULL, /* URL? */
-                               NULL, /* encoding */
+                               base_url,
+                               encoding,
                                XML_PARSE_RECOVER | XML_PARSE_NOCDATA);
 
   while (xmlTextReaderRead (reader) == 1)

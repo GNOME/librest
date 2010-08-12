@@ -83,6 +83,12 @@ RestXmlNode *rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                               const gchar   *data,
                                               goffset        len);
 
+RestXmlNode *rest_xml_parser_parse_from_data_full (RestXmlParser *parser,
+                                                   const gchar   *data,
+                                                   goffset        len,
+                                                   const gchar   *base_url,
+                                                   const gchar   *encoding);
+
 GType rest_xml_node_get_type (void);
 
 RestXmlNode * rest_xml_node_ref (RestXmlNode *node);
