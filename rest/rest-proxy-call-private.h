@@ -45,6 +45,7 @@ struct _RestProxyCallPrivate {
   gchar *payload;
   guint status_code;
   gchar *status_message;
+  GHashTable *content_params;
 
   RestProxy *proxy;
 
