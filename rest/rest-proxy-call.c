@@ -1220,3 +1220,25 @@ rest_proxy_call_get_status_message (RestProxyCall *call)
 
   return priv->status_message;
 }
+
+RestXmlNode *
+rest_proxy_call_get_payload_as_xml (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv;
+  static RestXmlParser *parser = NULL;
+  RestXmlNode *root;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+  priv = GET_PRIVATE (call);
+
+  if (parser == NULL)
+    parser = rest_xml_parser_new ();
+
+  root = rest_xml_parser_parse_from_data_full (parser,
+                                               priv->payload,
+                                               priv->length,
+                                               priv->url,
+                                               g_hash_table_lookup (priv->content_params, "charset"));
+
+  return root;
+}

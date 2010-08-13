@@ -25,6 +25,7 @@
 
 #include <glib-object.h>
 #include <rest/rest-params.h>
+#include <rest/rest-xml-parser.h>
 
 G_BEGIN_DECLS
 
@@ -184,6 +185,8 @@ goffset rest_proxy_call_get_payload_length (RestProxyCall *call);
 const gchar *rest_proxy_call_get_payload (RestProxyCall *call);
 guint rest_proxy_call_get_status_code (RestProxyCall *call);
 const gchar *rest_proxy_call_get_status_message (RestProxyCall *call);
+
+RestXmlNode *rest_proxy_call_get_payload_as_xml (RestProxyCall *call);
 
 G_END_DECLS
 
