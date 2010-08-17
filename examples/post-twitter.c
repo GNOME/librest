@@ -42,7 +42,7 @@ main (int argc, char **argv)
   /* Create the proxy */
   proxy = oauth_proxy_new ("UfXFxDbUjk41scg0kmkFwA",
                            "pYQlfI2ZQ1zVK0f01dnfhFTWzizBGDnhNJIw6xwto",
-                           "https://twitter.com/", FALSE);
+                           "https://api.twitter.com/", FALSE);
 
   /* First stage authentication, this gets a request token */
   if (!oauth_proxy_request_token (OAUTH_PROXY (proxy), "oauth/request_token", "oob", &error))
@@ -63,7 +63,7 @@ main (int argc, char **argv)
 
   /* Post the status message */
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "statuses/update.xml");
+  rest_proxy_call_set_function (call, "1/statuses/update.xml");
   rest_proxy_call_set_method (call, "POST");
   rest_proxy_call_add_param (call, "status", argv[1]);
 
