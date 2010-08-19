@@ -232,6 +232,7 @@ rest_xml_node_find (RestXmlNode *start,
   {
     if ((tmp = g_hash_table_lookup (node->children, tag_interned)) != NULL)
     {
+      g_queue_clear (&stack);
       return tmp;
     }
 
@@ -243,6 +244,7 @@ rest_xml_node_find (RestXmlNode *start,
     g_list_free (children);
   }
 
+  g_queue_clear (&stack);
   return NULL;
 }
 
