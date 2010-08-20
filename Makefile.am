@@ -10,4 +10,4 @@ CLEANFILES = $(pkgconfig_DATA)
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
-ACLOCAL_AMFLAGS = -I .
+ACLOCAL_AMFLAGS = -I build

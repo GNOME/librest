@@ -37,46 +37,31 @@ test_runner_LDFLAGS = $(librest_extras_@API_VERSION@_la_LIBADD)
 
 # TODO: use gtester
 
+# intospection
+-include $(INTROSPECTION_MAKEFILE)
+
 if HAVE_INTROSPECTION
-BUILT_GIRSOURCES =
+INTROSPECTION_GIRS = RestExtras-@API_VERSION@.gir
 
-RestExtras-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-extras-@API_VERSION@.la
-	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
-		--namespace RestExtras --nsversion=@API_VERSION@ \
-		--add-include-path=$(top_builddir)/rest \
-		--include=GObject-2.0 \
-		--include=Soup-2.4 \
-		--include=libxml2-2.0 \
-		--include=Rest-@API_VERSION@ \
-		--library=librest-extras-@API_VERSION@.la \
-		--libtool="$(top_builddir)/libtool" \
-		--pkg gobject-2.0 \
-		--pkg libsoup-2.4 \
-		--pkg libxml-2.0 \
-		--output $@ \
-		-I$(top_srcdir) \
-		$(addprefix $(top_srcdir)/rest-extras/, $(lib_headers)) \
-		$(addprefix $(top_srcdir)/rest-extras/, $(lib_sources))
+# need to include ../rest when scanning/compiling
+INTROSPECTION_SCANNER_ARGS = --add-include-path=$(top_builddir)/rest
+INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/rest
 
-BUILT_GIRSOURCES += RestExtras-@API_VERSION@.gir
+RestExtras-@API_VERSION@.gir: librest-extras-@API_VERSION@.la Makefile
 
-# INTROSPECTION_GIRDIR/INTROSPECTION_TYPELIBDIR aren't the right place to
-# install anything - we need to install inside our prefix.
+RestExtras_@API_VERSION_AM@_gir_NAMESPACE = RestExtras
+RestExtras_@API_VERSION_AM@_gir_VERSION = @API_VERSION@
+RestExtras_@API_VERSION_AM@_gir_LIBS = librest-extras-@API_VERSION@.la
+RestExtras_@API_VERSION_AM@_gir_FILES = $(addprefix $(top_srcdir)/rest-extras/, $(lib_headers))
+RestExtras_@API_VERSION_AM@_gir_CFLAGS = -I$(top_srcdir)
+RestExtras_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 Soup-2.4 libxml2-2.0 Rest-@API_VERSION@
+RestExtras_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0
+
 girdir = $(datadir)/gir-1.0
-gir_DATA = $(BUILT_GIRSOURCES)
+dist_gir_DATA = $(INTROSPECTION_GIRS)
 
 typelibsdir = $(libdir)/girepository-1.0/
-typelibs_DATA = $(BUILT_GIRSOURCES:.gir=.typelib)
+typelibs_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
-%.typelib: %.gir $(INTROSPECTION_COMPILER)
-	$(AM_V_GEN) \
-	LD_LIBRARY_PATH=.libs${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
-	$(INTROSPECTION_COMPILER) \
-		--includedir=$(srcdir) \
-		--includedir=. \
-		--includedir=$(top_builddir)/rest \
-		$(INTROSPECTION_COMPILER_OPTS) $< -o $(@F)
-
-CLEANFILES += $(BUILT_GIRSOURCES) $(typelibs_DATA)
-
-endif #HAVE_INTROSPECTION
+CLEANFILES += $(dist_gir_DATA) $(typelibs_DATA)
+endif # HAVE_INTROSPECTION

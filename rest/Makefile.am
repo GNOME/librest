@@ -52,43 +52,27 @@ test_runner_LDFLAGS = $(librest_@API_VERSION@_la_LIBADD)
 
 # TODO: use gtester
 
+# intospection
+-include $(INTROSPECTION_MAKEFILE)
+
 if HAVE_INTROSPECTION
-BUILT_GIRSOURCES =
+INTROSPECTION_GIRS = Rest-@API_VERSION@.gir
 
-Rest-@API_VERSION@.gir: $(INTROSPECTION_SCANNER) librest-@API_VERSION@.la
-	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
-		--namespace Rest --nsversion=@API_VERSION@ \
-		--include=GObject-2.0 \
-		--include=Soup-2.4 \
-		--include=libxml2-2.0 \
-		--library=librest-@API_VERSION@.la \
-		--libtool="$(top_builddir)/libtool" \
-		--pkg gobject-2.0 \
-		--pkg libsoup-2.4 \
-		--pkg libxml-2.0 \
-		--output $@ \
-		-I$(top_srcdir) \
-		$(addprefix $(top_srcdir)/rest/, $(lib_headers)) \
-		$(addprefix $(top_srcdir)/rest/, $(lib_sources))
+Rest-@API_VERSION@.gir: librest-@API_VERSION@.la Makefile
 
-BUILT_GIRSOURCES += Rest-@API_VERSION@.gir
+Rest_@API_VERSION_AM@_gir_NAMESPACE = Rest
+Rest_@API_VERSION_AM@_gir_VERSION = @API_VERSION@
+Rest_@API_VERSION_AM@_gir_LIBS = librest-@API_VERSION@.la
+Rest_@API_VERSION_AM@_gir_FILES = $(addprefix $(top_srcdir)/rest/, $(lib_headers))
+Rest_@API_VERSION_AM@_gir_CFLAGS = -I$(top_srcdir)
+Rest_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 Soup-2.4 libxml2-2.0
+Rest_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0
 
-# INTROSPECTION_GIRDIR/INTROSPECTION_TYPELIBDIR aren't the right place to
-# install anything - we need to install inside our prefix.
 girdir = $(datadir)/gir-1.0
-gir_DATA = $(BUILT_GIRSOURCES)
+dist_gir_DATA = $(INTROSPECTION_GIRS)
 
 typelibsdir = $(libdir)/girepository-1.0/
-typelibs_DATA = $(BUILT_GIRSOURCES:.gir=.typelib)
+typelibs_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
-%.typelib: %.gir $(INTROSPECTION_COMPILER)
-	$(AM_V_GEN) \
-	LD_LIBRARY_PATH=.libs${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
-	$(INTROSPECTION_COMPILER) \
-		--includedir=$(srcdir) \
-		--includedir=. \
-		$(INTROSPECTION_COMPILER_OPTS) $< -o $(@F)
-
-CLEANFILES += $(BUILT_GIRSOURCES) $(typelibs_DATA)
-
-endif #HAVE_INTROSPECTION
+CLEANFILES += $(dist_gir_DATA) $(typelibs_DATA)
+endif # HAVE_INTROSPECTION

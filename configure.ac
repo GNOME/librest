@@ -1,24 +1,41 @@
-AC_PREREQ(2.53)
-AC_INIT(rest, 0.7.2)
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
-AM_CONFIG_HEADER(config.h)
-AC_CONFIG_MACRO_DIR([.])
+m4_define([api_major], [0])
+m4_define([api_minor], [7])
+m4_define([api_micro], [2])
 
-m4_define([api_version], [0.7])
-AC_SUBST([API_VERSION],[api_version])
+AC_PREREQ([2.63])
+AC_INIT([rest], [0.7.2],
+        [],
+        [rest],
+        [http://meego.gitorious.org/meego-middleware/librest])
+
+AC_CONFIG_SRCDIR([rest/rest-proxy.h])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_AUX_DIR([build])
+AC_CONFIG_MACRO_DIR([build])
+
+AM_INIT_AUTOMAKE([1.11 foreign -Wno-portability no-define])
+
+AM_SILENT_RULES([yes])
+
+API_MAJOR=api_major
+API_MINOR=api_minor
+AC_SUBST([API_VERSION],[$API_MAJOR.$API_MINOR])
+AC_SUBST([API_VERSION_AM],[$API_MAJOR\_$API_MINOR])
 AC_DEFINE_UNQUOTED(API_VERSION, [$API_VERSION], [API version])
-
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_CANONICAL_HOST
 
 AC_PROG_CC
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
 AC_ISC_POSIX
 AC_HEADER_STDC
+
 AM_PROG_CC_C_O
+
+# require libtool >= 2.2
+LT_PREREQ([2.2.6])
+LT_INIT([disable-static])
 
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.18)
 PKG_CHECK_MODULES(SOUP, libsoup-2.4)
@@ -39,8 +56,8 @@ AS_IF(
         AC_MSG_RESULT([no])
 )
 
-GTK_DOC_CHECK(1.9)
-GOBJECT_INTROSPECTION_CHECK([0.6.4])
+GTK_DOC_CHECK([1.13], [--flavour no-tmpl])
+GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
 localedir=${datadir}/locale
 AC_SUBST(localedir)
