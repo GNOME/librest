@@ -1,6 +1,6 @@
 m4_define([api_major], [0])
 m4_define([api_minor], [7])
-m4_define([api_micro], [2])
+m4_define([api_micro], [3])
 
 AC_PREREQ([2.63])
 AC_INIT([rest], [0.7.2],
