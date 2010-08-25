@@ -227,36 +227,40 @@ _prepare (RestProxyCall *call, GError **error)
   g_object_get (call, "proxy", &proxy, NULL);
   priv = PROXY_GET_PRIVATE (proxy);
 
-  oauth_params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+  /* We have to make this hash free the strings and thus duplicate when we put
+   * them in since when we call call steal_oauth_params that has to duplicate
+   * the param names since it removes them from the main hash
+   */
+  oauth_params = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
   /* First, steal any OAuth properties in the regular params */
   steal_oauth_params (call, oauth_params);
 
-  g_hash_table_insert (oauth_params, "oauth_version", g_strdup ("1.0"));
+  g_hash_table_insert (oauth_params, g_strdup ("oauth_version"), g_strdup ("1.0"));
 
   s = g_strdup_printf ("%lli", (long long int) time (NULL));
-  g_hash_table_insert (oauth_params, "oauth_timestamp", s);
+  g_hash_table_insert (oauth_params, g_strdup ("oauth_timestamp"), s);
 
   s = g_strdup_printf ("%u", g_random_int ());
-  g_hash_table_insert (oauth_params, "oauth_nonce", s);
+  g_hash_table_insert (oauth_params, g_strdup ("oauth_nonce"), s);
 
-  g_hash_table_insert (oauth_params, "oauth_consumer_key",
+  g_hash_table_insert (oauth_params, g_strdup ("oauth_consumer_key"),
                        g_strdup (priv->consumer_key));
 
   if (priv->token)
-    g_hash_table_insert (oauth_params, "oauth_token", g_strdup (priv->token));
+    g_hash_table_insert (oauth_params, g_strdup ("oauth_token"), g_strdup (priv->token));
 
   switch (priv->method) {
   case PLAINTEXT:
-    g_hash_table_insert (oauth_params, "oauth_signature_method", g_strdup ("PLAINTEXT"));
+    g_hash_table_insert (oauth_params, g_strdup ("oauth_signature_method"), g_strdup ("PLAINTEXT"));
     s = sign_plaintext (priv);
     break;
   case HMAC_SHA1:
-    g_hash_table_insert (oauth_params, "oauth_signature_method", g_strdup ("HMAC-SHA1"));
+    g_hash_table_insert (oauth_params, g_strdup ("oauth_signature_method"), g_strdup ("HMAC-SHA1"));
     s = sign_hmac (proxy, call, oauth_params);
     break;
   }
-  g_hash_table_insert (oauth_params, "oauth_signature", s);
+  g_hash_table_insert (oauth_params, g_strdup ("oauth_signature"), s);
 
   s = make_authorized_header (oauth_params);
   if (priv->oauth_echo) {
