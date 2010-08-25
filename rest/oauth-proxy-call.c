@@ -203,7 +203,9 @@ steal_oauth_params (RestProxyCall *call, GHashTable *oauth_params)
   rest_params_iter_init (&iter, params);
   while (rest_params_iter_next (&iter, &name, &param)) {
     if (rest_param_is_string (param) && g_str_has_prefix (name, "oauth_")) {
-      g_hash_table_insert (oauth_params, g_strdup (name), (gpointer)rest_param_get_content (param));
+      g_hash_table_insert (oauth_params,
+                           g_strdup (name),
+                           g_strdup (rest_param_get_content (param)));
       to_remove = g_list_prepend (to_remove, g_strdup (name));
     }
   }
