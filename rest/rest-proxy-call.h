@@ -155,6 +155,20 @@ gboolean rest_proxy_call_async (RestProxyCall                *call,
                                 gpointer                      userdata,
                                 GError                      **error);
 
+
+typedef void (*RestProxyCallContinuousCallback) (RestProxyCall *call,
+                                                 const gchar   *buf,
+                                                 gsize          len,
+                                                 const GError  *error,
+                                                 GObject       *weak_object,
+                                                 gpointer       userdata);
+
+gboolean rest_proxy_call_continuous (RestProxyCall                    *call,
+                                     RestProxyCallContinuousCallback   cb,
+                                     GObject                          *weak_object,
+                                     gpointer                          userdata,
+                                     GError                          **error);
+
 gboolean rest_proxy_call_cancel (RestProxyCall *call);
 
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);

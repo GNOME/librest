@@ -41,6 +41,15 @@ struct _RestProxyCallAsyncClosure {
   SoupMessage *message;
 };
 
+
+struct _RestProxyCallContinuousClosure {
+  RestProxyCall *call;
+  RestProxyCallContinuousCallback callback;
+  GObject *weak_object;
+  gpointer userdata;
+  SoupMessage *message;
+};
+
 enum
 {
   PROP_0 = 0,
@@ -627,6 +636,49 @@ _call_message_completed_cb (SoupSession *session,
   g_slice_free (RestProxyCallAsyncClosure, closure);
 }
 
+
+static void
+_continuous_call_message_completed_cb (SoupSession *session,
+                                       SoupMessage *message,
+                                       gpointer     userdata)
+{
+  RestProxyCallContinuousClosure *closure;
+  RestProxyCall *call;
+  RestProxyCallPrivate *priv;
+  GError *error = NULL;
+
+  closure = (RestProxyCallContinuousClosure *)userdata;
+  call = closure->call;
+  priv = GET_PRIVATE (call);
+
+  priv->status_code = message->status_code;
+  priv->status_message = g_strdup (message->reason_phrase);
+
+  _handle_error_from_message (message, &error);
+
+  closure->callback (closure->call,
+                     NULL,
+                     0,
+                     error,
+                     closure->weak_object,
+                     closure->userdata);
+
+  g_clear_error (&error);
+
+  /* Success. We don't need the weak reference any more */
+  if (closure->weak_object)
+  {
+    g_object_weak_unref (closure->weak_object,
+        (GWeakNotify)_call_async_weak_notify_cb,
+        closure);
+  }
+
+  priv->cur_call_closure = NULL;
+  g_object_unref (closure->call);
+  g_slice_free (RestProxyCallContinuousClosure, closure);
+}
+
+
 static void
 _call_async_weak_notify_cb (gpointer *data,
                             GObject  *dead_object)
@@ -807,6 +859,83 @@ rest_proxy_call_async (RestProxyCall                *call,
   _rest_proxy_queue_message (priv->proxy,
                              message,
                              _call_message_completed_cb,
+                             closure);
+  g_free (priv->url);
+  priv->url = NULL;
+  return TRUE;
+
+error:
+  g_free (priv->url);
+  priv->url = NULL;
+  return FALSE;
+}
+
+static void
+_continuous_call_message_got_chunk_cb (SoupMessage                    *msg,
+                                       SoupBuffer                     *chunk,
+                                       RestProxyCallContinuousClosure *closure)
+{
+  closure->callback (closure->call,
+                     chunk->data,
+                     chunk->length,
+                     NULL,
+                     closure->weak_object,
+                     closure->userdata);
+}
+
+gboolean
+rest_proxy_call_continuous (RestProxyCall                    *call,
+                            RestProxyCallContinuousCallback   callback,
+                            GObject                          *weak_object,
+                            gpointer                          userdata,
+                            GError                          **error)
+{
+  RestProxyCallPrivate *priv;
+  RestProxyCallClass *call_class;
+  SoupMessage *message;
+  RestProxyCallContinuousClosure *closure;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  priv = GET_PRIVATE (call);
+  g_assert (priv->proxy);
+  call_class = REST_PROXY_CALL_GET_CLASS (call);
+
+  if (priv->cur_call_closure)
+  {
+    /* FIXME: Use GError here */
+    g_critical (G_STRLOC ": Call already in progress.");
+    return FALSE;
+  }
+
+  message = prepare_message (call, error);
+  if (message == NULL)
+    goto error;
+
+  closure = g_slice_new0 (RestProxyCallContinuousClosure);
+  closure->call = g_object_ref (call);
+  closure->callback = callback;
+  closure->weak_object = weak_object;
+  closure->message = message;
+  closure->userdata = userdata;
+
+  priv->cur_call_closure = closure;
+
+  /* Weakly reference this object. We remove our callback if it goes away. */
+  if (closure->weak_object)
+  {
+    g_object_weak_ref (closure->weak_object,
+        (GWeakNotify)_call_async_weak_notify_cb,
+        closure);
+  }
+
+  g_signal_connect (message,
+                    "got-chunk",
+                    (GCallback)_continuous_call_message_got_chunk_cb,
+                    closure);
+
+  _rest_proxy_queue_message (priv->proxy,
+                             message,
+                             _continuous_call_message_completed_cb,
                              closure);
   g_free (priv->url);
   priv->url = NULL;
