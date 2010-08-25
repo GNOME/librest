@@ -1,4 +1,4 @@
-noinst_PROGRAMS = test-raw test-xml dump-xml get-fireeagle-location post-twitter get-flickr-favorites lastfm-shout
+noinst_PROGRAMS = test-raw test-xml dump-xml get-fireeagle-location post-twitter get-flickr-favorites lastfm-shout continuous-twitter
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(SOUP_CFLAGS) -I$(top_srcdir)
 AM_LDFLAGS = $(GLIB_LIBS) $(SOUP_LIBS) ../rest/librest-@API_VERSION@.la ../rest-extras/librest-extras-@API_VERSION@.la
@@ -10,3 +10,4 @@ dump_xml_SOURCES = dump-xml.c
 post_twitter_SOURCES = post-twitter.c
 get_flickr_favorites_SOURCES = get-flickr-favorites.c
 lastfm_shout_SOURCES = lastfm-shout.c
+continuous_twitter_SOURCES = continuous-twitter.c
