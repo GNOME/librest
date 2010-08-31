@@ -2,8 +2,11 @@ m4_define([api_major], [0])
 m4_define([api_minor], [7])
 m4_define([api_micro], [3])
 
+m4_define([rest_version], [api_major.api_minor.api_micro])
+
+
 AC_PREREQ([2.63])
-AC_INIT([rest], [0.7.2],
+AC_INIT([rest], [rest_version],
         [],
         [rest],
         [http://meego.gitorious.org/meego-middleware/librest])
