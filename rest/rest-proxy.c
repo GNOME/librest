@@ -212,6 +212,7 @@ static void
 rest_proxy_init (RestProxy *self)
 {
   RestProxyPrivate *priv = GET_PRIVATE (self);
+  SoupSessionFeature *cookie_jar;
 
   priv->session = soup_session_async_new ();
   priv->session_sync = soup_session_sync_new ();
@@ -232,7 +233,7 @@ rest_proxy_init (RestProxy *self)
     g_object_unref (logger);
   }
 
-  SoupSessionFeature *cookie_jar = soup_cookie_jar_new ();
+  cookie_jar = soup_cookie_jar_new ();
   soup_session_add_feature (priv->session, cookie_jar);
   soup_session_add_feature (priv->session_sync, cookie_jar);
   g_object_unref (cookie_jar);
