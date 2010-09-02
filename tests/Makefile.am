@@ -1,7 +1,8 @@
 TESTS = proxy threaded oauth oauth-async oauth2 flickr lastfm
 
-AM_CPPFLAGS = $(SOUP_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(SOUP_LIBS) ../rest/librest-@API_VERSION@.la ../rest-extras/librest-extras-@API_VERSION@.la
+AM_CPPFLAGS = $(SOUP_CFLAGS) -I$(top_srcdir) $(GCOV_CFLAGS)
+AM_LDFLAGS = $(SOUP_LIBS) $(GCOV_LDFLAGS) \
+	     ../rest/librest-@API_VERSION@.la ../rest-extras/librest-extras-@API_VERSION@.la
 
 check_PROGRAMS = $(TESTS)
 

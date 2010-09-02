@@ -11,3 +11,24 @@ CLEANFILES = $(pkgconfig_DATA)
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
 ACLOCAL_AMFLAGS = -I build
+
+if GCOV_ENABLED
+cov-reset:
+	@rm -fr coverage
+	@find . -name "*.gcda" -exec rm {} \;
+	@lcov --directory . --zerocounters
+
+cov-report:
+	@mkdir -p coverage
+	@lcov --compat-libtool --directory . --capture --output-file coverage/app.info
+	@genhtml -o coverage/ coverage/app.info
+
+cov:
+	@make cov-report
+
+clean-local:
+	@make cov-reset
+
+check:
+	@make cov
+endif

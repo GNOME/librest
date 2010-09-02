@@ -65,6 +65,35 @@ GOBJECT_INTROSPECTION_CHECK([0.6.7])
 localedir=${datadir}/locale
 AC_SUBST(localedir)
 
+dnl === Coverage report =======================================================
+AC_PATH_PROG([GCOV], [lcov], [enable_gcov=no])
+
+AC_MSG_CHECKING([whether to build with gcov testing])
+
+AC_ARG_ENABLE([gcov],
+              [AS_HELP_STRING([--enable-gcov],
+                              [Whether to enable coverage testing (requires gcc
+and lcov)])],
+              [],
+              [enable_gcov=no])
+
+AS_IF([test "x$enable_gcov" = "xyes" && test "x$GCC" = "xyes"],
+      [
+        AS_IF([test "x$enable_gtk_doc" = "xyes"],
+              [AC_MSG_WARN([gtk-doc is enabled, this may go horribly wrong])],
+              [AC_MSG_RESULT([yes])]
+        )
+
+        GCOV_CFLAGS="-g -O0 -fprofile-arcs -ftest-coverage"
+        GCOV_LDFLAGS="-lgcov"
+      ],
+      [AC_MSG_RESULT([no])]
+)
+
+AM_CONDITIONAL([GCOV_ENABLED], [test "x$enable_gcov" = "xyes"])
+AC_SUBST([GCOV_CFLAGS])
+AC_SUBST([GCOV_LDFLAGS])
+
 AC_OUTPUT([
         Makefile
         rest/Makefile
