@@ -887,6 +887,29 @@ _continuous_call_message_got_chunk_cb (SoupMessage                    *msg,
                      closure->userdata);
 }
 
+
+/**
+ * rest_proxy_call_continuous:
+ * @call: The #RestProxyCall
+ * @callback: a #RestProxyCallContinuousCallback to invoke when data is available
+ * @weak_object: The #GObject to weakly reference and tie the lifecycle to
+ * @userdata: data to pass to @callback
+ * @error: a #GError, or %NULL
+ *
+ * Asynchronously invoke @call but expect a continuous stream of content. This
+ * means that the body data will not be accumulated and thus you cannot use
+ * rest_proxy_call_get_payload()
+ *
+ * When there is data @callback will be called and when the connection is
+ * closed or the stream ends @callback will also be called. 
+ *
+ * If @weak_object is disposed during the call then this call will be
+ * cancelled. If the call is cancelled then the callback will be invoked with
+ * an error state.
+ *
+ * You may unref the call after calling this function since there is an
+ * internal reference, or you may unref in the callback.
+ */
 gboolean
 rest_proxy_call_continuous (RestProxyCall                    *call,
                             RestProxyCallContinuousCallback   callback,
