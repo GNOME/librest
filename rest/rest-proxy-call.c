@@ -948,7 +948,7 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
   closure->message = message;
   closure->userdata = userdata;
 
-  priv->cur_call_closure = closure;
+  priv->cur_call_closure = (RestProxyCallAsyncClosure *)closure;
 
   /* Weakly reference this object. We remove our callback if it goes away. */
   if (closure->weak_object)
