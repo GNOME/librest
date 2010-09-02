@@ -809,7 +809,11 @@ prepare_message (RestProxyCall *call, GError **error_out)
  * Asynchronously invoke @call.
  *
  * When the call has finished, @callback will be called.  If @weak_object is
- * disposed during the call then this call will be cancelled.
+ * disposed during the call then this call will be cancelled. If the call is
+ * cancelled then the callback will be invoked with an error state.
+ *
+ * You may unref the call after calling this function since there is an
+ * internal reference, or you may unref in the callback.
  */
 gboolean
 rest_proxy_call_async (RestProxyCall                *call,
