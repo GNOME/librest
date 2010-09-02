@@ -938,6 +938,9 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
   if (message == NULL)
     goto error;
 
+  /* Must turn off accumulation */
+  soup_message_body_set_accumulate (message->response_body, FALSE);
+
   closure = g_slice_new0 (RestProxyCallContinuousClosure);
   closure->call = g_object_ref (call);
   closure->callback = callback;
