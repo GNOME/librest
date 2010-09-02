@@ -54,6 +54,7 @@ tests/oauth
 tests/oauth-async
 tests/oauth2
 tests/proxy
+tests/proxy-continuous
 tests/flickr
 tests/threaded
 tests/lastfm
