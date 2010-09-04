@@ -528,7 +528,7 @@ _populate_headers_hash_table (const gchar *name,
 }
 
 /* I apologise for this macro, but it saves typing ;-) */
-#define error_helper(x) g_set_error(error, REST_PROXY_ERROR, x, message->reason_phrase)
+#define error_helper(x) g_set_error_literal(error, REST_PROXY_ERROR, x, message->reason_phrase)
 static gboolean
 _handle_error_from_message (SoupMessage *message, GError **error)
 {
@@ -568,10 +568,10 @@ _handle_error_from_message (SoupMessage *message, GError **error)
   }
 
   /* If we are here we must be in some kind of HTTP error, lets try */
-  g_set_error (error,
-               REST_PROXY_ERROR,
-               message->status_code,
-               message->reason_phrase);
+  g_set_error_literal (error,
+                       REST_PROXY_ERROR,
+                       message->status_code,
+                       message->reason_phrase);
   return FALSE;
 }
 
