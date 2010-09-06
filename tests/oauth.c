@@ -77,10 +77,10 @@ main (int argc, char **argv)
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo_api.php");
-  rest_proxy_call_add_param (call, "escape", "!£$%^&*()");
+  rest_proxy_call_add_param (call, "escape", "!+£$%^&*()");
   if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
-  g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "escape=%21%C2%A3%24%25%5E%26%2A%28%29");
+  g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "escape=%21%2B%C2%A3%24%25%5E%26%2A%28%29");
   g_object_unref (call);
 
   g_object_unref (proxy);
