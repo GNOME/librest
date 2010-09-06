@@ -44,7 +44,7 @@ get_xml (RestProxyCall *call)
                                           rest_proxy_call_get_payload_length (call));
 
   if (!flickr_proxy_is_successful (root, &error))
-    g_error (error->message);
+    g_error ("%s", error->message);
 
   g_object_unref (call);
   g_object_unref (parser);

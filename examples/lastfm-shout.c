@@ -45,7 +45,7 @@ get_xml (RestProxyCall *call)
                                           rest_proxy_call_get_payload_length (call));
 
   if (!lastfm_proxy_is_successful (root, &error))
-    g_error (error->message);
+    g_error ("%s", error->message);
 
   g_object_unref (call);
   g_object_unref (parser);
@@ -99,7 +99,7 @@ main (int argc, char **argv)
 
   if (userid == NULL) {
     g_print ("Need a user ID to send a shout out to\n\n");
-    g_print (g_option_context_get_help (context, TRUE, NULL));
+    g_print ("%s", g_option_context_get_help (context, TRUE, NULL));
     return 1;
   }
 
