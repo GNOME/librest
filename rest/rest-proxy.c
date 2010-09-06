@@ -233,7 +233,7 @@ rest_proxy_init (RestProxy *self)
     g_object_unref (logger);
   }
 
-  cookie_jar = soup_cookie_jar_new ();
+  cookie_jar = (SoupSessionFeature *)soup_cookie_jar_new ();
   soup_session_add_feature (priv->session, cookie_jar);
   soup_session_add_feature (priv->session_sync, cookie_jar);
   g_object_unref (cookie_jar);
