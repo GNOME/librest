@@ -1075,7 +1075,6 @@ rest_proxy_call_sync (RestProxyCall *call,
 {
   RestProxyCallPrivate *priv;
   SoupMessage *message;
-  guint status;
   gboolean ret;
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
@@ -1086,7 +1085,7 @@ rest_proxy_call_sync (RestProxyCall *call,
   if (!message)
     return FALSE;
 
-  status = _rest_proxy_send_message (priv->proxy, message);
+  _rest_proxy_send_message (priv->proxy, message);
 
   ret = finish_call (call, message, error_out);
 
