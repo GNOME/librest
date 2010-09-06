@@ -300,7 +300,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                NULL, /* encoding */
                                XML_PARSE_RECOVER | XML_PARSE_NOCDATA);
 
-  while ((res = xmlTextReaderRead (reader)) == 1)
+  while (xmlTextReaderRead (reader) == 1)
   {
     switch (xmlTextReaderNodeType (reader))
     {
@@ -375,7 +375,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                      attr_name, 
                      attr_value);
 
-          } while ((res = xmlTextReaderMoveToNextAttribute (reader)) == 1);
+          } while (xmlTextReaderMoveToNextAttribute (reader) == 1);
         }
 
         break;
