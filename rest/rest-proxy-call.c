@@ -823,14 +823,12 @@ rest_proxy_call_async (RestProxyCall                *call,
                        GError                      **error)
 {
   RestProxyCallPrivate *priv;
-  RestProxyCallClass *call_class;
   SoupMessage *message;
   RestProxyCallAsyncClosure *closure;
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
   priv = GET_PRIVATE (call);
   g_assert (priv->proxy);
-  call_class = REST_PROXY_CALL_GET_CLASS (call);
 
   if (priv->cur_call_closure)
   {
@@ -918,14 +916,12 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
                             GError                          **error)
 {
   RestProxyCallPrivate *priv;
-  RestProxyCallClass *call_class;
   SoupMessage *message;
   RestProxyCallContinuousClosure *closure;
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
   priv = GET_PRIVATE (call);
   g_assert (priv->proxy);
-  call_class = REST_PROXY_CALL_GET_CLASS (call);
 
   if (priv->cur_call_closure)
   {
