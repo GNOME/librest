@@ -66,7 +66,7 @@ Rest_@API_VERSION_AM@_gir_VERSION = @API_VERSION@
 Rest_@API_VERSION_AM@_gir_LIBS = librest-@API_VERSION@.la
 Rest_@API_VERSION_AM@_gir_FILES = $(addprefix $(top_srcdir)/rest/, $(lib_headers))
 Rest_@API_VERSION_AM@_gir_CFLAGS = -I$(top_srcdir)
-Rest_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 Soup-2.4 libxml2-2.0
+Rest_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0
 Rest_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0
 
 girdir = $(datadir)/gir-1.0
