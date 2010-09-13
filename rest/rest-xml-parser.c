@@ -288,7 +288,6 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   const gchar *attr_name = NULL;
   const gchar *attr_value = NULL;
   GQueue nodes = G_QUEUE_INIT;
-  gint res = 0;
 
   g_return_val_if_fail (REST_IS_XML_PARSER (parser), NULL);
 
