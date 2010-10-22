@@ -45,7 +45,7 @@ if HAVE_INTROSPECTION
 INTROSPECTION_GIRS = RestExtras-@API_VERSION@.gir
 
 # need to include ../rest when scanning/compiling
-INTROSPECTION_SCANNER_ARGS = --add-include-path=$(top_builddir)/rest
+INTROSPECTION_SCANNER_ARGS = --add-include-path=$(top_builddir)/rest --identifier-prefix=
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/rest
 
 RestExtras-@API_VERSION@.gir: librest-extras-@API_VERSION@.la Makefile
