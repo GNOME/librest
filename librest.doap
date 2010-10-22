@@ -8,15 +8,19 @@
   <shortdesc xml:lang="en">Helper library for RESTful services</shortdesc>
   <description>librest is a helper library for RESTful services. It uses libsoup to provide HTTP communication.</description>
 
-  <homepage rdf:resource="http://live.gnome.org/LibRest" />
-  <download-page rdf:resource="ftp://ftp.gnome.org/pub/GNOME/sources/librest/"/>
-  <bug-database rdf:resource="http://bugzilla.gnome.org/browse.cgi?product=librest"/>
-
   <maintainer>
     <foaf:Person>
-      <foaf:name>Ross Burton</foaf:name>
-      <foaf:mbox rdf:resource="mailto:ross@burtonini.com" />
-      <gnome:userid>rburton</gnome:userid>
+      <foaf:name>Rob Bradford</foaf:name>
+      <foaf:mbox rdf:resource="mailto:rob@linux.intel.com" />
+      <gnome:userid>rbradford</gnome:userid>
     </foaf:Person>
+  </maintainer>
+
+  <maintainer>
+     <foaf:Person>
+       <foaf:name>Ross Burton</foaf:name>
+       <foaf:mbox rdf:resource="mailto:ross@linux.intel.com"/>
+       <gnome:userid>rburton</gnome:userid>
+     </foaf:Person>
   </maintainer>
 </Project>
