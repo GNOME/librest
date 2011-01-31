@@ -1,4 +1,4 @@
-TESTS = proxy proxy-continuous threaded oauth oauth-async oauth2 flickr lastfm
+TESTS = proxy proxy-continuous threaded oauth oauth-async oauth2 flickr lastfm xml
 
 AM_CPPFLAGS = $(SOUP_CFLAGS) -I$(top_srcdir) $(GCOV_CFLAGS)
 AM_LDFLAGS = $(SOUP_LIBS) $(GCOV_LDFLAGS) \
@@ -14,3 +14,4 @@ oauth_async_SOURCES = oauth-async.c
 oauth2_SOURCES = oauth2.c
 flickr_SOURCES = flickr.c
 lastfm_SOURCES = lastfm.c
+xml_SOURCES = xml.c

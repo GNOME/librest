@@ -8,6 +8,7 @@ lib_sources = \
 	rest-proxy.c 			\
 	rest-proxy-call.c		\
 	rest-proxy-call-private.h	\
+	rest-xml-node.c			\
 	rest-xml-parser.c		\
 	rest-main.c			\
 	rest-private.h			\
@@ -28,6 +29,7 @@ lib_headers = \
 	oauth-proxy-call.h	\
 	oauth2-proxy.h		\
 	oauth2-proxy-call.h	\
+	rest-xml-node.h		\
 	rest-xml-parser.h
 
 lib_LTLIBRARIES = librest-@API_VERSION@.la

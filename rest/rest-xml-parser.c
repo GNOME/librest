@@ -39,215 +39,6 @@ rest_xml_parser_init (RestXmlParser *self)
 {
 }
 
-static RestXmlNode *
-rest_xml_node_reverse_siblings (RestXmlNode *current)
-{
-  RestXmlNode *next;
-  RestXmlNode *prev = NULL;
-
-  while (current)
-  {
-    next = current->next;
-    current->next = prev;
-
-    prev = current;
-    current = next;
-  }
-
-  return prev;
-}
-
-static void
-rest_xml_node_reverse_children_siblings (RestXmlNode *node)
-{
-  GList *l, *children;
-  RestXmlNode *new_node;
-
-  children = g_hash_table_get_values (node->children);
-
-  for (l = children; l; l = l->next)
-  {
-    new_node = rest_xml_node_reverse_siblings ((RestXmlNode *)l->data);
-    g_hash_table_insert (node->children, new_node->name, new_node);
-  }
-
-  if (children)
-    g_list_free (children);
-}
-
-static RestXmlNode *
-rest_xml_node_prepend (RestXmlNode *cur_node, RestXmlNode *new_node)
-{
-  g_assert (new_node->next == NULL);
-  new_node->next = cur_node;
-
-  return new_node;
-}
-
-GType
-rest_xml_node_get_type (void)
-{
-  static GType type = 0;
-  if (G_UNLIKELY (type == 0)) {
-    type = g_boxed_type_register_static ("RestXmlNode",
-                                         (GBoxedCopyFunc)rest_xml_node_ref,
-                                         (GBoxedFreeFunc)rest_xml_node_unref);
-  }
-  return type;
-}
-
-static RestXmlNode *
-rest_xml_node_new ()
-{
-  RestXmlNode *node;
-
-  node = g_slice_new0 (RestXmlNode);
-  node->ref_count = 1;
-  node->children = g_hash_table_new (NULL, NULL);
-  node->attrs = g_hash_table_new_full (g_str_hash,
-                                       g_str_equal,
-                                       g_free,
-                                       g_free);
-
-  return node;
-}
-
-/**
- * rest_xml_node_ref:
- * @node: a #RestXmlNode
- *
- * Increases the reference count of @node.
- *
- * Returns: the same @node.
- */
-RestXmlNode *
-rest_xml_node_ref (RestXmlNode *node)
-{
-  g_return_val_if_fail (node, NULL);
-  g_return_val_if_fail (node->ref_count > 0, NULL);
-
-  g_atomic_int_inc (&node->ref_count);
-
-  return node;
-}
-
-/**
- * rest_xml_node_unref:
- * @node: a #RestXmlNode
- *
- * Decreases the reference count of @node. When its reference count drops to 0,
- * the node is finalized (i.e. its memory is freed).
- */
-void
-rest_xml_node_unref (RestXmlNode *node)
-{
-  GList *l;
-  RestXmlNode *next = NULL;
-  g_return_if_fail (node);
-  g_return_if_fail (node->ref_count > 0);
-
-  /* Try and unref the chain, this is equivalent to being tail recursively
-   * unreffing the next pointer
-   */
-  while (node && g_atomic_int_dec_and_test (&node->ref_count))
-  {
-      /*
-       * Save this pointer now since we are going to free the structure it
-       * contains soon.
-       */
-    next = node->next;
-
-    l = g_hash_table_get_values (node->children);
-    while (l)
-    {
-      rest_xml_node_unref ((RestXmlNode *)l->data);
-      l = g_list_delete_link (l, l);
-    }
-
-    g_hash_table_unref (node->children);
-    g_hash_table_unref (node->attrs);
-    g_free (node->content);
-    g_slice_free (RestXmlNode, node);
-
-    /*
-     * Free the next in the chain by updating node. If we're at the end or
-     * there are no siblings then the next = NULL definition deals with this
-     * case
-     */
-    node = next;
-  }
-}
-
-G_GNUC_DEPRECATED void
-rest_xml_node_free (RestXmlNode *node)
-{
-  rest_xml_node_unref (node);
-}
-
-/**
- * rest_xml_node_get_attr:
- * @node: a #RestXmlNode
- * @attr_name: the name of an attribute
- *
- * Get the value of the attribute named @attr_name, or %NULL if it doesn't
- * exist.
- *
- * Returns: the attribute value. This string is owned by #RestXmlNode and should
- * not be freed.
- */
-const gchar *
-rest_xml_node_get_attr (RestXmlNode *node, 
-                        const gchar *attr_name)
-{
-  return g_hash_table_lookup (node->attrs, attr_name);
-}
-
-/**
- * rest_xml_node_find:
- * @start: a #RestXmlNode
- * @tag: the name of a node
- *
- * Searches for the first child node of @start named @tag.
- *
- * Returns: the first child node, or %NULL if it doesn't exist.
- */
-RestXmlNode *
-rest_xml_node_find (RestXmlNode *start,
-                    const gchar *tag)
-{
-  RestXmlNode *node;
-  RestXmlNode *tmp;
-  GQueue stack = G_QUEUE_INIT;
-  GList *children, *l;
-  const char *tag_interned;
-
-  g_return_val_if_fail (start, NULL);
-  g_return_val_if_fail (start->ref_count > 0, NULL);
-
-  tag_interned = g_intern_string (tag);
-
-  g_queue_push_head (&stack, start);
-
-  while ((node = g_queue_pop_head (&stack)) != NULL)
-  {
-    if ((tmp = g_hash_table_lookup (node->children, tag_interned)) != NULL)
-    {
-      g_queue_clear (&stack);
-      return tmp;
-    }
-
-    children = g_hash_table_get_values (node->children);
-    for (l = children; l; l = l->next)
-    {
-      g_queue_push_head (&stack, l->data);
-    }
-    g_list_free (children);
-  }
-
-  g_queue_clear (&stack);
-  return NULL;
-}
-
 /**
  * rest_xml_parser_new:
  *
@@ -310,7 +101,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
 
         /* Create our new node for this tag */
 
-        new_node = rest_xml_node_new ();
+        new_node = _rest_xml_node_new ();
         new_node->name = G (g_intern_string (name));
 
         if (!root_node)
@@ -332,7 +123,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                               "Prepending to the list.");
             g_hash_table_insert (cur_node->children, 
                                  G(tmp_node->name),
-                                 rest_xml_node_prepend (tmp_node, new_node));
+                                 _rest_xml_node_prepend (tmp_node, new_node));
           } else {
             REST_DEBUG (XML_PARSER, "Unseen name. Adding to the children table.");
             g_hash_table_insert (cur_node->children,
@@ -386,7 +177,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
 
         /* For those children that have siblings, reverse the siblings */
         node = (RestXmlNode *)g_queue_pop_head (&nodes);
-        rest_xml_node_reverse_children_siblings (node);
+        _rest_xml_node_reverse_children_siblings (node);
 
         /* Update the current node to the new top of the stack */
         cur_node = (RestXmlNode *)g_queue_peek_head (&nodes);

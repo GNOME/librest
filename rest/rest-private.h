@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-proxy-call.h>
+#include <rest/rest-xml-node.h>
 #include <libsoup/soup.h>
 
 G_BEGIN_DECLS
@@ -58,5 +59,11 @@ void _rest_proxy_cancel_message (RestProxy   *proxy,
                                  SoupMessage *message);
 guint _rest_proxy_send_message (RestProxy   *proxy,
                                 SoupMessage *message);
+
+RestXmlNode *_rest_xml_node_new (void);
+void         _rest_xml_node_reverse_children_siblings (RestXmlNode *node);
+RestXmlNode *_rest_xml_node_prepend (RestXmlNode *cur_node,
+                                     RestXmlNode *new_node);
+
 G_END_DECLS
 #endif /* _REST_PRIVATE */
