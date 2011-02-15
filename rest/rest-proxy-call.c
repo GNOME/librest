@@ -780,10 +780,14 @@ prepare_message (RestProxyCall *call, GError **error_out)
                                          rest_param_get_file_name (param),
                                          rest_param_get_content_type (param),
                                          sb);
+
+        soup_buffer_free (sb);
       }
     }
 
     message = soup_form_request_new_from_multipart (priv->url, mp);
+
+    soup_multipart_free (mp);
   }
 
   /* Set the user agent, if one was set in the proxy */
