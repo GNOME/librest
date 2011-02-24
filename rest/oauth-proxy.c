@@ -386,6 +386,7 @@ oauth_proxy_request_token (OAuthProxy *proxy,
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
+  rest_proxy_call_set_method (call, "POST");
 
   if (callback_uri)
     rest_proxy_call_add_param (call, "oauth_callback", callback_uri);
@@ -463,6 +464,7 @@ oauth_proxy_request_token_async (OAuthProxy            *proxy,
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
+  rest_proxy_call_set_method (call, "POST");
 
   if (callback_uri)
     rest_proxy_call_add_param (call, "oauth_callback", callback_uri);
@@ -501,6 +503,7 @@ oauth_proxy_access_token (OAuthProxy *proxy,
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
+  rest_proxy_call_set_method (call, "POST");
 
   if (verifier)
     rest_proxy_call_add_param (call, "oauth_verifier", verifier);
@@ -579,6 +582,7 @@ oauth_proxy_access_token_async (OAuthProxy            *proxy,
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
+  rest_proxy_call_set_method (call, "POST");
 
   if (verifier)
     rest_proxy_call_add_param (call, "oauth_verifier", verifier);
