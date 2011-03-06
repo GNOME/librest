@@ -129,10 +129,22 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   text = g_string_new (NULL);
   g_string_append (text, rest_proxy_call_get_method (REST_PROXY_CALL (call)));
   g_string_append_c (text, '&');
-  if (priv->oauth_echo)
+  if (priv->oauth_echo) {
     g_string_append_uri_escaped (text, priv->service_url, NULL, FALSE);
-  else
+  } else if (priv->signature_host != NULL) {
+    SoupURI *url = soup_uri_new (callpriv->url);
+    gchar *signing_url;
+
+    soup_uri_set_host (url, priv->signature_host);
+    signing_url = soup_uri_to_string (url, FALSE);
+
+    g_string_append_uri_escaped (text, signing_url, NULL, FALSE);
+
+    soup_uri_free (url);
+    g_free (signing_url);
+  } else {
     g_string_append_uri_escaped (text, callpriv->url, NULL, FALSE);
+  }
   g_string_append_c (text, '&');
 
   /* Merge the OAuth parameters with the query parameters */

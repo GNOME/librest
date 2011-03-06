@@ -33,7 +33,8 @@ enum {
   PROP_CONSUMER_KEY,
   PROP_CONSUMER_SECRET,
   PROP_TOKEN,
-  PROP_TOKEN_SECRET
+  PROP_TOKEN_SECRET,
+  PROP_SIGNATURE_HOST,
 };
 
 static RestProxyCall *
@@ -67,6 +68,9 @@ oauth_proxy_get_property (GObject *object, guint property_id,
   case PROP_TOKEN_SECRET:
     g_value_set_string (value, priv->token_secret);
     break;
+  case PROP_SIGNATURE_HOST:
+    g_value_set_string (value, priv->signature_host);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -98,6 +102,11 @@ oauth_proxy_set_property (GObject *object, guint property_id,
     if (priv->token_secret)
       g_free (priv->token_secret);
     priv->token_secret = g_value_dup_string (value);
+    break;
+  case PROP_SIGNATURE_HOST:
+    if (priv->signature_host)
+      g_free (priv->signature_host);
+    priv->signature_host = g_value_dup_string (value);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -164,6 +173,13 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
                                G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class,
                                    PROP_TOKEN_SECRET,
+                                   pspec);
+
+  pspec = g_param_spec_string ("signature-host",  "signature-host",
+                               "The base URL used in the signature string",
+                               NULL, G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class,
+                                   PROP_SIGNATURE_HOST,
                                    pspec);
 
   /* TODO: add enum property for signature method */
@@ -684,6 +700,47 @@ oauth_proxy_is_oauth10a (OAuthProxy *proxy)
   g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
 
   return PROXY_GET_PRIVATE (proxy)->oauth_10a;
+}
+
+/**
+ * oauth_proxy_get_signature_host:
+ * @proxy: an #OAuthProxy
+ *
+ * Get the signature hostname used when creating a signature base string.
+ *
+ * Returns: the signature hostname, or %NULL if there is none set.
+ *  This string is owned by #OAuthProxy and should not be freed.
+ */
+const char *
+oauth_proxy_get_signature_host (OAuthProxy *proxy)
+{
+  OAuthProxyPrivate *priv;
+
+  g_return_val_if_fail (OAUTH_IS_PROXY (proxy), NULL);
+  priv = PROXY_GET_PRIVATE (proxy);
+
+  return priv->signature_host;
+}
+
+/**
+ * oauth_proxy_set_signature_host:
+ * @proxy: an #OAuthProxy
+ * @signature_host: the signature host
+ *
+ * Set the signature hostname used when creating a signature base string.
+ */
+void
+oauth_proxy_set_signature_host (OAuthProxy *proxy,
+                                const char *signature_host)
+{
+  OAuthProxyPrivate *priv;
+
+  g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  priv = PROXY_GET_PRIVATE (proxy);
+
+  g_free (priv->signature_host);
+
+  priv->signature_host = g_strdup (signature_host);
 }
 
 RestProxy *

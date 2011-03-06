@@ -152,6 +152,10 @@ void oauth_proxy_set_token (OAuthProxy *proxy, const char *token);
 const char * oauth_proxy_get_token_secret (OAuthProxy *proxy);
 
 void oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret);
+const char * oauth_proxy_get_signature_host (OAuthProxy *proxy);
+
+void oauth_proxy_set_signature_host (OAuthProxy *proxy,
+                                     const char *signature_host);
 
 RestProxy *oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
                                        const char  *service_url,

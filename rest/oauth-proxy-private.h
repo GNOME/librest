@@ -40,4 +40,6 @@ typedef struct {
   /* OAuth Echo */
   gboolean oauth_echo;
   char *service_url;
+  /* URL to use for signatures */
+  char *signature_host;
 } OAuthProxyPrivate;

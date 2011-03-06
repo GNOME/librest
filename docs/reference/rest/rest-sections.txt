@@ -165,6 +165,8 @@ oauth_proxy_get_token
 oauth_proxy_set_token
 oauth_proxy_get_token_secret
 oauth_proxy_set_token_secret
+oauth_proxy_get_signature_host
+oauth_proxy_set_signature_host
 <SUBSECTION Standard>
 OAuthProxyPrivate
 OAuthProxyClass
