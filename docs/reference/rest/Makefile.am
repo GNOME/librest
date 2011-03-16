@@ -72,7 +72,9 @@ expand_content_files=
 # e.g. INCLUDES=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 INCLUDES=-I$(top_srcdir) -I$(top_builddir) $(GLIB_CFLAGS) $(SOUP_CFLAGS) $(XML_CFLAGS)
-GTKDOC_LIBS=$(top_builddir)/rest/librest-@API_VERSION@.la $(top_builddir)/rest-extras/librest-extras-@API_VERSION@.la
+GTKDOC_LIBS=$(top_builddir)/rest/librest-@API_VERSION@.la $(top_builddir)/rest-extras/librest-extras-@API_VERSION@.la \
+	    $(GLIB_LIBS) $(SOUP_LIBS) $(XML_LIBS)
+
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make
