@@ -55,8 +55,9 @@ RestExtras_@API_VERSION_AM@_gir_VERSION = @API_VERSION@
 RestExtras_@API_VERSION_AM@_gir_LIBS = librest-extras-@API_VERSION@.la
 RestExtras_@API_VERSION_AM@_gir_FILES = $(addprefix $(top_srcdir)/rest-extras/, $(lib_headers))
 RestExtras_@API_VERSION_AM@_gir_CFLAGS = -I$(top_srcdir)
-RestExtras_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 libxml2-2.0 Rest-@API_VERSION@
+RestExtras_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 libxml2-2.0
 RestExtras_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0
+RestExtras_@API_VERSION_AM@_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/rest/Rest-@API_VERSION@.gir
 
 girdir = $(datadir)/gir-1.0
 dist_gir_DATA = $(INTROSPECTION_GIRS)
