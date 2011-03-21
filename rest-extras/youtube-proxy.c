@@ -160,7 +160,7 @@ youtube_proxy_set_user_auth (YoutubeProxy *proxy,
 }
 
 static gchar *
-_construct_upload_atom_xml (GHashTable *fields)
+_construct_upload_atom_xml (GHashTable *fields, gboolean incomplete)
 {
   GHashTableIter iter;
   gpointer key, value;
@@ -174,6 +174,9 @@ _construct_upload_atom_xml (GHashTable *fields)
                           "http://search.yahoo.com/mrss/");
   rest_xml_node_add_attr (entry, "xmlns:yt",
                           "http://gdata.youtube.com/schemas/2007");
+
+  if (incomplete)
+    rest_xml_node_add_child (group, "yt:incomplete");
 
   g_hash_table_iter_init (&iter, fields);
 
@@ -317,6 +320,7 @@ gboolean
 youtube_proxy_upload_async (YoutubeProxy              *self,
                             const gchar               *filename,
                             GHashTable                *fields,
+                            gboolean                   incomplete,
                             YoutubeProxyUploadCallback callback,
                             GObject                   *weak_object,
                             gpointer                   userdata,
@@ -339,7 +343,7 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
 
   mp = soup_multipart_new ("multipart/related");
 
-  atom_xml = _construct_upload_atom_xml (fields);
+  atom_xml = _construct_upload_atom_xml (fields, incomplete);
 
   sb = soup_buffer_new_with_owner (atom_xml,
                                    strlen(atom_xml),
