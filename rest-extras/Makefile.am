@@ -6,12 +6,15 @@ lib_sources = \
 		     flickr-proxy-private.h \
 		     lastfm-proxy.c	\
 		     lastfm-proxy-call.c	\
-		     lastfm-proxy-private.h
+		     lastfm-proxy-private.h \
+		     youtube-proxy.c \
+		     youtube-proxy-private.h
 lib_headers = \
 		     flickr-proxy.h	\
 		     flickr-proxy-call.h \
 		     lastfm-proxy.h	\
-		     lastfm-proxy-call.h
+		     lastfm-proxy-call.h \
+		     youtube-proxy.h
 
 
 lib_LTLIBRARIES = librest-extras-@API_VERSION@.la
