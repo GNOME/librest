@@ -72,6 +72,9 @@ RestProxy* youtube_proxy_new (const gchar *developer_key);
 RestProxy* youtube_proxy_new_with_auth (const gchar *developer_key,
         const gchar *user_auth);
 
+void youtube_proxy_set_user_auth (YoutubeProxy *proxy,
+                                  const gchar  *user_auth);
+
 typedef void (*YoutubeProxyUploadCallback)(YoutubeProxy   *proxy,
                                            const gchar   *payload,
                                            const GError  *error,

@@ -150,6 +150,15 @@ youtube_proxy_new_with_auth (const char *developer_key,
                        NULL);
 }
 
+void
+youtube_proxy_set_user_auth (YoutubeProxy *proxy,
+                             const gchar  *user_auth)
+{
+  YoutubeProxyPrivate *priv = proxy->priv;
+
+  priv->user_auth = g_strdup (user_auth);
+}
+
 static gchar *
 _construct_upload_atom_xml (GHashTable *fields)
 {
@@ -165,7 +174,6 @@ _construct_upload_atom_xml (GHashTable *fields)
                           "http://search.yahoo.com/mrss/");
   rest_xml_node_add_attr (entry, "xmlns:yt",
                           "http://gdata.youtube.com/schemas/2007");
-
 
   g_hash_table_iter_init (&iter, fields);
 
@@ -214,6 +222,8 @@ _set_upload_headers (YoutubeProxy *self,
   user_agent = rest_proxy_get_user_agent (REST_PROXY (self));
   if (user_agent)
     soup_message_headers_append (headers, "User-Agent", user_agent);
+
+  g_print ("%s\n", priv->user_auth);
 
   user_auth_header = g_strdup_printf ("GoogleLogin auth=%s", priv->user_auth);
   soup_message_headers_append (headers, "Authorization", user_auth_header);
