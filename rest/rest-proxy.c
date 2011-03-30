@@ -45,6 +45,7 @@ struct _RestProxyPrivate {
   gboolean binding_required;
   SoupSession *session;
   SoupSession *session_sync;
+  gboolean disable_cookies;
 };
 
 enum
@@ -52,7 +53,8 @@ enum
   PROP0 = 0,
   PROP_URL_FORMAT,
   PROP_BINDING_REQUIRED,
-  PROP_USER_AGENT
+  PROP_USER_AGENT,
+  PROP_DISABLE_COOKIES
 };
 
 static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
@@ -90,6 +92,9 @@ rest_proxy_get_property (GObject   *object,
     case PROP_USER_AGENT:
       g_value_set_string (value, priv->user_agent);
       break;
+    case PROP_DISABLE_COOKIES:
+      g_value_set_boolean (value, priv->disable_cookies);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -123,6 +128,9 @@ rest_proxy_set_property (GObject      *object,
       g_free (priv->user_agent);
       priv->user_agent = g_value_dup_string (value);
       break;
+    case PROP_DISABLE_COOKIES:
+      priv->disable_cookies = g_value_get_boolean (value);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -146,6 +154,20 @@ rest_proxy_dispose (GObject *object)
   }
 
   G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
+}
+
+static void
+rest_proxy_constructed (GObject *object)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (object);
+
+  if (!priv->disable_cookies) {
+    SoupSessionFeature *cookie_jar =
+      (SoupSessionFeature *)soup_cookie_jar_new ();
+    soup_session_add_feature (priv->session, cookie_jar);
+    soup_session_add_feature (priv->session_sync, cookie_jar);
+    g_object_unref (cookie_jar);
+  }
 }
 
 static void
@@ -174,6 +196,7 @@ rest_proxy_class_init (RestProxyClass *klass)
   object_class->get_property = rest_proxy_get_property;
   object_class->set_property = rest_proxy_set_property;
   object_class->dispose = rest_proxy_dispose;
+  object_class->constructed = rest_proxy_constructed;
   object_class->finalize = rest_proxy_finalize;
 
   proxy_class->simple_run_valist = _rest_proxy_simple_run_valist;
@@ -206,13 +229,21 @@ rest_proxy_class_init (RestProxyClass *klass)
   g_object_class_install_property (object_class,
                                    PROP_USER_AGENT,
                                    pspec);
+
+  pspec = g_param_spec_boolean ("disable-cookies",
+                                "disable-cookies",
+                                "Whether to disable cookie support",
+                                FALSE,
+                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+  g_object_class_install_property (object_class,
+                                   PROP_DISABLE_COOKIES,
+                                   pspec);
 }
 
 static void
 rest_proxy_init (RestProxy *self)
 {
   RestProxyPrivate *priv = GET_PRIVATE (self);
-  SoupSessionFeature *cookie_jar;
 
   priv->session = soup_session_async_new ();
   priv->session_sync = soup_session_sync_new ();
@@ -232,11 +263,6 @@ rest_proxy_init (RestProxy *self)
     soup_session_add_feature (priv->session_sync, logger);
     g_object_unref (logger);
   }
-
-  cookie_jar = (SoupSessionFeature *)soup_cookie_jar_new ();
-  soup_session_add_feature (priv->session, cookie_jar);
-  soup_session_add_feature (priv->session_sync, cookie_jar);
-  g_object_unref (cookie_jar);
 }
 
 /**
