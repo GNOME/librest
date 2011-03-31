@@ -176,6 +176,19 @@ gboolean rest_proxy_call_continuous (RestProxyCall                    *call,
                                      gpointer                          userdata,
                                      GError                          **error);
 
+typedef void (*RestProxyCallUploadCallback) (RestProxyCall *call,
+                                             gsize          total,
+                                             gsize          uploaded,
+                                             const GError  *error,
+                                             GObject       *weak_object,
+                                             gpointer       userdata);
+
+gboolean rest_proxy_call_upload (RestProxyCall                *call,
+                                 RestProxyCallUploadCallback   cb,
+                                 GObject                      *weak_object,
+                                 gpointer                      userdata,
+                                 GError                      **error);
+
 gboolean rest_proxy_call_cancel (RestProxyCall *call);
 
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
