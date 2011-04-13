@@ -1060,6 +1060,28 @@ _upload_call_message_wrote_data_cb (SoupMessage                *msg,
                        closure->userdata);
 }
 
+/**
+ * rest_proxy_call_upload:
+ * @call: The #RestProxyCall
+ * @callback: a #RestProxyCallUploadCallback to invoke when a chunk of data was
+ *   uploaded
+ * @weak_object: The #GObject to weakly reference and tie the lifecycle to
+ * @userdata: data to pass to @callback
+ * @error: a #GError, or %NULL
+ *
+ * Asynchronously invoke @call but expect to have the callback invoked every time a
+ * chunk of our request's body is written.
+ *
+ * When the callback is invoked with the uploaded byte count equaling the message
+ * byte count, the call has completed.
+ *
+ * If @weak_object is disposed during the call then this call will be
+ * cancelled. If the call is cancelled then the callback will be invoked with
+ * an error state.
+ *
+ * You may unref the call after calling this function since there is an
+ * internal reference, or you may unref in the callback.
+ */
 gboolean
 rest_proxy_call_upload (RestProxyCall                *call,
                         RestProxyCallUploadCallback   callback,
