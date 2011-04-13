@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 
 typedef struct _RestProxyCallAsyncClosure RestProxyCallAsyncClosure;
 typedef struct _RestProxyCallContinuousClosure RestProxyCallContinuousClosure;
+typedef struct _RestProxyCallUploadClosure RestProxyCallUploadClosure;
 
 struct _RestProxyCallPrivate {
   gchar *method;

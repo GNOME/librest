@@ -50,6 +50,15 @@ struct _RestProxyCallContinuousClosure {
   SoupMessage *message;
 };
 
+struct _RestProxyCallUploadClosure {
+  RestProxyCall *call;
+  RestProxyCallUploadCallback callback;
+  GObject *weak_object;
+  gpointer userdata;
+  SoupMessage *message;
+  gsize uploaded;
+};
+
 enum
 {
   PROP_0 = 0,
@@ -983,6 +992,148 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
   _rest_proxy_queue_message (priv->proxy,
                              message,
                              _continuous_call_message_completed_cb,
+                             closure);
+  g_free (priv->url);
+  priv->url = NULL;
+  return TRUE;
+
+error:
+  g_free (priv->url);
+  priv->url = NULL;
+  return FALSE;
+}
+
+static void
+_upload_call_message_completed_cb (SoupSession *session,
+                                   SoupMessage *message,
+                                   gpointer     user_data)
+{
+  RestProxyCall *call;
+  RestProxyCallPrivate *priv;
+  GError *error = NULL;
+  RestProxyCallUploadClosure *closure;
+
+  closure = (RestProxyCallUploadClosure *) user_data;
+  call = closure->call;
+  priv = GET_PRIVATE (call);
+
+  priv->status_code = message->status_code;
+  priv->status_message = g_strdup (message->reason_phrase);
+
+  _handle_error_from_message (message, &error);
+
+  closure->callback (closure->call,
+                     closure->uploaded,
+                     closure->uploaded,
+                     error,
+                     closure->weak_object,
+                     closure->userdata);
+
+  g_clear_error (&error);
+
+  /* Success. We don't need the weak reference any more */
+  if (closure->weak_object)
+  {
+    g_object_weak_unref (closure->weak_object,
+        (GWeakNotify)_call_async_weak_notify_cb,
+        closure);
+  }
+
+  priv->cur_call_closure = NULL;
+  g_object_unref (closure->call);
+  g_slice_free (RestProxyCallUploadClosure, closure);
+}
+
+static void
+_upload_call_message_wrote_data_cb (SoupMessage                *msg,
+                                    SoupBuffer                 *chunk,
+                                    RestProxyCallUploadClosure *closure)
+{
+  closure->uploaded = closure->uploaded + chunk->length;
+
+  if (closure->uploaded < msg->request_body->length)
+    closure->callback (closure->call,
+                       msg->request_body->length,
+                       closure->uploaded,
+                       NULL,
+                       closure->weak_object,
+                       closure->userdata);
+}
+
+/**
+ * rest_proxy_call_upload:
+ * @call: The #RestProxyCall
+ * @callback: a #RestProxyCallUploadCallback to invoke when a chunk of data was
+ *   uploaded
+ * @weak_object: The #GObject to weakly reference and tie the lifecycle to
+ * @userdata: data to pass to @callback
+ * @error: a #GError, or %NULL
+ *
+ * Asynchronously invoke @call but expect to have the callback invoked every time a
+ * chunk of our request's body is written.
+ *
+ * When the callback is invoked with the uploaded byte count equaling the message
+ * byte count, the call has completed.
+ *
+ * If @weak_object is disposed during the call then this call will be
+ * cancelled. If the call is cancelled then the callback will be invoked with
+ * an error state.
+ *
+ * You may unref the call after calling this function since there is an
+ * internal reference, or you may unref in the callback.
+ */
+gboolean
+rest_proxy_call_upload (RestProxyCall                *call,
+                        RestProxyCallUploadCallback   callback,
+                        GObject                      *weak_object,
+                        gpointer                      userdata,
+                        GError                      **error)
+{
+  RestProxyCallPrivate *priv;
+  SoupMessage *message;
+  RestProxyCallUploadClosure *closure;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  priv = GET_PRIVATE (call);
+  g_assert (priv->proxy);
+
+  if (priv->cur_call_closure)
+  {
+    /* FIXME: Use GError here */
+    g_critical (G_STRLOC ": Call already in progress.");
+    return FALSE;
+  }
+
+  message = prepare_message (call, error);
+  if (message == NULL)
+    goto error;
+
+  closure = g_slice_new0 (RestProxyCallUploadClosure);
+  closure->call = g_object_ref (call);
+  closure->callback = callback;
+  closure->weak_object = weak_object;
+  closure->message = message;
+  closure->userdata = userdata;
+  closure->uploaded = 0;
+
+  priv->cur_call_closure = (RestProxyCallAsyncClosure *)closure;
+
+  /* Weakly reference this object. We remove our callback if it goes away. */
+  if (closure->weak_object)
+  {
+    g_object_weak_ref (closure->weak_object,
+        (GWeakNotify)_call_async_weak_notify_cb,
+        closure);
+  }
+
+  g_signal_connect (message,
+                    "wrote-body-data",
+                    (GCallback) _upload_call_message_wrote_data_cb,
+                    closure);
+
+  _rest_proxy_queue_message (priv->proxy,
+                             message,
+                             _upload_call_message_completed_cb,
                              closure);
   g_free (priv->url);
   priv->url = NULL;
