@@ -1,4 +1,4 @@
-TESTS = proxy proxy-continuous threaded oauth oauth-async oauth2 flickr lastfm xml
+TESTS = proxy proxy-continuous threaded oauth oauth-async oauth2 flickr lastfm xml custom-serialize
 # TODO: fix this test case
 XFAIL_TESTS = xml
 
@@ -17,3 +17,4 @@ oauth2_SOURCES = oauth2.c
 flickr_SOURCES = flickr.c
 lastfm_SOURCES = lastfm.c
 xml_SOURCES = xml.c
+custom_serialize_SOURCES = custom-serialize.c
