@@ -745,7 +745,24 @@ prepare_message (RestProxyCall *call, GError **error_out)
     }
   }
 
-  if (rest_params_are_strings (priv->params)) {
+  if (call_class->serialize_params) {
+    gchar *content;
+    gchar *content_type;
+    gsize content_len;
+
+    if (!call_class->serialize_params (call, &content_type, 
+                                       &content, &content_len, &error))
+    {
+      g_propagate_error (error_out, error);
+      return NULL;
+    }
+
+    message = soup_message_new (priv->method, priv->url);
+    soup_message_set_request (message, content_type, 
+                              SOUP_MEMORY_TAKE, content, content_len);
+
+    g_free (content_type);
+  } else if (rest_params_are_strings (priv->params)) {
     GHashTable *hash;
 
     hash = rest_params_as_string_hash_table (priv->params);
@@ -1227,4 +1244,37 @@ rest_proxy_call_get_status_message (RestProxyCall *call)
   priv = GET_PRIVATE (call);
 
   return priv->status_message;
+}
+
+/**
+ * rest_proxy_call_serialize_params:
+ * @call: The #RestProxyCall
+ * @content_type: (out): Content type of the payload
+ * @content: (out): The payload
+ * @content_len: (out): Length of the payload data
+ * @error: a #GError, or %NULL
+ *
+ * Invoker for a virtual method to serialize the parameters for this
+ * #RestProxyCall.
+ *
+ * Returns: TRUE if the serialization was successful, FALSE otherwise.
+ */
+gboolean
+rest_proxy_call_serialize_params (RestProxyCall *call,
+                                  gchar **content_type,
+                                  gchar **content,
+                                  gsize *content_len,
+                                  GError **error)
+{
+  RestProxyCallClass *call_class;
+
+  call_class = REST_PROXY_CALL_GET_CLASS (call);
+
+  if (call_class->serialize_params)
+  {
+    return call_class->serialize_params (call, content_type,
+                                         content, content_len, error);
+  }
+
+  return FALSE;
 }

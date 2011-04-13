@@ -61,6 +61,8 @@ typedef struct {
  * RestProxyCallClass:
  * @prepare: Virtual function called before making the request, This allows the
  * call to be modified, for example to add a signature.
+ * @serialize_params: Virtual function allowing custom serialization of the
+ * parameters, for example when the API doesn't expect standard form content.
  *
  * Class structure for #RestProxyCall for subclasses to implement specialised
  * behaviour.
@@ -70,10 +72,15 @@ typedef struct {
   GObjectClass parent_class;
   /*< public >*/
   gboolean (*prepare)(RestProxyCall *call, GError **error);
+  gboolean (*serialize_params) (RestProxyCall *call,
+                                gchar **content_type,
+                                gchar **content,
+                                gsize *content_len,
+                                GError **error);
 
   /*< private >*/
   /* padding for future expansion */
-  gpointer _padding_dummy[8];
+  gpointer _padding_dummy[7];
 } RestProxyCallClass;
 
 #define REST_PROXY_CALL_ERROR rest_proxy_call_error_quark ()
@@ -184,6 +191,12 @@ goffset rest_proxy_call_get_payload_length (RestProxyCall *call);
 const gchar *rest_proxy_call_get_payload (RestProxyCall *call);
 guint rest_proxy_call_get_status_code (RestProxyCall *call);
 const gchar *rest_proxy_call_get_status_message (RestProxyCall *call);
+gboolean rest_proxy_call_serialize_params (RestProxyCall *call,
+                                           gchar        **content_type,
+                                           gchar        **content,
+                                           gsize         *content_len,
+                                           GError       **error);
+
 
 G_END_DECLS
 
