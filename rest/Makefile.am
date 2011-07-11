@@ -12,6 +12,7 @@ lib_sources = \
 	rest-xml-parser.c		\
 	rest-main.c			\
 	rest-private.h			\
+	rest-enum-types.c		\
 	oauth-proxy.c			\
 	oauth-proxy-call.c		\
 	oauth-proxy-private.h 		\
@@ -25,6 +26,7 @@ lib_headers = \
 	rest-params.h		\
 	rest-proxy.h		\
 	rest-proxy-call.h	\
+	rest-enum-types.h	\
 	oauth-proxy.h		\
 	oauth-proxy-call.h	\
 	oauth2-proxy.h		\
@@ -43,6 +45,30 @@ librest_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
 librest_@API_VERSION@_la_SOURCES = $(lib_sources) $(lib_headers)
 librest_@API_VERSION@_la_HEADERS = $(lib_headers)
 librest_@API_VERSION@_ladir = $(includedir)/rest-@API_VERSION@/rest
+
+rest-enum-types.h: stamp-rest-enum-types.h
+	@true
+
+stamp-rest-enum-types.h: rest-proxy.h rest-proxy-call.h Makefile
+	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) \
+			--fhead "#ifndef __REST_ENUM_TYPES_H__\n#define __REST_ENUM_TYPES_H__\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n" \
+			--fprod "/* enumerations from \"@filename@\" */\n" \
+			--vhead "GType @enum_name@_get_type (void) G_GNUC_CONST;\n#define REST_TYPE_@ENUMSHORT@ (@enum_name@_get_type())\n" \
+			--ftail "G_END_DECLS\n\n#endif /* __REST_ENUM_TYPES_H__ */" rest-proxy.h rest-proxy-call.h) >> xgen-gtbh \
+	&& (cmp -s xgen-gtbh rest-enum-types.h || cp xgen-gtbh rest-enum-types.h ) \
+	&& rm -f xgen-gtbh \
+	&& echo timestamp > $(@F)
+
+rest-enum-types.c: rest-proxy.h rest-proxy-call.h Makefile rest-enum-types.h
+	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) \
+			--fhead "#include \"rest-proxy.h\"\n#include \"rest-proxy-call.h\"\n#include \"rest-enum-types.h\"" \
+			--fprod "\n/* enumerations from \"@filename@\" */" \
+			--vhead "GType\n@enum_name@_get_type (void)\n{\n  static GType etype = 0;\n  if (etype == 0) {\n    static const G@Type@Value values[] = {" \
+			--vprod "      { @VALUENAME@, \"@VALUENAME@\", \"@valuenick@\" }," \
+			--vtail "      { 0, NULL, NULL }\n    };\n    etype = g_@type@_register_static (\"@EnumName@\", values);\n  }\n  return etype;\n}\n" \
+		rest-proxy.h rest-proxy-call.h) > xgen-gtbc \
+	&& cp xgen-gtbc rest-enum-types.c  \
+	&& rm -f xgen-gtbc
 
 
 # Test suite
@@ -81,5 +107,11 @@ dist_gir_DATA = $(INTROSPECTION_GIRS)
 typelibsdir = $(libdir)/girepository-1.0/
 typelibs_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
-CLEANFILES += $(dist_gir_DATA) $(typelibs_DATA)
+CLEANFILES += $(dist_gir_DATA) \
+	$(typelibs_DATA) \
+	rest-enum-types.h \
+	rest-enum-types.c \
+	stamp-rest-enum-types.h \
+	$(NULL)
+
 endif # HAVE_INTROSPECTION
