@@ -62,6 +62,8 @@ AS_IF(
 GTK_DOC_CHECK([1.13], [--flavour no-tmpl])
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
+AC_PATH_PROG([GLIB_MKENUMS],[glib-mkenums])
+
 localedir=${datadir}/locale
 AC_SUBST(localedir)
 
