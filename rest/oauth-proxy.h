@@ -60,6 +60,9 @@ typedef struct {
   gpointer _padding_dummy[8];
 } OAuthProxyClass;
 
+GType oauth_signature_method_get_type (void) G_GNUC_CONST;
+#define OAUTH_TYPE_SIGNATURE_METHOD (oauth_signature_method_get_type())
+
 /**
  * OAuthSignatureMethod:
  * @PLAINTEXT: plain text signatures (not recommended)

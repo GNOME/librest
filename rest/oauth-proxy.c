@@ -775,3 +775,21 @@ oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
 
   return (RestProxy *)echo_proxy;
 }
+
+GType
+oauth_signature_method_get_type (void)
+{
+  static GType enum_type_id = 0;
+  if (G_UNLIKELY (!enum_type_id))
+  {
+    static const GEnumValue values[] =
+    {
+      { PLAINTEXT, "PLAINTEXT", "plaintext" },
+      { HMAC_SHA1, "HMAC_SHA1", "hmac-sha1" },
+      { 0, NULL, NULL }
+    };
+    enum_type_id = g_enum_register_static ("OAuthSignatureMethod", values);
+  }
+  return enum_type_id;
+}
+
