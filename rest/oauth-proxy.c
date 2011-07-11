@@ -35,6 +35,7 @@ enum {
   PROP_TOKEN,
   PROP_TOKEN_SECRET,
   PROP_SIGNATURE_HOST,
+  PROP_SIGNATURE_METHOD,
 };
 
 static RestProxyCall *
@@ -70,6 +71,9 @@ oauth_proxy_get_property (GObject *object, guint property_id,
     break;
   case PROP_SIGNATURE_HOST:
     g_value_set_string (value, priv->signature_host);
+    break;
+  case PROP_SIGNATURE_METHOD:
+    g_value_set_enum (value, priv->method);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -107,6 +111,9 @@ oauth_proxy_set_property (GObject *object, guint property_id,
     if (priv->signature_host)
       g_free (priv->signature_host);
     priv->signature_host = g_value_dup_string (value);
+    break;
+  case PROP_SIGNATURE_METHOD:
+    priv->method = g_value_get_enum (value);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -182,7 +189,13 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
                                    PROP_SIGNATURE_HOST,
                                    pspec);
 
-  /* TODO: add enum property for signature method */
+  pspec = g_param_spec_enum ("signature-method", "signature-method",
+                             "Signature method used",
+                             OAUTH_TYPE_SIGNATURE_METHOD, HMAC_SHA1,
+                             G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class,
+                                   PROP_SIGNATURE_METHOD,
+                                   pspec);
 }
 
 static void
