@@ -59,7 +59,12 @@ AS_IF(
         AC_MSG_RESULT([no])
 )
 
+# gtkdocize greps for ^GTK_DOC_CHECK and parses it, so you need to have
+# it on it's own line.
+m4_ifdef([GTK_DOC_CHECK], [
 GTK_DOC_CHECK([1.13], [--flavour no-tmpl])
+])
+
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
 AC_PATH_PROG([GLIB_MKENUMS],[glib-mkenums])
