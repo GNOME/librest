@@ -250,7 +250,7 @@ _prepare (RestProxyCall *call, GError **error)
 
   g_hash_table_insert (oauth_params, g_strdup ("oauth_version"), g_strdup ("1.0"));
 
-  s = g_strdup_printf ("%lli", (long long int) time (NULL));
+  s = g_strdup_printf ("%"G_GINT64_FORMAT , (gint64) time (NULL));
   g_hash_table_insert (oauth_params, g_strdup ("oauth_timestamp"), s);
 
   s = g_strdup_printf ("%u", g_random_int ());
