@@ -26,6 +26,7 @@ librest_extras_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
                     $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS) \
 		    $(GCOV_LDFLAGS) \
                     $(top_builddir)/rest/librest-@API_VERSION@.la
+librest_extras_@API_VERSION@_la_LDFLAGS = -no-undefined
 librest_extras_@API_VERSION@_la_SOURCES = $(lib_sources) $(lib_headers)
 librest_extras_@API_VERSION@_la_HEADERS = $(lib_headers)
 librest_extras_@API_VERSION@_ladir = $(includedir)/rest-@API_VERSION@/rest-extras

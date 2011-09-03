@@ -39,6 +39,7 @@ librest_@API_VERSION@_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
 		    $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
 		    $(XML_CFLAGS) $(GCOV_CFLAGS) \
 		    -I$(top_srcdir) -Wall -DG_LOG_DOMAIN=\"Rest\"
+librest_@API_VERSION@_la_LDFLAGS = -no-undefined
 librest_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
                     $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS) \
 		    $(GCOV_LDFLAGS)
