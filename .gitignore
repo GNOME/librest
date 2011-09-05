@@ -50,6 +50,9 @@ examples/post-twitter
 examples/test-raw
 examples/test-xml
 rest-extras/test-runner
+rest/rest-enum-types.c
+rest/rest-enum-types.h
+rest/stamp-rest-enum-types.h
 rest/test-runner
 tests/custom-serialize
 tests/flickr
