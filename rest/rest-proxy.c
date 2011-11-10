@@ -247,6 +247,16 @@ rest_proxy_init (RestProxy *self)
 
   priv->session = soup_session_async_new ();
   priv->session_sync = soup_session_sync_new ();
+
+  /* with ssl-strict (defaults TRUE) setting ssl-ca-file forces all
+   * certificates to be trusted */
+  g_object_set (priv->session,
+                "ssl-ca-file", REST_SYSTEM_CA_FILE,
+                NULL);
+  g_object_set (priv->session_sync,
+                "ssl-ca-file", REST_SYSTEM_CA_FILE,
+                NULL);
+
 #if WITH_GNOME
   soup_session_add_feature_by_type (priv->session,
                                     SOUP_TYPE_PROXY_RESOLVER_GNOME);
