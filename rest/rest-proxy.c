@@ -42,6 +42,8 @@ struct _RestProxyPrivate {
   gchar *url_format;
   gchar *url;
   gchar *user_agent;
+  gchar *username;
+  gchar *password;
   gboolean binding_required;
   SoupSession *session;
   SoupSession *session_sync;
@@ -54,7 +56,9 @@ enum
   PROP_URL_FORMAT,
   PROP_BINDING_REQUIRED,
   PROP_USER_AGENT,
-  PROP_DISABLE_COOKIES
+  PROP_DISABLE_COOKIES,
+  PROP_USERNAME,
+  PROP_PASSWORD
 };
 
 static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
@@ -95,6 +99,12 @@ rest_proxy_get_property (GObject   *object,
     case PROP_DISABLE_COOKIES:
       g_value_set_boolean (value, priv->disable_cookies);
       break;
+    case PROP_USERNAME:
+      g_value_set_string (value, priv->username);
+      break;
+    case PROP_PASSWORD:
+      g_value_set_string (value, priv->password);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -131,6 +141,14 @@ rest_proxy_set_property (GObject      *object,
     case PROP_DISABLE_COOKIES:
       priv->disable_cookies = g_value_get_boolean (value);
       break;
+    case PROP_USERNAME:
+      g_free (priv->username);
+      priv->username = g_value_dup_string (value);
+      break;
+    case PROP_PASSWORD:
+      g_free (priv->password);
+      priv->password = g_value_dup_string (value);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -157,6 +175,18 @@ rest_proxy_dispose (GObject *object)
 }
 
 static void
+authenticate (RestProxy   *self,
+              SoupMessage *msg,
+              SoupAuth    *auth,
+              gboolean     retrying,
+              SoupSession *session)
+{
+    RestProxyPrivate *priv = GET_PRIVATE (self);
+
+    soup_auth_authenticate (auth, priv->username, priv->password);
+}
+
+static void
 rest_proxy_constructed (GObject *object)
 {
   RestProxyPrivate *priv = GET_PRIVATE (object);
@@ -168,6 +198,12 @@ rest_proxy_constructed (GObject *object)
     soup_session_add_feature (priv->session_sync, cookie_jar);
     g_object_unref (cookie_jar);
   }
+
+  /* session lifetime is same as self, no need to keep signalid */
+  g_signal_connect_swapped (priv->session, "authenticate",
+                            G_CALLBACK(authenticate), object);
+  g_signal_connect_swapped (priv->session_sync, "authenticate",
+                            G_CALLBACK(authenticate), object);
 }
 
 static void
@@ -178,6 +214,8 @@ rest_proxy_finalize (GObject *object)
   g_free (priv->url);
   g_free (priv->url_format);
   g_free (priv->user_agent);
+  g_free (priv->username);
+  g_free (priv->password);
 
   G_OBJECT_CLASS (rest_proxy_parent_class)->finalize (object);
 }
@@ -238,6 +276,24 @@ rest_proxy_class_init (RestProxyClass *klass)
   g_object_class_install_property (object_class,
                                    PROP_DISABLE_COOKIES,
                                    pspec);
+
+  pspec = g_param_spec_string ("username",
+                               "username",
+                               "The username for authentication",
+                               NULL,
+                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class,
+                                   PROP_USERNAME,
+                                   pspec);
+
+  pspec = g_param_spec_string ("password",
+                               "password",
+                               "The password for authentication",
+                               NULL,
+                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class,
+                                   PROP_PASSWORD,
+                                   pspec);
 }
 
 static void
@@ -290,12 +346,42 @@ rest_proxy_init (RestProxy *self)
  * Returns: A new #RestProxy.
  */
 RestProxy *
-rest_proxy_new (const gchar *url_format, 
+rest_proxy_new (const gchar *url_format,
                 gboolean     binding_required)
 {
-  return g_object_new (REST_TYPE_PROXY, 
+  return g_object_new (REST_TYPE_PROXY,
                        "url-format", url_format,
                        "binding-required", binding_required,
+                       NULL);
+}
+
+/**
+ * rest_proxy_new_with_authentication:
+ * @url_format: the endpoint URL
+ * @binding_required: whether the URL needs to be bound before calling
+ * @username: the username provided by the user or client
+ * @password: the password provided by the user or client
+ *
+ * Create a new #RestProxy for the specified endpoint @url_format, using the
+ * "GET" method.
+ *
+ * Set @binding_required to %TRUE if the URL contains string formatting
+ * operations (for example "http://foo.com/%<!-- -->s".  These must be expanded
+ * using rest_proxy_bind() before invoking the proxy.
+ *
+ * Returns: A new #RestProxy.
+ */
+RestProxy *
+rest_proxy_new_with_authentication (const gchar *url_format,
+                                    gboolean     binding_required,
+                                    const gchar *username,
+                                    const gchar *password)
+{
+  return g_object_new (REST_TYPE_PROXY,
+                       "url-format", url_format,
+                       "binding-required", binding_required,
+                       "username", username,
+                       "password", password,
                        NULL);
 }
 

@@ -139,6 +139,12 @@ GType rest_proxy_get_type (void);
 RestProxy *rest_proxy_new (const gchar *url_format, 
                            gboolean     binding_required);
 
+RestProxy *
+rest_proxy_new_with_authentication (const gchar *url_format,
+                                    gboolean     binding_required,
+                                    const gchar *username,
+                                    const gchar *password);
+
 gboolean rest_proxy_bind (RestProxy *proxy,
                           ...);
 
