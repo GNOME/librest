@@ -37,7 +37,6 @@ main (int argc, char **argv)
   RestXmlParser *parser;
   RestXmlNode *root, *u_node, *node;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   /* Create the proxy */

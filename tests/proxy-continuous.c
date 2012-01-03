@@ -168,7 +168,6 @@ main (int argc, char **argv)
   char *url;
   RestProxy *proxy;
 
-  g_thread_init (NULL);
   g_type_init ();
   loop = g_main_loop_new (NULL, FALSE);
 

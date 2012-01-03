@@ -43,7 +43,6 @@ main (int argc, char **argv)
   char pin[256];
   GMainLoop *loop;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   loop = g_main_loop_new (NULL, FALSE);

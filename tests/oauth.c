@@ -33,7 +33,6 @@ main (int argc, char **argv)
   RestProxyCall *call;
   GError *error = NULL;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   /* Create the proxy */

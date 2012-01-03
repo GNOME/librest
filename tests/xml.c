@@ -33,7 +33,6 @@ main (int argc, char **argv)
   RestXmlNode *root, *node;
   char *xml;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   parser = rest_xml_parser_new ();

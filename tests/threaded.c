@@ -85,7 +85,6 @@ main (int argc, char **argv)
   char *url;
   int i;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   session = soup_session_sync_new ();

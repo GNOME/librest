@@ -283,7 +283,6 @@ main (int argc, char **argv)
   char *url;
   RestProxy *proxy;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   session = soup_session_async_new ();

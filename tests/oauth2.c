@@ -47,7 +47,6 @@ test_extract_token ()
 int
 main (int argc, char **argv)
 {
-  g_thread_init (NULL);
   g_type_init ();
 
   test_extract_token ();

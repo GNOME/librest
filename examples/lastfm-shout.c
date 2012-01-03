@@ -87,7 +87,6 @@ main (int argc, char **argv)
     { NULL }
   };
 
-  g_thread_init (NULL);
   g_type_init ();
 
   context = g_option_context_new ("- send a shout to a Last.fm user");

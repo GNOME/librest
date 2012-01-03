@@ -124,7 +124,6 @@ main (int argc, char **argv)
   int i;
   GError *error;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   session = soup_session_sync_new ();

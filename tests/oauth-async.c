@@ -113,7 +113,6 @@ main (int argc, char **argv)
   OAuthProxy *oproxy;
   GError *error = NULL;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   /* Install a timeout so that we don't hang or infinite loop */

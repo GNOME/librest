@@ -31,7 +31,6 @@ main (int argc, char **argv)
   GError *error = NULL;
   char pin[256];
 
-  g_thread_init (NULL);
   g_type_init ();
 
   if (argc != 2) {

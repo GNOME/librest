@@ -106,7 +106,6 @@ main (int argc, char **argv)
   char *frob, *url;
   const char *token;
 
-  g_thread_init (NULL);
   g_type_init ();
 
   proxy = flickr_proxy_new ("cf4e02fc57240a9b07346ad26e291080", "cdfa2329cb206e50");
