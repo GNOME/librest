@@ -44,6 +44,7 @@ PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.22)
 PKG_CHECK_MODULES(SOUP, libsoup-2.4)
 PKG_CHECK_MODULES(XML, libxml-2.0)
 PKG_CHECK_MODULES(GTHREAD, gthread-2.0)
+PKG_CHECK_MODULES(GOA, goa-1.0)
 
 AC_MSG_CHECKING([whether to use the GNOME environment])
 AC_ARG_WITH([gnome],[AS_HELP_STRING([--without-gnome], [disable support for GNOME environment])],
