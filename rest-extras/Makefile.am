@@ -8,22 +8,25 @@ lib_sources = \
 		     lastfm-proxy-call.c	\
 		     lastfm-proxy-private.h \
 		     youtube-proxy.c \
-		     youtube-proxy-private.h
+		     youtube-proxy-private.h \
+		     rest-goa.c
+
 lib_headers = \
 		     flickr-proxy.h	\
 		     flickr-proxy-call.h \
 		     lastfm-proxy.h	\
 		     lastfm-proxy-call.h \
-		     youtube-proxy.h
+		     youtube-proxy.h \
+		     rest-goa.h
 
 
 lib_LTLIBRARIES = librest-extras-@API_VERSION@.la
 librest_extras_@API_VERSION@_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
-		    $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
+		    $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) $(GOA_CFLAGS) \
 		    $(XML_CFLAGS) $(GCOV_CFLAGS) \
 		    -I$(top_srcdir) -Wall -DG_LOG_DOMAIN=\"Rest\"
 librest_extras_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
-                    $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS) \
+                    $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS) $(GOA_LIBS) \
 		    $(GCOV_LDFLAGS) \
                     $(top_builddir)/rest/librest-@API_VERSION@.la
 librest_extras_@API_VERSION@_la_LDFLAGS = -no-undefined
@@ -60,7 +63,7 @@ RestExtras_@API_VERSION_AM@_gir_LIBS = librest-extras-@API_VERSION@.la
 RestExtras_@API_VERSION_AM@_gir_FILES = $(addprefix $(top_srcdir)/rest-extras/, $(lib_headers))
 RestExtras_@API_VERSION_AM@_gir_CFLAGS = -I$(top_srcdir)
 RestExtras_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 libxml2-2.0
-RestExtras_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0
+RestExtras_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0 goa-1.0
 RestExtras_@API_VERSION_AM@_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/rest/Rest-@API_VERSION@.gir
 
 girdir = $(datadir)/gir-1.0
