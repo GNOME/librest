@@ -49,6 +49,7 @@ examples/lastfm-shout
 examples/post-twitter
 examples/test-raw
 examples/test-xml
+examples/goa-tweet
 rest-extras/test-runner
 rest/rest-enum-types.c
 rest/rest-enum-types.h
