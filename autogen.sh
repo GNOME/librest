@@ -8,4 +8,8 @@ else
   gtkdocize --flavour no-tmpl || exit 1
 fi
 
-ACLOCAL="${ACLOCAL-aclocal} $ACLOCAL_FLAGS" autoreconf -v -i && ./configure $@
+ACLOCAL="${ACLOCAL-aclocal} $ACLOCAL_FLAGS" autoreconf -v -i
+
+if test -z "$NOCONFIGURE"; then
+    exec ./configure "$@"
+fi
