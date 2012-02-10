@@ -12,6 +12,8 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
 ACLOCAL_AMFLAGS = -I build ${ACLOCAL_FLAGS}
 
+all-local: rest-$(API_VERSION).pc rest-extras-$(API_VERSION).pc
+
 if GCOV_ENABLED
 cov-reset:
 	@rm -fr coverage
