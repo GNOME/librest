@@ -1263,6 +1263,9 @@ rest_proxy_call_sync (RestProxyCall *call,
 
   g_object_unref (message);
 
+  g_free (priv->url);
+  priv->url = NULL;
+
   return ret;
 }
 
