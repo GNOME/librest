@@ -460,6 +460,15 @@ _rest_proxy_new_call (RestProxy *proxy)
   return call;
 }
 
+/**
+ * rest_proxy_new_call:
+ * @proxy: the #RestProxy
+ *
+ * Create a new #RestProxyCall for making a call to the web service.  This call
+ * is one-shot and should not be re-used for making multiple calls.
+ *
+ * Returns: a new #RestProxyCall.
+ */
 RestProxyCall *
 rest_proxy_new_call (RestProxy *proxy)
 {
