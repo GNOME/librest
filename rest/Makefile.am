@@ -97,8 +97,8 @@ Rest_@API_VERSION_AM@_gir_FILES = \
 	$(lib_headers) \
 	$(filter-out %private.h, $(lib_sources))
 Rest_@API_VERSION_AM@_gir_CFLAGS = -I$(top_srcdir)
-Rest_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0
-Rest_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0
+Rest_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 Gio-2.0
+Rest_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0 gio-2.0
 Rest_@API_VERSION_AM@_gir_SCANNERFLAGS = --accept-unprefixed
 Rest_@API_VERSION_AM@_gir_EXPORT_PACKAGES = rest-@API_VERSION@
 

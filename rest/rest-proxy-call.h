@@ -24,6 +24,7 @@
 #define _REST_PROXY_CALL
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include <rest/rest-params.h>
 
 G_BEGIN_DECLS
@@ -162,6 +163,13 @@ gboolean rest_proxy_call_async (RestProxyCall                *call,
                                 gpointer                      userdata,
                                 GError                      **error);
 
+void rest_proxy_call_call_async (RestProxyCall       *call,
+                                 GCancellable        *cancellable,
+                                 GAsyncReadyCallback  callback,
+                                 gpointer             user_data);
+gboolean rest_proxy_call_call_finish (RestProxyCall *call,
+                                     GAsyncResult  *result,
+                                     GError       **error);
 
 typedef void (*RestProxyCallContinuousCallback) (RestProxyCall *call,
                                                  const gchar   *buf,
