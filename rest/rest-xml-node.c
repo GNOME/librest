@@ -135,7 +135,7 @@ _rest_xml_node_new ()
 }
 
 /**
- * rest_xml_node_ref:
+ * rest_xml_node_ref: (skip):
  * @node: a #RestXmlNode
  *
  * Increases the reference count of @node.
@@ -154,7 +154,7 @@ rest_xml_node_ref (RestXmlNode *node)
 }
 
 /**
- * rest_xml_node_unref:
+ * rest_xml_node_unref: (skip):
  * @node: a #RestXmlNode
  *
  * Decreases the reference count of @node. When its reference count drops to 0,
