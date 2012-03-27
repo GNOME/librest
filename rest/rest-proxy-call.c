@@ -721,6 +721,12 @@ prepare_message (RestProxyCall *call, GError **error_out)
   priv = GET_PRIVATE (call);
   call_class = REST_PROXY_CALL_GET_CLASS (call);
 
+  /* Emit a warning if the caller is re-using RestProxyCall objects */
+  if (priv->url)
+  {
+    g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
+  }
+
   bound_url =_rest_proxy_get_bound_url (priv->proxy);
 
   if (_rest_proxy_get_binding_required (priv->proxy) && !bound_url)
@@ -759,7 +765,7 @@ prepare_message (RestProxyCall *call, GError **error_out)
     gchar *content_type;
     gsize content_len;
 
-    if (!call_class->serialize_params (call, &content_type, 
+    if (!call_class->serialize_params (call, &content_type,
                                        &content, &content_len, &error))
     {
       g_propagate_error (error_out, error);
@@ -767,7 +773,7 @@ prepare_message (RestProxyCall *call, GError **error_out)
     }
 
     message = soup_message_new (priv->method, priv->url);
-    soup_message_set_request (message, content_type, 
+    soup_message_set_request (message, content_type,
                               SOUP_MEMORY_TAKE, content, content_len);
 
     g_free (content_type);
@@ -862,14 +868,13 @@ rest_proxy_call_async (RestProxyCall                *call,
 
   if (priv->cur_call_closure)
   {
-    /* FIXME: Use GError here */
-    g_critical (G_STRLOC ": Call already in progress.");
+    g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
     return FALSE;
   }
 
   message = prepare_message (call, error);
   if (message == NULL)
-    goto error;
+    return FALSE;
 
   closure = g_slice_new0 (RestProxyCallAsyncClosure);
   closure->call = g_object_ref (call);
@@ -892,14 +897,7 @@ rest_proxy_call_async (RestProxyCall                *call,
                              message,
                              _call_message_completed_cb,
                              closure);
-  g_free (priv->url);
-  priv->url = NULL;
   return TRUE;
-
-error:
-  g_free (priv->url);
-  priv->url = NULL;
-  return FALSE;
 }
 
 static void
@@ -966,7 +964,7 @@ rest_proxy_call_invoke_async (RestProxyCall      *call,
     {
       g_simple_async_report_take_gerror_in_idle (G_OBJECT (call), callback,
                                                  user_data, error);
-      goto error;
+      return;
     }
 
   result = g_simple_async_result_new (G_OBJECT (call), callback,
@@ -1064,14 +1062,13 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
 
   if (priv->cur_call_closure)
   {
-    /* FIXME: Use GError here */
-    g_critical (G_STRLOC ": Call already in progress.");
+    g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
     return FALSE;
   }
 
   message = prepare_message (call, error);
   if (message == NULL)
-    goto error;
+    return FALSE;
 
   /* Must turn off accumulation */
   soup_message_body_set_accumulate (message->response_body, FALSE);
@@ -1102,14 +1099,7 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
                              message,
                              _continuous_call_message_completed_cb,
                              closure);
-  g_free (priv->url);
-  priv->url = NULL;
   return TRUE;
-
-error:
-  g_free (priv->url);
-  priv->url = NULL;
-  return FALSE;
 }
 
 static void
@@ -1208,14 +1198,13 @@ rest_proxy_call_upload (RestProxyCall                *call,
 
   if (priv->cur_call_closure)
   {
-    /* FIXME: Use GError here */
-    g_critical (G_STRLOC ": Call already in progress.");
+    g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
     return FALSE;
   }
 
   message = prepare_message (call, error);
   if (message == NULL)
-    goto error;
+    return FALSE;
 
   closure = g_slice_new0 (RestProxyCallUploadClosure);
   closure->call = g_object_ref (call);
@@ -1244,14 +1233,7 @@ rest_proxy_call_upload (RestProxyCall                *call,
                              message,
                              _upload_call_message_completed_cb,
                              closure);
-  g_free (priv->url);
-  priv->url = NULL;
   return TRUE;
-
-error:
-  g_free (priv->url);
-  priv->url = NULL;
-  return FALSE;
 }
 
 /**
@@ -1374,9 +1356,6 @@ rest_proxy_call_sync (RestProxyCall *call,
   ret = finish_call (call, message, error_out);
 
   g_object_unref (message);
-
-  g_free (priv->url);
-  priv->url = NULL;
 
   return ret;
 }
