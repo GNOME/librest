@@ -937,7 +937,7 @@ _call_message_call_completed_cb (SoupSession *session,
 }
 
 /**
- * rest_proxy_call_call_async:
+ * rest_proxy_call_invoke_async:
  * @call: a #RestProxyCall
  * @cancellable: (allow-none): an optional #GCancellable that can be used to
  *   cancel the call, or %NULL
@@ -947,10 +947,10 @@ _call_message_call_completed_cb (SoupSession *session,
  * A GIO-style version of rest_proxy_call_async().
  */
 void
-rest_proxy_call_call_async (RestProxyCall      *call,
-                            GCancellable       *cancellable,
-                            GAsyncReadyCallback callback,
-                            gpointer            user_data)
+rest_proxy_call_invoke_async (RestProxyCall      *call,
+                              GCancellable       *cancellable,
+                              GAsyncReadyCallback callback,
+                              gpointer            user_data)
 {
   GSimpleAsyncResult *result;
   RestProxyCallPrivate *priv;
@@ -966,11 +966,11 @@ rest_proxy_call_call_async (RestProxyCall      *call,
     {
       g_simple_async_report_take_gerror_in_idle (G_OBJECT (call), callback,
                                                  user_data, error);
-      return;
+      goto error;
     }
 
   result = g_simple_async_result_new (G_OBJECT (call), callback,
-                                      user_data, rest_proxy_call_call_async);
+                                      user_data, rest_proxy_call_invoke_async);
 
   if (cancellable != NULL)
     g_signal_connect (cancellable, "cancelled",
@@ -983,7 +983,7 @@ rest_proxy_call_call_async (RestProxyCall      *call,
 }
 
 /**
- * rest_proxy_call_call_finish:
+ * rest_proxy_call_invoke_finish:
  * @call: a #RestProxyCall
  * @result: the result from the #GAsyncReadyCallback
  * @error: optional #GError
@@ -991,7 +991,7 @@ rest_proxy_call_call_async (RestProxyCall      *call,
  * Returns: %TRUE on success
  */
 gboolean
-rest_proxy_call_call_finish (RestProxyCall *call,
+rest_proxy_call_invoke_finish (RestProxyCall *call,
                              GAsyncResult  *result,
                              GError       **error)
 {
@@ -1003,7 +1003,7 @@ rest_proxy_call_call_finish (RestProxyCall *call,
   simple = G_SIMPLE_ASYNC_RESULT (result);
 
   g_return_val_if_fail (g_simple_async_result_is_valid (result,
-        G_OBJECT (call), rest_proxy_call_call_async), FALSE);
+        G_OBJECT (call), rest_proxy_call_invoke_async), FALSE);
 
   if (g_simple_async_result_propagate_error (simple, error))
     return FALSE;
@@ -1262,7 +1262,7 @@ error:
  * the callback will not be invoked.
  *
  * N.B. this method should only be used with rest_proxy_call_async() and NOT
- * rest_proxy_call_call_async().
+ * rest_proxy_call_invoke_async().
  */
 gboolean
 rest_proxy_call_cancel (RestProxyCall *call)
