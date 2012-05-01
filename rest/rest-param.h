@@ -30,6 +30,8 @@
 
 G_BEGIN_DECLS
 
+#define REST_TYPE_PARAM (gtk_css_section_get_type ())
+
 /**
  * RestMemoryUse:
  * @REST_MEMORY_STATIC: the memory block can be assumed to always exist for the
@@ -46,6 +48,8 @@ typedef enum {
 
 
 typedef struct _RestParam RestParam;
+
+GType rest_param_get_type (void) G_GNUC_CONST;
 
 RestParam *rest_param_new_string (const char    *name,
                                   RestMemoryUse  use,

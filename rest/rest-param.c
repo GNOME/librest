@@ -52,6 +52,8 @@ struct _RestParam {
   GDestroyNotify owner_dnotify;
 };
 
+G_DEFINE_BOXED_TYPE (RestParam, rest_param, rest_param_ref, rest_param_unref)
+
 /**
  * rest_param_new_full:
  * @name: the parameter name
