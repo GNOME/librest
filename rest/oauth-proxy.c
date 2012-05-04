@@ -756,6 +756,19 @@ oauth_proxy_set_signature_host (OAuthProxy *proxy,
   priv->signature_host = g_strdup (signature_host);
 }
 
+/**
+ * oauth_proxy_new_echo_proxy:
+ * @proxy: an #OAuthProxy
+ * @service_url: the service URL
+ * @url_format: the URL format
+ * @binding_required: whether a binding is required
+ *
+ * Create a new <ulink
+ * url="http://www.scribd.com/doc/26707268/OAuth-Echo-Identity-Veri%EF%AC%81cation-Delegation-Draft">OAuth
+ * Echo</ulink> proxy.
+ *
+ * Returns: (transfer full): a new OAuth Echo proxy
+ */
 RestProxy *
 oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
                             /* TODO: should this be a function on the base url? */

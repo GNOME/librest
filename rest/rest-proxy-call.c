@@ -1390,9 +1390,9 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
  * rest_proxy_call_get_response_headers:
  * @call: The #RestProxyCall
  *
- * Returns:  pointer to a hash table of headers. This hash table must not be
- * changed. You should call g_hash_table_unref() when you have finished with
- * it.
+ * Returns: (transfer container): pointer to a hash table of
+ * headers. This hash table must not be changed. You should call
+ * g_hash_table_unref() when you have finished with it.
  */
 GHashTable *
 rest_proxy_call_get_response_headers (RestProxyCall *call)

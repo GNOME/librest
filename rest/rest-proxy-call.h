@@ -179,7 +179,7 @@ typedef void (*RestProxyCallContinuousCallback) (RestProxyCall *call,
                                                  gpointer       userdata);
 
 gboolean rest_proxy_call_continuous (RestProxyCall                    *call,
-                                     RestProxyCallContinuousCallback   cb,
+                                     RestProxyCallContinuousCallback   callback,
                                      GObject                          *weak_object,
                                      gpointer                          userdata,
                                      GError                          **error);
@@ -192,7 +192,7 @@ typedef void (*RestProxyCallUploadCallback) (RestProxyCall *call,
                                              gpointer       userdata);
 
 gboolean rest_proxy_call_upload (RestProxyCall                *call,
-                                 RestProxyCallUploadCallback   cb,
+                                 RestProxyCallUploadCallback   callback,
                                  GObject                      *weak_object,
                                  gpointer                      userdata,
                                  GError                      **error);

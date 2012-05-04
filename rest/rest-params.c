@@ -170,7 +170,7 @@ rest_params_are_strings (RestParams *params)
  * The values are owned by the #RestParams, so don't destroy the #RestParams
  * before the hash table.
  *
- * Returns: a new #GHashTable.
+ * Returns: (element-type utf8 Rest.Param) (transfer container): a new #GHashTable.
  **/
 GHashTable *
 rest_params_as_string_hash_table (RestParams *params)

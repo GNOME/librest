@@ -58,7 +58,8 @@ G_DEFINE_BOXED_TYPE (RestParam, rest_param, rest_param_ref, rest_param_unref)
  * rest_param_new_full:
  * @name: the parameter name
  * @use: the #RestMemoryUse describing how the memory can be used
- * @data: a pointer to the start of the data
+ * @data: (array length=length) (element-type guint8): a pointer to
+ *   the start of the data
  * @length: the length of the data
  * @content_type: the content type of the data
  * @filename: the original filename, or %NULL
@@ -109,12 +110,14 @@ rest_param_new_full (const char    *name,
 /**
  * rest_param_new_with_owner:
  * @name: the parameter name
- * @data: a pointer to the start of the data
+ * @data: (array length=length) (element-type guint8): a pointer to
+ *   the start of the data
  * @length: the length of the data
  * @content_type: the content type of the data
- * @filename: the original filename, or %NULL
- * @owner: pointer to an object that owns @data
- * @owner_dnotify: a function to free/unref @owner when the buffer is freed
+ * @filename: (allow-none): the original filename, or %NULL
+ * @owner: (transfer full): pointer to an object that owns @data
+ * @owner_dnotify: (allow-none): a function to free/unref @owner when
+ *   the buffer is freed
  *
  * Create a new #RestParam called @name with @length bytes of @data as the
  * value.  @content_type is the type of the data as a MIME type, for example
@@ -260,7 +263,7 @@ rest_param_is_string (RestParam *param)
  * Get the content of @param.  The content should be treated as read-only and
  * not modified in any way.
  *
- * Returns: the content.
+ * Returns: (transfer none): the content.
  **/
 gconstpointer
 rest_param_get_content (RestParam *param)
