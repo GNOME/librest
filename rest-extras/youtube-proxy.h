@@ -81,7 +81,7 @@ typedef void (*YoutubeProxyUploadCallback)(YoutubeProxy  *proxy,
                                            gsize          uploaded,
                                            const GError  *error,
                                            GObject       *weak_object,
-                                           gpointer       userdata);
+                                           gpointer       user_data);
 
 gboolean youtube_proxy_upload_async (YoutubeProxy              *self,
                                      const gchar               *filename,
@@ -89,7 +89,7 @@ gboolean youtube_proxy_upload_async (YoutubeProxy              *self,
                                      gboolean                   incomplete,
                                      YoutubeProxyUploadCallback callback,
                                      GObject                   *weak_object,
-                                     gpointer                   userdata,
+                                     gpointer                   user_data,
                                      GError                   **error);
 
 G_END_DECLS

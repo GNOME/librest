@@ -336,6 +336,21 @@ _message_wrote_data_cb (SoupMessage               *msg,
                        closure->user_data);
 }
 
+/**
+ * youtube_proxy_upload_async:
+ * @self: a #YoutubeProxy
+ * @filename: filename
+ * @fields: fields
+ * @incomplete: incomplete
+ * @callback: (scope async): callback to invoke upon completion
+ * @weak_object:
+ * @user_data: user data to pass to the callback
+ * @error: a #GError pointer, or %NULL
+ *
+ * Upload a file.
+ *
+ * Returns: %TRUE, or %FALSE if the file could not be opened
+ */
 gboolean
 youtube_proxy_upload_async (YoutubeProxy              *self,
                             const gchar               *filename,
@@ -343,7 +358,7 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
                             gboolean                   incomplete,
                             YoutubeProxyUploadCallback callback,
                             GObject                   *weak_object,
-                            gpointer                   userdata,
+                            gpointer                   user_data,
                             GError                   **error)
 {
   SoupMultipart *mp;
@@ -406,7 +421,7 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
   _set_upload_headers (self, message->request_headers, filename);
 
   closure = _upload_async_closure_new (self, callback, message, weak_object,
-                                       userdata);
+                                       user_data);
 
   g_signal_connect (message,
                     "wrote-body-data",

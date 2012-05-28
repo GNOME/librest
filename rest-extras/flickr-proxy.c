@@ -376,6 +376,8 @@ flickr_proxy_is_successful (RestXmlNode *root, GError **error)
  *
  * See http://www.flickr.com/services/api/upload.api.html for details on
  * uploading to Flickr.
+ *
+ * Returns: (type FlickrProxyCall) (transfer full): a new #FlickrProxyCall
  */
 RestProxyCall *
 flickr_proxy_new_upload (FlickrProxy *proxy)
@@ -402,6 +404,8 @@ flickr_proxy_new_upload (FlickrProxy *proxy)
  *
  * See http://www.flickr.com/services/api/upload.api.html for details on
  * uploading to Flickr.
+ *
+ * Returns: (type FlickrProxyCall) (transfer full): a new #FlickrProxyCall
  */
 RestProxyCall *
 flickr_proxy_new_upload_for_file (FlickrProxy *proxy, const char *filename, GError **error)
