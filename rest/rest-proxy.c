@@ -183,7 +183,8 @@ authenticate (RestProxy   *self,
 {
     RestProxyPrivate *priv = GET_PRIVATE (self);
 
-    soup_auth_authenticate (auth, priv->username, priv->password);
+    if (!retrying)
+      soup_auth_authenticate (auth, priv->username, priv->password);
 }
 
 static void
