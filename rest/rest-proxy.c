@@ -58,7 +58,8 @@ enum
   PROP_USER_AGENT,
   PROP_DISABLE_COOKIES,
   PROP_USERNAME,
-  PROP_PASSWORD
+  PROP_PASSWORD,
+  PROP_SSL_STRICT
 };
 
 static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
@@ -105,6 +106,14 @@ rest_proxy_get_property (GObject   *object,
     case PROP_PASSWORD:
       g_value_set_string (value, priv->password);
       break;
+    case PROP_SSL_STRICT: {
+      gboolean ssl_strict;
+      g_object_get (G_OBJECT(priv->session),
+                    "ssl-strict", &ssl_strict,
+                    NULL);
+      g_value_set_boolean (value, ssl_strict);
+      break;
+    }
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -148,6 +157,14 @@ rest_proxy_set_property (GObject      *object,
     case PROP_PASSWORD:
       g_free (priv->password);
       priv->password = g_value_dup_string (value);
+      break;
+    case PROP_SSL_STRICT:
+      g_object_set (G_OBJECT(priv->session),
+                    "ssl-strict", g_value_get_boolean (value),
+                    NULL);
+      g_object_set (G_OBJECT(priv->session_sync),
+                    "ssl-strict", g_value_get_boolean (value),
+                    NULL);
       break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -294,6 +311,15 @@ rest_proxy_class_init (RestProxyClass *klass)
                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class,
                                    PROP_PASSWORD,
+                                   pspec);
+
+  pspec = g_param_spec_boolean ("ssl-strict",
+                                "Strictly validate SSL certificates",
+                                "Whether certificate errors should be considered a connection error",
+                                TRUE,
+                                G_PARAM_READWRITE);
+  g_object_class_install_property (object_class,
+                                   PROP_SSL_STRICT,
                                    pspec);
 }
 
