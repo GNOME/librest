@@ -24,6 +24,7 @@
 #define _REST_PROXY
 
 #include <glib-object.h>
+#include <rest/rest-proxy-auth.h>
 #include <rest/rest-proxy-call.h>
 
 G_BEGIN_DECLS
@@ -77,7 +78,7 @@ struct _RestProxyClass {
   RestProxyCall *(*new_call)(RestProxy *proxy);
   gboolean (*simple_run_valist)(RestProxy *proxy, gchar **payload,
       goffset *len, GError **error, va_list params);
-  gboolean (*authenticate)(RestProxy *proxy, gboolean retrying);
+  gboolean (*authenticate)(RestProxy *proxy, RestProxyAuth *auth, gboolean retrying);
 
   /*< private >*/
   /* padding for future expansion */

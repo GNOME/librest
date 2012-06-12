@@ -28,6 +28,7 @@
 #include <libsoup/soup-gnome.h>
 #endif
 
+#include "rest-proxy-auth-private.h"
 #include "rest-proxy.h"
 #include "rest-private.h"
 
@@ -200,7 +201,9 @@ rest_proxy_dispose (GObject *object)
 }
 
 static gboolean
-default_authenticate_cb (RestProxy *self, gboolean retrying)
+default_authenticate_cb (RestProxy *self,
+                         G_GNUC_UNUSED RestProxyAuth *auth,
+                         gboolean retrying)
 {
   /* We only want to try the credentials once, otherwise we get in an
    * infinite loop with failed credentials, retrying the same invalid
@@ -212,16 +215,19 @@ default_authenticate_cb (RestProxy *self, gboolean retrying)
 static void
 authenticate (RestProxy   *self,
               SoupMessage *msg,
-              SoupAuth    *auth,
+              SoupAuth    *soup_auth,
               gboolean     retrying,
               SoupSession *session)
 {
   RestProxyPrivate *priv = GET_PRIVATE (self);
+  RestProxyAuth *rest_auth;
   gboolean try_auth;
 
-  g_signal_emit(self, signals[AUTHENTICATE], 0, retrying, &try_auth);
-  if (try_auth)
-    soup_auth_authenticate (auth, priv->username, priv->password);
+  rest_auth = rest_proxy_auth_new (self, session, msg, soup_auth);
+  g_signal_emit(self, signals[AUTHENTICATE], 0, rest_auth, retrying, &try_auth);
+  if (try_auth && !rest_proxy_auth_is_paused (rest_auth))
+    soup_auth_authenticate (soup_auth, priv->username, priv->password);
+  g_object_unref (G_OBJECT (rest_auth));
 }
 
 static void
@@ -355,6 +361,14 @@ rest_proxy_class_init (RestProxyClass *klass)
    * If these credentials fail, the signal will be
    * emitted again, with @retrying set to %TRUE, which will
    * continue until FALSE is returned from the callback.
+   *
+   * If you call rest_proxy_auth_pause() on @auth before
+   * returning, then you can the authentication credentials on
+   * the RestProxy object asynchronously. You have to make sure
+   * that @auth does not get destroyed with g_object_ref().
+   * You can then unpause the authentication with
+   * rest_proxy_auth_unpause() when everything is ready for it
+   * to continue.
    **/
   signals[AUTHENTICATE] =
       g_signal_new ("authenticate",
@@ -362,7 +376,8 @@ rest_proxy_class_init (RestProxyClass *klass)
                     G_SIGNAL_RUN_LAST,
                     G_STRUCT_OFFSET (RestProxyClass, authenticate),
                     g_signal_accumulator_true_handled, NULL, NULL,
-                    G_TYPE_BOOLEAN, 1,
+                    G_TYPE_BOOLEAN, 2,
+                    REST_TYPE_PROXY_AUTH,
                     G_TYPE_BOOLEAN);
 
   proxy_class->authenticate = default_authenticate_cb;
