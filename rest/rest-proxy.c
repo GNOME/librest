@@ -62,6 +62,14 @@ enum
   PROP_SSL_STRICT
 };
 
+enum {
+  AUTHENTICATE,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
+
 static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
                                                char     **payload, 
                                                goffset   *len,
@@ -191,6 +199,16 @@ rest_proxy_dispose (GObject *object)
   G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
 }
 
+static gboolean
+default_authenticate_cb (RestProxy *self, gboolean retrying)
+{
+  /* We only want to try the credentials once, otherwise we get in an
+   * infinite loop with failed credentials, retrying the same invalid
+   * ones again and again
+   */
+  return !retrying;
+}
+
 static void
 authenticate (RestProxy   *self,
               SoupMessage *msg,
@@ -198,10 +216,12 @@ authenticate (RestProxy   *self,
               gboolean     retrying,
               SoupSession *session)
 {
-    RestProxyPrivate *priv = GET_PRIVATE (self);
+  RestProxyPrivate *priv = GET_PRIVATE (self);
+  gboolean try_auth;
 
-    if (!retrying)
-      soup_auth_authenticate (auth, priv->username, priv->password);
+  g_signal_emit(self, signals[AUTHENTICATE], 0, retrying, &try_auth);
+  if (try_auth)
+    soup_auth_authenticate (auth, priv->username, priv->password);
 }
 
 static void
@@ -299,7 +319,7 @@ rest_proxy_class_init (RestProxyClass *klass)
                                "username",
                                "The username for authentication",
                                NULL,
-                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class,
                                    PROP_USERNAME,
                                    pspec);
@@ -308,7 +328,7 @@ rest_proxy_class_init (RestProxyClass *klass)
                                "password",
                                "The password for authentication",
                                NULL,
-                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class,
                                    PROP_PASSWORD,
                                    pspec);
@@ -321,6 +341,31 @@ rest_proxy_class_init (RestProxyClass *klass)
   g_object_class_install_property (object_class,
                                    PROP_SSL_STRICT,
                                    pspec);
+
+  /**
+   * RestProxy::authenticate:
+   * @proxy: the proxy
+   * @retrying: %TRUE if this is the second (or later) attempt
+   *
+   * Emitted when the proxy requires authentication. If
+   * credentials are available, set the 'username' and 'password'
+   * properties on @proxy and return TRUE from the callback.
+   * This will cause the signal emission to stop, and librest will
+   * try to connect with these credentials
+   * If these credentials fail, the signal will be
+   * emitted again, with @retrying set to %TRUE, which will
+   * continue until FALSE is returned from the callback.
+   **/
+  signals[AUTHENTICATE] =
+      g_signal_new ("authenticate",
+                    G_OBJECT_CLASS_TYPE (object_class),
+                    G_SIGNAL_RUN_LAST,
+                    G_STRUCT_OFFSET (RestProxyClass, authenticate),
+                    g_signal_accumulator_true_handled, NULL, NULL,
+                    G_TYPE_BOOLEAN, 1,
+                    G_TYPE_BOOLEAN);
+
+  proxy_class->authenticate = default_authenticate_cb;
 }
 
 static void

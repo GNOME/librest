@@ -77,10 +77,11 @@ struct _RestProxyClass {
   RestProxyCall *(*new_call)(RestProxy *proxy);
   gboolean (*simple_run_valist)(RestProxy *proxy, gchar **payload,
       goffset *len, GError **error, va_list params);
+  gboolean (*authenticate)(RestProxy *proxy, gboolean retrying);
 
   /*< private >*/
   /* padding for future expansion */
-  gpointer _padding_dummy[8];
+  gpointer _padding_dummy[7];
 };
 
 #define REST_PROXY_ERROR rest_proxy_error_quark ()
