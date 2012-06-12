@@ -32,6 +32,7 @@ RestProxyAuth* rest_proxy_auth_new (RestProxy *proxy,
                                     SoupSession *session,
                                     SoupMessage *message,
                                     SoupAuth *auth);
+gboolean rest_proxy_auth_is_paused (RestProxyAuth *auth);
 
 G_END_DECLS
 

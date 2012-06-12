@@ -87,3 +87,41 @@ rest_proxy_auth_new (RestProxy *proxy,
 
   return rest_auth;
 }
+
+void
+rest_proxy_auth_pause (RestProxyAuth *auth)
+{
+  g_return_if_fail (REST_IS_PROXY_AUTH (auth));
+
+  if (auth->priv->paused)
+      return;
+
+  auth->priv->paused = TRUE;
+  soup_session_pause_message (auth->priv->session, auth->priv->message);
+}
+
+void
+rest_proxy_auth_unpause (RestProxyAuth *auth)
+{
+  RestProxy *proxy;
+  gchar *username;
+  gchar *password;
+
+  g_return_if_fail (REST_IS_PROXY_AUTH (auth));
+  g_return_if_fail (auth->priv->paused);
+
+  proxy = REST_PROXY (auth->priv->proxy);
+  g_object_get (G_OBJECT (proxy), "username", &username, "password", &password, NULL);
+  soup_auth_authenticate (auth->priv->auth, username, password);
+  g_free (username);
+  g_free (password);
+  soup_session_unpause_message (auth->priv->session, auth->priv->message);
+  auth->priv->paused = FALSE;
+}
+
+G_GNUC_INTERNAL gboolean rest_proxy_auth_is_paused (RestProxyAuth *auth)
+{
+  g_return_val_if_fail (REST_IS_PROXY_AUTH (auth), FALSE);
+
+  return auth->priv->paused;
+}
