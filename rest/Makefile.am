@@ -6,6 +6,8 @@ lib_sources = \
 	rest-param.c			\
 	rest-params.c			\
 	rest-proxy.c 			\
+	rest-proxy-auth.c		\
+	rest-proxy-auth-private.h	\
 	rest-proxy-call.c		\
 	rest-proxy-call-private.h	\
 	rest-xml-node.c			\
@@ -25,6 +27,7 @@ lib_headers = \
 	rest-param.h		\
 	rest-params.h		\
 	rest-proxy.h		\
+	rest-proxy-auth.h	\
 	rest-proxy-call.h	\
 	rest-enum-types.h	\
 	oauth-proxy.h		\
