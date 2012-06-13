@@ -148,6 +148,8 @@ rest_proxy_call_finalize (GObject *object)
   g_free (priv->payload);
   g_free (priv->status_message);
 
+  g_free (priv->url);
+
   G_OBJECT_CLASS (rest_proxy_call_parent_class)->finalize (object);
 }
 
