@@ -52,6 +52,9 @@ INTROSPECTION_GIRS = RestExtras-@API_VERSION@.gir
 INTROSPECTION_SCANNER_ARGS = --add-include-path=$(top_builddir)/rest --identifier-prefix=
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/rest
 
+REST_EXTRAS_CINCLUDES=$(patsubst %,--c-include='rest/%',$(shell echo $(lib_headers)))
+INTROSPECTION_SCANNER_ARGS += $(REST_EXTRAS_CINCLUDES)
+
 RestExtras-@API_VERSION@.gir: librest-extras-@API_VERSION@.la Makefile
 
 RestExtras_@API_VERSION_AM@_gir_NAMESPACE = RestExtras

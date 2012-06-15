@@ -101,6 +101,8 @@ Rest_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 Gio-2.0
 Rest_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0 gio-2.0
 Rest_@API_VERSION_AM@_gir_SCANNERFLAGS = --accept-unprefixed
 Rest_@API_VERSION_AM@_gir_EXPORT_PACKAGES = rest-@API_VERSION@
+REST_CINCLUDES=$(patsubst %,--c-include='rest/%',$(shell echo $(lib_headers)))
+INTROSPECTION_SCANNER_ARGS = $(REST_CINCLUDES)
 
 girdir = $(datadir)/gir-1.0
 dist_gir_DATA = $(INTROSPECTION_GIRS)
