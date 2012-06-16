@@ -1,4 +1,13 @@
 #!/bin/sh
+
+set -e
+
+test -n "$srcdir" || srcdir=`dirname "$0"`
+test -n "$srcdir" || srcdir=.
+
+olddir=`pwd`
+cd "$srcdir"
+
 GTKDOCIZE=`which gtkdocize`
 if test -z $GTKDOCIZE; then
   echo "*** No gtk-doc support ***"
@@ -10,6 +19,6 @@ fi
 
 ACLOCAL="${ACLOCAL-aclocal} $ACLOCAL_FLAGS" autoreconf -v -i
 
-if test -z "$NOCONFIGURE"; then
-    exec ./configure "$@"
-fi
+cd "$olddir"
+
+test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"
