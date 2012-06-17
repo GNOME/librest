@@ -20,6 +20,7 @@
  *
  */
 
+#include <string.h>
 #include <libxml/xmlreader.h>
 
 #include "rest-private.h"
@@ -56,7 +57,7 @@ rest_xml_parser_new (void)
  * rest_xml_parser_parse_from_data:
  * @parser: a #RestXmlParser
  * @data: the XML content to parse
- * @len: the length of @data
+ * @len: the length of @data, or -1 if @data is a nul-terminated string
  *
  * Parse the XML in @data, and return a new #RestXmlNode.  If @data is invalid
  * XML, %NULL is returned.
@@ -81,6 +82,9 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   GQueue nodes = G_QUEUE_INIT;
 
   g_return_val_if_fail (REST_IS_XML_PARSER (parser), NULL);
+
+  if (len == -1)
+    len = strlen (data);
 
   _rest_setup_debugging ();
 
