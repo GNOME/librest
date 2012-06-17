@@ -26,7 +26,6 @@
 #include "oauth-proxy-call.h"
 #include "oauth-proxy-private.h"
 #include "rest-proxy-call-private.h"
-#include "sha1.h"
 
 G_DEFINE_TYPE (OAuthProxyCall, oauth_proxy_call, REST_TYPE_PROXY_CALL)
 
@@ -163,8 +162,9 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   /* PLAINTEXT signature value is the HMAC-SHA1 key value */
   key = sign_plaintext (priv);
 
-  signature = hmac_sha1 (key, text->str);
-
+  signature = g_compute_hmac_for_string (G_CHECKSUM_SHA1,
+                                         (guchar *)key, strlen (key),
+                                         text->str, -1);
   g_free (key);
   g_string_free (text, TRUE);
 

@@ -27,7 +27,6 @@
 #include "oauth2-proxy-call.h"
 #include "oauth2-proxy-private.h"
 #include "rest-proxy-call-private.h"
-#include "sha1.h"
 
 G_DEFINE_TYPE (OAuth2ProxyCall, oauth2_proxy_call, REST_TYPE_PROXY_CALL)
 
