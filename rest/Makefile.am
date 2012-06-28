@@ -18,7 +18,9 @@ lib_sources = \
 	oauth-proxy-private.h 		\
 	oauth2-proxy.c			\
 	oauth2-proxy-call.c		\
-	oauth2-proxy-private.h
+	oauth2-proxy-private.h 		\
+	sha1.c				\
+	sha1.h
 lib_headers = \
 	rest-param.h		\
 	rest-params.h		\
