@@ -1,6 +1,6 @@
 m4_define([api_major], [0])
 m4_define([api_minor], [7])
-m4_define([api_micro], [13])
+m4_define([api_micro], [90])
 
 m4_define([rest_version], [api_major.api_minor.api_micro])
 
