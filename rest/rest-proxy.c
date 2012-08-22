@@ -391,7 +391,7 @@ rest_proxy_init (RestProxy *self)
   priv->session = soup_session_async_new ();
   priv->session_sync = soup_session_sync_new ();
 
-#if REST_SYSTEM_CA_FILE
+#ifdef REST_SYSTEM_CA_FILE
   /* with ssl-strict (defaults TRUE) setting ssl-ca-file forces all
    * certificates to be trusted */
   g_object_set (priv->session,
