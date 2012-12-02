@@ -303,7 +303,7 @@ oauth_proxy_call_init (OAuthProxyCall *self)
 }
 
 void
-oauth_proxy_call_parse_token_reponse (OAuthProxyCall *call)
+oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
 {
   OAuthProxyPrivate *priv;
   GHashTable *form;
@@ -323,6 +323,15 @@ oauth_proxy_call_parse_token_reponse (OAuthProxyCall *call)
   priv->oauth_10a = g_hash_table_lookup (form, "oauth_callback_confirmed") != NULL;
 
   g_hash_table_destroy (form);
+}
+
+/*
+ * Stub to keep ABI because this was the original (typo'd) function name.
+ */
+void
+oauth_proxy_call_parse_token_reponse (OAuthProxyCall *call)
+{
+  oauth_proxy_call_parse_token_response (call);
 }
 
 #if BUILD_TESTS

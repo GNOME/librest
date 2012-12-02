@@ -426,7 +426,7 @@ oauth_proxy_request_token (OAuthProxy *proxy,
   }
 
   /* TODO: sanity check response */
-  oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
+  oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
 
   g_object_unref (call);
 
@@ -446,7 +446,7 @@ request_token_cb (RestProxyCall *call,
   g_assert (proxy);
 
   if (!error) {
-    oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
+    oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
   }
 
   data->callback (proxy, error, weak_object, data->user_data);
@@ -543,7 +543,7 @@ oauth_proxy_access_token (OAuthProxy *proxy,
   }
 
   /* TODO: sanity check response */
-  oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
+  oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
 
   g_object_unref (call);
 
@@ -563,7 +563,7 @@ access_token_cb (RestProxyCall *call,
   g_assert (proxy);
 
   if (!error) {
-    oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
+    oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
   }
 
   data->callback (proxy, error, weak_object, data->user_data);

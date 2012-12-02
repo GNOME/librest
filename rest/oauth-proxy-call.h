@@ -62,6 +62,9 @@ typedef struct {
 
 GType oauth_proxy_call_get_type (void);
 
+void oauth_proxy_call_parse_token_response (OAuthProxyCall *call);
+
+G_GNUC_DEPRECATED_FOR(oauth_proxy_call_parse_token_response)
 void oauth_proxy_call_parse_token_reponse (OAuthProxyCall *call);
 
 G_END_DECLS

@@ -133,7 +133,7 @@ rest_proxy_error_quark
 <FILE>oauth-proxy-call</FILE>
 <TITLE>OAuthProxyCall</TITLE>
 OAuthProxyCall
-oauth_proxy_call_parse_token_reponse
+oauth_proxy_call_parse_token_response
 <SUBSECTION Standard>
 OAuthProxyCallClass
 OAUTH_PROXY_CALL
