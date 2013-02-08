@@ -120,8 +120,12 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   OAuthProxyPrivate *priv;
   RestProxyCallPrivate *callpriv;
   char *key, *signature, *ep, *eep;
+  const char *content_type;
   GString *text;
   GHashTable *all_params;
+  RestParamsIter params_iter;
+  RestParam *param;
+  gboolean encode_query_params = TRUE;
 
   priv = PROXY_GET_PRIVATE (proxy);
   callpriv = call->priv;
@@ -147,11 +151,28 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   }
   g_string_append_c (text, '&');
 
+
+
+  /* If one of the call's parameters is a multipart/form-data parameter, the
+     signature base string must be generated with only the oauth parameters */
+  rest_params_iter_init(&params_iter, callpriv->params);
+  while(rest_params_iter_next(&params_iter, (gpointer)&key, (gpointer)&param)) {
+    content_type = rest_param_get_content_type(param);
+    if (strcmp(content_type, "multipart/form-data") == 0){
+      encode_query_params = FALSE;
+      break;
+    }
+  }
+
+
+
   /* Merge the OAuth parameters with the query parameters */
   all_params = g_hash_table_new (g_str_hash, g_str_equal);
   merge_hashes (all_params, oauth_params);
-  if (!priv->oauth_echo)
-    merge_params (all_params, callpriv->params);
+  if (encode_query_params && !priv->oauth_echo) {
+      merge_params (all_params, callpriv->params);
+  }
+
 
   ep = encode_params (all_params);
   eep = OAUTH_ENCODE_STRING (ep);
