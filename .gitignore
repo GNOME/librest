@@ -47,6 +47,7 @@ examples/get-fireeagle-location
 examples/get-flickr-favorites
 examples/lastfm-shout
 examples/post-twitter
+examples/post-twitter-media
 examples/test-raw
 examples/test-xml
 rest-extras/test-runner
