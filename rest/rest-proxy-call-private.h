@@ -47,6 +47,9 @@ struct _RestProxyCallPrivate {
   guint status_code;
   gchar *status_message;
 
+  GCancellable *cancellable;
+  gulong cancel_sig;
+
   RestProxy *proxy;
 
   RestProxyCallAsyncClosure *cur_call_closure;

@@ -110,6 +110,12 @@ rest_proxy_call_dispose (GObject *object)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (object);
 
+  if (priv->cancellable)
+    {
+      g_signal_handler_disconnect (priv->cancellable, priv->cancel_sig);
+      g_clear_object (&priv->cancellable);
+    }
+
   if (priv->params)
   {
     rest_params_free (priv->params);
@@ -921,8 +927,6 @@ _call_message_call_completed_cb (SoupSession *session,
   call = REST_PROXY_CALL (
       g_async_result_get_source_object (G_ASYNC_RESULT (result)));
 
-  // FIXME: disconnect cancellable ?
-
   finish_call (call, message, &error);
 
   if (error != NULL)
@@ -973,8 +977,11 @@ rest_proxy_call_invoke_async (RestProxyCall      *call,
                                       user_data, rest_proxy_call_invoke_async);
 
   if (cancellable != NULL)
-    g_signal_connect (cancellable, "cancelled",
-        G_CALLBACK (_call_message_call_cancelled_cb), call);
+    {
+      priv->cancel_sig = g_signal_connect (cancellable, "cancelled",
+          G_CALLBACK (_call_message_call_cancelled_cb), call);
+      priv->cancellable = g_object_ref (cancellable);
+    }
 
   _rest_proxy_queue_message (priv->proxy,
                              message,
@@ -1258,6 +1265,12 @@ rest_proxy_call_cancel (RestProxyCall *call)
 
   priv = GET_PRIVATE (call);
   closure = priv->cur_call_closure;
+
+  if (priv->cancellable)
+    {
+      g_signal_handler_disconnect (priv->cancellable, priv->cancel_sig);
+      g_clear_object (&priv->cancellable);
+    }
 
   if (closure)
   {
