@@ -28,6 +28,7 @@
 #include <rest/rest-proxy-call.h>
 #include <rest/rest-xml-node.h>
 #include <libsoup/soup.h>
+#include "glib-compat.h"
 
 G_BEGIN_DECLS
 

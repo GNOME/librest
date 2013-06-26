@@ -3,6 +3,8 @@ CLEANFILES =
 # For some reason I can't use $(librest_@API_VERSION@_la_SOURCES) in
 # test_runner_SOURCES, so we have to do this
 lib_sources = \
+	glib-compat.h			\
+	glib-compat.c			\
 	rest-param.c			\
 	rest-params.c			\
 	rest-proxy.c 			\

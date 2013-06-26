@@ -22,6 +22,7 @@
 
 #include <rest/rest-proxy-auth.h>
 #include <rest/rest-proxy-auth-private.h>
+#include "rest-private.h"
 
 G_DEFINE_TYPE (RestProxyAuth, rest_proxy_auth, G_TYPE_OBJECT)
 
