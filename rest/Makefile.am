@@ -25,6 +25,9 @@ lib_sources = \
 	oauth2-proxy-private.h 		\
 	sha1.c				\
 	sha1.h
+nodist_lib_sources = \
+	rest-marshal.h		\
+	rest-marshal.c
 lib_headers = \
 	rest-param.h		\
 	rest-params.h		\
@@ -39,6 +42,9 @@ lib_headers = \
 	rest-xml-node.h		\
 	rest-xml-parser.h
 
+EXTRA_DIST = \
+	rest-marshal.txt
+
 lib_LTLIBRARIES = librest-@API_VERSION@.la
 librest_@API_VERSION@_la_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS) \
 		    $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
@@ -49,6 +55,7 @@ librest_@API_VERSION@_la_LIBADD = $(GLIB_LIBS) $(GTHREAD_LIBS) \
                     $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(XML_LIBS) \
 		    $(GCOV_LDFLAGS)
 librest_@API_VERSION@_la_SOURCES = $(lib_sources) $(lib_headers)
+nodist_librest_@API_VERSION@_la_SOURCES = $(nodist_lib_sources)
 librest_@API_VERSION@_la_HEADERS = $(lib_headers)
 librest_@API_VERSION@_ladir = $(includedir)/rest-@API_VERSION@/rest
 
@@ -76,12 +83,21 @@ rest-enum-types.c: rest-proxy.h rest-proxy-call.h Makefile rest-enum-types.h
 	&& cp xgen-gtbc rest-enum-types.c  \
 	&& rm -f xgen-gtbc
 
+BUILT_SOURCES = rest-marshal.c rest-marshal.h
+
+rest-marshal.c: rest-marshal.txt
+	$(AM_V_GEN)echo "#include \"rest-marshal.h\"" > $@ && \
+		glib-genmarshal --body $< >> $@ || (rm -f $@ && exit 1)
+
+rest-marshal.h: rest-marshal.txt
+	$(AM_V_GEN)glib-genmarshal --header $< > $@ || (rm -f $@ && exit 1)
+
 
 # Test suite
 TESTS = test-runner
 check_PROGRAMS = test-runner
 
-test_runner_SOURCES = test-runner.c $(lib_sources) $(lib_headers)
+test_runner_SOURCES = test-runner.c $(lib_sources) $(nodist_lib_sources) $(lib_headers)
 test_runner_CFLAGS = -DBUILD_TESTS $(librest_@API_VERSION@_la_CFLAGS) $(GCOV_CFLAGS)
 test_runner_LDFLAGS = $(librest_@API_VERSION@_la_LIBADD) $(GCOV_LDFLAGS)
 

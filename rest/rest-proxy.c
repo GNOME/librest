@@ -28,6 +28,7 @@
 #include <libsoup/soup-gnome.h>
 #endif
 
+#include "rest-marshal.h"
 #include "rest-proxy-auth-private.h"
 #include "rest-proxy.h"
 #include "rest-private.h"
@@ -375,7 +376,8 @@ rest_proxy_class_init (RestProxyClass *klass)
                     G_OBJECT_CLASS_TYPE (object_class),
                     G_SIGNAL_RUN_LAST,
                     G_STRUCT_OFFSET (RestProxyClass, authenticate),
-                    g_signal_accumulator_true_handled, NULL, NULL,
+                    g_signal_accumulator_true_handled, NULL,
+                    g_cclosure_user_marshal_BOOLEAN__OBJECT_BOOLEAN,
                     G_TYPE_BOOLEAN, 2,
                     REST_TYPE_PROXY_AUTH,
                     G_TYPE_BOOLEAN);
