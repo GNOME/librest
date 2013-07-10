@@ -608,7 +608,8 @@ finish_call (RestProxyCall *call, SoupMessage *message, GError **error)
       (SoupMessageHeadersForeachFunc)_populate_headers_hash_table,
       priv->response_headers);
 
-  priv->payload = g_memdup (message->response_body->data, message->response_body->length);
+  priv->payload = g_memdup (message->response_body->data,
+                            message->response_body->length + 1);
   priv->length = message->response_body->length;
 
   priv->status_code = message->status_code;
