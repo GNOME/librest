@@ -30,6 +30,7 @@ RestProxyCallError
 rest_proxy_call_set_method
 rest_proxy_call_get_method
 rest_proxy_call_set_function
+rest_proxy_call_get_function
 rest_proxy_call_add_header
 rest_proxy_call_add_headers
 rest_proxy_call_add_headers_from_valist

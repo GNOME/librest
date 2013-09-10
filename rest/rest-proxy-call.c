@@ -268,6 +268,29 @@ rest_proxy_call_set_function (RestProxyCall *call,
 }
 
 /**
+ * rest_proxy_call_get_function:
+ * @call: The #RestProxyCall
+ *
+ * Get the REST function that is going to be called on the proxy.
+ *
+ * Returns: The REST "function" for the current call, see also
+ * rest_proxy_call_set_function(). This string is owned by the #RestProxyCall
+ * and should not be freed.
+ * Since: 0.7.92
+ */
+const char *
+rest_proxy_call_get_function (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv;
+
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+  priv = GET_PRIVATE (call);
+
+  return priv->function;
+}
+
+
+/**
  * rest_proxy_call_add_header:
  * @call: The #RestProxyCall
  * @header: The name of the header to set
