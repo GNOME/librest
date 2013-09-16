@@ -50,6 +50,7 @@ struct _RestProxyPrivate {
   SoupSession *session;
   SoupSession *session_sync;
   gboolean disable_cookies;
+  char *ssl_ca_file;
 };
 
 enum
@@ -61,7 +62,8 @@ enum
   PROP_DISABLE_COOKIES,
   PROP_USERNAME,
   PROP_PASSWORD,
-  PROP_SSL_STRICT
+  PROP_SSL_STRICT,
+  PROP_SSL_CA_FILE
 };
 
 enum {
@@ -124,6 +126,10 @@ rest_proxy_get_property (GObject   *object,
       g_value_set_boolean (value, ssl_strict);
       break;
     }
+    case PROP_SSL_CA_FILE:
+      g_value_set_string (value, priv->ssl_ca_file);
+      break;
+
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -175,6 +181,10 @@ rest_proxy_set_property (GObject      *object,
       g_object_set (G_OBJECT(priv->session_sync),
                     "ssl-strict", g_value_get_boolean (value),
                     NULL);
+      break;
+    case PROP_SSL_CA_FILE:
+      g_free(priv->ssl_ca_file);
+      priv->ssl_ca_file = g_value_dup_string (value);
       break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -261,6 +271,7 @@ rest_proxy_finalize (GObject *object)
   g_free (priv->user_agent);
   g_free (priv->username);
   g_free (priv->password);
+  g_free (priv->ssl_ca_file);
 
   G_OBJECT_CLASS (rest_proxy_parent_class)->finalize (object);
 }
@@ -349,6 +360,15 @@ rest_proxy_class_init (RestProxyClass *klass)
                                    PROP_SSL_STRICT,
                                    pspec);
 
+  pspec = g_param_spec_string ("ssl-ca-file",
+                               "SSL CA file",
+                               "File containing SSL CA certificates.",
+                               NULL,
+                               G_PARAM_READWRITE);
+  g_object_class_install_property (object_class,
+                                   PROP_SSL_CA_FILE,
+                                   pspec);
+
   /**
    * RestProxy::authenticate:
    * @proxy: the proxy
@@ -403,6 +423,12 @@ rest_proxy_init (RestProxy *self)
                 "ssl-ca-file", REST_SYSTEM_CA_FILE,
                 NULL);
 #endif
+  g_object_bind_property (self, "ssl-ca-file",
+                          priv->session, "ssl-ca-file",
+                          G_BINDING_BIDIRECTIONAL);
+  g_object_bind_property (self, "ssl-ca-file",
+                          priv->session_sync, "ssl-ca-file",
+                          G_BINDING_BIDIRECTIONAL);
 
 #if WITH_GNOME
   soup_session_add_feature_by_type (priv->session,
