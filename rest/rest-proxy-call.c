@@ -508,10 +508,11 @@ rest_proxy_call_remove_param (RestProxyCall *call,
  * rest_proxy_call_get_params:
  * @call: The #RestProxyCall
  *
- * Get the parameters as a #GHashTable of parameter names to values.  The caller
- * should call g_hash_table_unref() when they have finished using it.
+ * Get the parameters as a #GHashTable of parameter names to values.  The
+ * returned value is owned by the RestProxyCall instance and should not
+ * be freed by the caller.
  *
- * Returns: A #GHashTable.
+ * Returns: A #RestParams.
  */
 RestParams *
 rest_proxy_call_get_params (RestProxyCall *call)
