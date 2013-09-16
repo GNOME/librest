@@ -70,6 +70,7 @@ custom_proxy_call_serialize (RestProxyCall *self,
   *content_type = g_strdup ("application/json");
   *content = g_strdup ("{}");
   *content_len = strlen (*content);
+  rest_proxy_call_set_function (self, "ping");
 
   return TRUE;
 }
@@ -137,7 +138,7 @@ main (int argc, char **argv)
   proxy = rest_proxy_new (url, FALSE);
   call = g_object_new (REST_TYPE_CUSTOM_PROXY_CALL, "proxy", proxy, NULL);
 
-  rest_proxy_call_set_function (call, "ping");
+  rest_proxy_call_set_function (call, "wrong-function");
 
   if (!rest_proxy_call_sync (call, &error)) {
     g_printerr ("Call failed: %s\n", error->message);

@@ -742,23 +742,13 @@ set_header (gpointer key, gpointer value, gpointer user_data)
   soup_message_headers_replace (headers, name, value);
 }
 
-static SoupMessage *
-prepare_message (RestProxyCall *call, GError **error_out)
+static gboolean
+set_url (RestProxyCall *call)
 {
   RestProxyCallPrivate *priv;
-  RestProxyCallClass *call_class;
-  const gchar *bound_url, *user_agent;
-  SoupMessage *message;
-  GError *error = NULL;
+  const gchar *bound_url;
 
   priv = GET_PRIVATE (call);
-  call_class = REST_PROXY_CALL_GET_CLASS (call);
-
-  /* Emit a warning if the caller is re-using RestProxyCall objects */
-  if (priv->url)
-  {
-    g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
-  }
 
   bound_url =_rest_proxy_get_bound_url (priv->proxy);
 
@@ -767,6 +757,8 @@ prepare_message (RestProxyCall *call, GError **error_out)
     g_critical (G_STRLOC ": URL requires binding and is unbound");
     return FALSE;
   }
+
+  g_free (priv->url);
 
   /* FIXME: Perhaps excessive memory duplication */
   if (priv->function)
@@ -780,6 +772,27 @@ prepare_message (RestProxyCall *call, GError **error_out)
     }
   } else {
     priv->url = g_strdup (bound_url);
+  }
+
+  return TRUE;
+}
+
+static SoupMessage *
+prepare_message (RestProxyCall *call, GError **error_out)
+{
+  RestProxyCallPrivate *priv;
+  RestProxyCallClass *call_class;
+  const gchar *user_agent;
+  SoupMessage *message;
+  GError *error = NULL;
+
+  priv = GET_PRIVATE (call);
+  call_class = REST_PROXY_CALL_GET_CLASS (call);
+
+  /* Emit a warning if the caller is re-using RestProxyCall objects */
+  if (priv->url)
+  {
+    g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
   }
 
   /* Allow an overrideable prepare function that is called before every
@@ -806,6 +819,16 @@ prepare_message (RestProxyCall *call, GError **error_out)
       return NULL;
     }
 
+    /* Reset priv->url as the serialize_params vcall may have called
+     * rest_proxy_call_set_function()
+     */
+    if (!set_url (call))
+    {
+        g_free (content);
+        g_free (content_type);
+        return NULL;
+    }
+
     message = soup_message_new (priv->method, priv->url);
     if (message == NULL) {
         g_free (content);
@@ -822,6 +845,11 @@ prepare_message (RestProxyCall *call, GError **error_out)
     g_free (content_type);
   } else if (rest_params_are_strings (priv->params)) {
     GHashTable *hash;
+
+    if (!set_url (call))
+    {
+        return NULL;
+    }
 
     hash = rest_params_as_string_hash_table (priv->params);
 
@@ -858,6 +886,12 @@ prepare_message (RestProxyCall *call, GError **error_out)
 
         soup_buffer_free (sb);
       }
+    }
+
+    if (!set_url (call))
+    {
+        soup_multipart_free (mp);
+        return NULL;
     }
 
     message = soup_form_request_new_from_multipart (priv->url, mp);
