@@ -111,7 +111,8 @@ if test "$with_ca_certificates" = "no"; then
 else
     if test -z "$with_ca_certificates"; then
         for f in /etc/pki/tls/certs/ca-bundle.crt \
-                 /etc/ssl/certs/ca-certificates.crt; do
+                 /etc/ssl/certs/ca-certificates.crt \
+                 /etc/ssl/ca-bundle.pem; do
             if test -f "$f"; then
                 with_ca_certificates="$f"
             fi
