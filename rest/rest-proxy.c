@@ -254,6 +254,16 @@ rest_proxy_constructed (GObject *object)
     g_object_unref (cookie_jar);
   }
 
+  if (REST_DEBUG_ENABLED(PROXY)) {
+    SoupSessionFeature *logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0);
+    soup_session_add_feature (priv->session, logger);
+    g_object_unref (logger);
+
+    logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0);
+    soup_session_add_feature (priv->session_sync, logger);
+    g_object_unref (logger);
+  }
+
   /* session lifetime is same as self, no need to keep signalid */
   g_signal_connect_swapped (priv->session, "authenticate",
                             G_CALLBACK(authenticate), object);
@@ -436,16 +446,6 @@ rest_proxy_init (RestProxy *self)
   soup_session_add_feature_by_type (priv->session_sync,
                                     SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
-
-  if (REST_DEBUG_ENABLED(PROXY)) {
-    SoupSessionFeature *logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0);
-    soup_session_add_feature (priv->session, logger);
-    g_object_unref (logger);
-
-    logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0);
-    soup_session_add_feature (priv->session_sync, logger);
-    g_object_unref (logger);
-  }
 }
 
 /**
