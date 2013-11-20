@@ -845,7 +845,7 @@ prepare_message (RestProxyCall *call, GError **error_out)
 }
 
 /**
- * rest_proxy_call_async: (skip):
+ * rest_proxy_call_async: (skip)
  * @call: The #RestProxyCall
  * @callback: a #RestProxyCallAsyncCallback to invoke on completion of the call
  * @weak_object: The #GObject to weakly reference and tie the lifecycle too
@@ -1248,7 +1248,7 @@ rest_proxy_call_upload (RestProxyCall                *call,
 }
 
 /**
- * rest_proxy_call_cancel: (skip):
+ * rest_proxy_call_cancel: (skip)
  * @call: The #RestProxyCall
  *
  * Cancel this call.  It may be too late to not actually send the message, but

@@ -135,7 +135,7 @@ _rest_xml_node_new ()
 }
 
 /**
- * rest_xml_node_ref: (skip):
+ * rest_xml_node_ref: (skip)
  * @node: a #RestXmlNode
  *
  * Increases the reference count of @node.
@@ -154,7 +154,7 @@ rest_xml_node_ref (RestXmlNode *node)
 }
 
 /**
- * rest_xml_node_unref: (skip):
+ * rest_xml_node_unref: (skip)
  * @node: a #RestXmlNode
  *
  * Decreases the reference count of @node. When its reference count drops to 0,
@@ -276,7 +276,7 @@ rest_xml_node_find (RestXmlNode *start,
  *
  * Recursively outputs given node and it's children.
  *
- * Return value: (transfer: full): xml string representing the node.
+ * Return value: (transfer full): xml string representing the node.
  */
 char *
 rest_xml_node_print (RestXmlNode *node)

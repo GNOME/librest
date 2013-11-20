@@ -382,20 +382,21 @@ rest_proxy_class_init (RestProxyClass *klass)
   /**
    * RestProxy::authenticate:
    * @proxy: the proxy
+   * @auth: authentication state
    * @retrying: %TRUE if this is the second (or later) attempt
    *
    * Emitted when the proxy requires authentication. If
    * credentials are available, set the 'username' and 'password'
-   * properties on @proxy and return TRUE from the callback.
+   * properties on @proxy and return %TRUE from the callback.
    * This will cause the signal emission to stop, and librest will
    * try to connect with these credentials
    * If these credentials fail, the signal will be
    * emitted again, with @retrying set to %TRUE, which will
-   * continue until FALSE is returned from the callback.
+   * continue until %FALSE is returned from the callback.
    *
    * If you call rest_proxy_auth_pause() on @auth before
    * returning, then you can the authentication credentials on
-   * the RestProxy object asynchronously. You have to make sure
+   * the #RestProxy object asynchronously. You have to make sure
    * that @auth does not get destroyed with g_object_ref().
    * You can then unpause the authentication with
    * rest_proxy_auth_unpause() when everything is ready for it
