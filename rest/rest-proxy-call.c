@@ -1035,12 +1035,12 @@ _continuous_call_message_got_chunk_cb (SoupMessage                    *msg,
 
 
 /**
- * rest_proxy_call_continuous:
+ * rest_proxy_call_continuous: (skip)
  * @call: The #RestProxyCall
  * @callback: a #RestProxyCallContinuousCallback to invoke when data is available
  * @weak_object: The #GObject to weakly reference and tie the lifecycle to
- * @userdata: data to pass to @callback
- * @error: a #GError, or %NULL
+ * @userdata: (closure): data to pass to @callback
+ * @error: (out) (allow-none): a #GError, or %NULL
  *
  * Asynchronously invoke @call but expect a continuous stream of content. This
  * means that the body data will not be accumulated and thus you cannot use
@@ -1173,8 +1173,8 @@ _upload_call_message_wrote_data_cb (SoupMessage                *msg,
 /**
  * rest_proxy_call_upload:
  * @call: The #RestProxyCall
- * @callback: a #RestProxyCallUploadCallback to invoke when a chunk of data was
- *   uploaded
+ * @callback: (scope async): a #RestProxyCallUploadCallback to invoke when a chunk
+ *   of data was uploaded
  * @weak_object: The #GObject to weakly reference and tie the lifecycle to
  * @userdata: data to pass to @callback
  * @error: a #GError, or %NULL

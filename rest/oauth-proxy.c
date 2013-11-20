@@ -317,7 +317,7 @@ auth_callback (RestProxyCall *call,
  * oauth_proxy_auth_step_async:
  * @proxy: an #OAuthProxy
  * @function: the function to invoke on the proxy
- * @callback: the callback to invoke when authorisation is complete
+ * @callback: (scope async): the callback to invoke when authorisation is complete
  * @weak_object: the #GObject to weakly reference and tie the lifecycle too
  * @user_data: data to pass to @callback
  * @error_out: a #GError, or %NULL
@@ -461,7 +461,7 @@ request_token_cb (RestProxyCall *call,
  * @proxy: an #OAuthProxy
  * @function: the function name to invoke
  * @callback_uri: the callback URI
- * @callback: a #OAuthProxyAuthCallback to invoke on completion
+ * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
  * @weak_object: #GObject to weakly reference and tie the lifecycle of the method call too
  * @user_data: user data to pass to @callback
  * @error: a #GError, or %NULL
@@ -578,7 +578,7 @@ access_token_cb (RestProxyCall *call,
  * @proxy: an #OAuthProxy
  * @function: the function name to invoke
  * @verifier: the verifier
- * @callback: a #OAuthProxyAuthCallback to invoke on completion
+ * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
  * @weak_object: #GObject to weakly reference and tie the lifecycle of the method call too
  * @user_data: user data to pass to @callback
  * @error: a #GError, or %NULL
