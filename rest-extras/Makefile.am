@@ -66,7 +66,7 @@ RestExtras_@API_VERSION_AM@_gir_FILES = \
 RestExtras_@API_VERSION_AM@_gir_CFLAGS = -I$(top_srcdir)
 RestExtras_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 libxml2-2.0
 RestExtras_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0
-RestExtras_@API_VERSION_AM@_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/rest/Rest-@API_VERSION@.gir --accept-unprefixed
+RestExtras_@API_VERSION_AM@_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/rest/Rest-@API_VERSION@.gir --accept-unprefixed --warn-all
 RestExtras_@API_VERSION_AM@_gir_EXPORT_PACKAGES = rest-extras-@API_VERSION@
 
 girdir = $(datadir)/gir-1.0
