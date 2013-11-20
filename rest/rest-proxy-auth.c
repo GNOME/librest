@@ -89,6 +89,15 @@ rest_proxy_auth_new (RestProxy *proxy,
   return rest_auth;
 }
 
+/**
+ * rest_proxy_auth_pause:
+ * @auth: a #RestProxyAuth
+ *
+ * Pauses @auth.
+ *
+ * If @auth is already paused, this function does not
+ * do anything.
+ */
 void
 rest_proxy_auth_pause (RestProxyAuth *auth)
 {
@@ -101,6 +110,12 @@ rest_proxy_auth_pause (RestProxyAuth *auth)
   soup_session_pause_message (auth->priv->session, auth->priv->message);
 }
 
+/**
+ * rest_proxy_auth_unpause:
+ * @auth: a paused #RestProxyAuth
+ *
+ * Unpauses a paused #RestProxyAuth instance.
+ */
 void
 rest_proxy_auth_unpause (RestProxyAuth *auth)
 {
