@@ -295,7 +295,7 @@ rest_proxy_call_add_header (RestProxyCall *call,
 /**
  * rest_proxy_call_add_headers:
  * @call: The #RestProxyCall
- * @Varargs: Header name and value pairs, followed by %NULL.
+ * @...: Header name and value pairs, followed by %NULL.
  *
  * Add the specified header name and value pairs to the call.  If a header
  * already exists, the new value will replace the old.
@@ -419,7 +419,7 @@ rest_proxy_call_add_param_full (RestProxyCall *call, RestParam *param)
 /**
  * rest_proxy_call_add_params:
  * @call: The #RestProxyCall
- * @Varargs: Parameter name and value pairs, followed by %NULL.
+ * @...: Parameter name and value pairs, followed by %NULL.
  *
  * Add the specified parameter name and value pairs to the call.  If a parameter
  * already exists, the new value will replace the old.

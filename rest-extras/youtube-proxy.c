@@ -343,7 +343,7 @@ _message_wrote_data_cb (SoupMessage               *msg,
  * @fields: fields
  * @incomplete: incomplete
  * @callback: (scope async): callback to invoke upon completion
- * @weak_object:
+ * @weak_object: an object instance used to tie the life cycle of the proxy to 
  * @user_data: user data to pass to the callback
  * @error: a #GError pointer, or %NULL
  *
