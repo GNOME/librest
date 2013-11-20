@@ -28,6 +28,7 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+build/test-driver
 docs/reference/rest*/*-decl*.txt
 docs/reference/rest*/*-overrides.txt
 docs/reference/rest*/*-undeclared.txt
@@ -54,6 +55,7 @@ rest-extras/test-runner
 rest/rest-enum-types.c
 rest/rest-enum-types.h
 rest/stamp-rest-enum-types.h
+rest/rest-marshal.[ch]
 rest/test-runner
 tests/custom-serialize
 tests/flickr
