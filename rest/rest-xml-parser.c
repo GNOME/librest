@@ -204,9 +204,15 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         }
         break;
       case XML_READER_TYPE_TEXT:
-        cur_node->content = g_strdup (G(xmlTextReaderConstValue (reader)));
-        REST_DEBUG (XML_PARSER, "Text content found: %s",
-                 cur_node->content);
+        if (cur_node)
+        {
+          cur_node->content = g_strdup (G(xmlTextReaderConstValue (reader)));
+          REST_DEBUG (XML_PARSER, "Text content found: %s",
+                   cur_node->content);
+        } else {
+          g_warning ("[XML_PARSER] " G_STRLOC ": "
+                     "Text content ignored at top level.");
+        }
         break;
       default:
         REST_DEBUG (XML_PARSER, "Found unknown content with type: 0x%x", 
