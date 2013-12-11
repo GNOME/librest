@@ -566,6 +566,42 @@ rest_proxy_get_user_agent (RestProxy *proxy)
   return priv->user_agent;
 }
 
+/**
+ * rest_proxy_add_soup_feature:
+ * @proxy: The #RestProxy
+ * @feature: A #SoupSessionFeature
+ *
+ * This method can be used to add specific features to the #SoupSession objects
+ * that are used by librest for its HTTP connections. For example, if one needs
+ * extensive control over the cookies which are used for the REST HTTP
+ * communication, it's possible to get full access to libsoup cookie API by
+ * using
+ *
+ *   <programlisting>
+ *   RestProxy *proxy = g_object_new(REST_TYPE_PROXY,
+ *                                   "url-format", url,
+ *                                   "disable-cookies", TRUE,
+ *                                   NULL);
+ *   SoupSessionFeature *cookie_jar = SOUP_SESSION_FEATURE(soup_cookie_jar_new ());
+ *   rest_proxy_add_soup_feature(proxy, cookie_jar);
+ *   </programlisting>
+ *
+ * Since: 0.7.92
+ */
+void
+rest_proxy_add_soup_feature (RestProxy *proxy, SoupSessionFeature *feature)
+{
+  RestProxyPrivate *priv;
+
+  g_return_if_fail (REST_IS_PROXY(proxy));
+  priv = GET_PRIVATE (proxy);
+  g_return_if_fail (priv->session != NULL);
+  g_return_if_fail (priv->session_sync != NULL);
+
+  soup_session_add_feature (priv->session, feature);
+  soup_session_add_feature (priv->session_sync, feature);
+}
+
 static RestProxyCall *
 _rest_proxy_new_call (RestProxy *proxy)
 {

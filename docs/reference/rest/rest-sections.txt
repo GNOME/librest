@@ -116,6 +116,7 @@ rest_proxy_bind
 rest_proxy_bind_valist
 rest_proxy_set_user_agent
 rest_proxy_get_user_agent
+rest_proxy_add_soup_feature
 rest_proxy_new_call
 rest_proxy_simple_run
 rest_proxy_simple_run_valist

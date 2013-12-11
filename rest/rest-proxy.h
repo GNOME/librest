@@ -24,6 +24,7 @@
 #define _REST_PROXY
 
 #include <glib-object.h>
+#include <libsoup/soup-session-feature.h>
 #include <rest/rest-proxy-auth.h>
 #include <rest/rest-proxy-call.h>
 
@@ -195,6 +196,9 @@ gboolean rest_proxy_bind_valist (RestProxy *proxy,
 void rest_proxy_set_user_agent (RestProxy *proxy, const char *user_agent);
 
 const gchar *rest_proxy_get_user_agent (RestProxy *proxy);
+
+void rest_proxy_add_soup_feature (RestProxy *proxy,
+                                  SoupSessionFeature *feature);
 
 RestProxyCall *rest_proxy_new_call (RestProxy *proxy);
 
