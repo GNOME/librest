@@ -45,6 +45,9 @@ main (int argc, char **argv)
 
   /* First stage authentication, this gets a request token */
   oauth_proxy_request_token (oproxy, "request_token.php", NULL, &error);
+  if (error != NULL && g_error_matches (error, REST_PROXY_ERROR, REST_PROXY_ERROR_CONNECTION))
+    return 0;
+
   g_assert_no_error (error);
   g_assert_cmpstr (priv->token, ==, "requestkey");
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");

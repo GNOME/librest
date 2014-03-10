@@ -87,6 +87,12 @@ request_token_cb (OAuthProxy   *proxy,
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   GError *err = NULL;
 
+  if (error != NULL && g_error_matches (error, REST_PROXY_ERROR, REST_PROXY_ERROR_CONNECTION))
+    {
+      g_main_loop_quit (loop);
+      return;
+    };
+
   g_assert_no_error ((GError *)error);
 
   g_assert_cmpstr (priv->token, ==, "requestkey");
