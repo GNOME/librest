@@ -748,7 +748,8 @@ prepare_message (RestProxyCall *call, GError **error_out)
   /* FIXME: Perhaps excessive memory duplication */
   if (priv->function)
   {
-    if (g_str_has_suffix (bound_url, "/"))
+    if (g_str_has_suffix (bound_url, "/")
+          || g_str_has_prefix (priv->function, "/"))
     {
       priv->url = g_strdup_printf ("%s%s", bound_url, priv->function);
     } else {
