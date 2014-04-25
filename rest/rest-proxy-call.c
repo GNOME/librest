@@ -783,6 +783,15 @@ prepare_message (RestProxyCall *call, GError **error_out)
     }
 
     message = soup_message_new (priv->method, priv->url);
+    if (message == NULL) {
+        g_free (content);
+        g_free (content_type);
+        g_set_error_literal (error_out,
+                             REST_PROXY_ERROR,
+                             REST_PROXY_ERROR_FAILED,
+                             "Could not parse URI");
+        return NULL;
+    }
     soup_message_set_request (message, content_type,
                               SOUP_MEMORY_TAKE, content, content_len);
 
