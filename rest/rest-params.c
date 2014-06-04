@@ -91,7 +91,7 @@ rest_params_add (RestParams *params, RestParam *param)
   g_return_if_fail (params);
   g_return_if_fail (param);
 
-  g_hash_table_insert (hash, (gpointer)rest_param_get_name (param), param);
+  g_hash_table_replace (hash, (gpointer)rest_param_get_name (param), param);
 }
 
 /**
