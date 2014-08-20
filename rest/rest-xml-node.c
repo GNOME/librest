@@ -271,7 +271,7 @@ rest_xml_node_find (RestXmlNode *start,
 }
 
 /**
- * rest_xml_node_print_node:
+ * rest_xml_node_print:
  * @node: #RestXmlNode
  *
  * Recursively outputs given node and it's children.
