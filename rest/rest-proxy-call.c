@@ -531,11 +531,11 @@ rest_proxy_call_remove_param (RestProxyCall *call,
  * rest_proxy_call_get_params:
  * @call: The #RestProxyCall
  *
- * Get the parameters as a #GHashTable of parameter names to values.  The
+ * Get the parameters as a #RestParams of parameter names to values.  The
  * returned value is owned by the RestProxyCall instance and should not
  * be freed by the caller.
  *
- * Returns: A #RestParams.
+ * Returns: (transfer none): A #RestParams.
  */
 RestParams *
 rest_proxy_call_get_params (RestProxyCall *call)
