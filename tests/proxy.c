@@ -115,6 +115,7 @@ ping_test (RestProxy *proxy)
     g_object_unref (call);
     return;
   }
+  g_assert(error == NULL);
 
   if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
     g_printerr ("wrong response code\n");
@@ -148,6 +149,7 @@ echo_test (RestProxy *proxy)
     g_object_unref (call);
     return;
   }
+  g_assert(error == NULL);
 
   if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
     g_printerr ("wrong response code\n");
@@ -187,6 +189,7 @@ reverse_test (RestProxy *proxy)
     g_object_unref (call);
     return;
   }
+  g_assert(error == NULL);
 
   if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
     g_printerr ("wrong response code\n");
@@ -229,6 +232,7 @@ status_ok_test (RestProxy *proxy, int status)
     g_object_unref (call);
     return;
   }
+  g_assert(error == NULL);
 
   if (rest_proxy_call_get_status_code (call) != status) {
     g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
@@ -285,6 +289,7 @@ test_status_ok (RestProxy *proxy, const char *function)
     g_object_unref (call);
     return;
   }
+  g_assert(error == NULL);
 
   if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
     g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
