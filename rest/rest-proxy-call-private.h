@@ -29,32 +29,6 @@
 
 G_BEGIN_DECLS
 
-typedef struct _RestProxyCallAsyncClosure RestProxyCallAsyncClosure;
-typedef struct _RestProxyCallContinuousClosure RestProxyCallContinuousClosure;
-typedef struct _RestProxyCallUploadClosure RestProxyCallUploadClosure;
-
-struct _RestProxyCallPrivate {
-  gchar *method;
-  gchar *function;
-  GHashTable *headers;
-  RestParams *params;
-  /* The real URL we're about to invoke */
-  gchar *url;
-
-  GHashTable *response_headers;
-  goffset length;
-  gchar *payload;
-  guint status_code;
-  gchar *status_message;
-
-  GCancellable *cancellable;
-  gulong cancel_sig;
-
-  RestProxy *proxy;
-
-  RestProxyCallAsyncClosure *cur_call_closure;
-};
-
 const char *rest_proxy_call_get_url (RestProxyCall *call);
 
 G_END_DECLS

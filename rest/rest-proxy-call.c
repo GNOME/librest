@@ -28,10 +28,6 @@
 #include "rest-private.h"
 #include "rest-proxy-call-private.h"
 
-G_DEFINE_TYPE (RestProxyCall, rest_proxy_call, G_TYPE_OBJECT)
-
-#define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_PROXY_CALL, RestProxyCallPrivate))
 
 struct _RestProxyCallAsyncClosure {
   RestProxyCall *call;
@@ -40,7 +36,7 @@ struct _RestProxyCallAsyncClosure {
   gpointer userdata;
   SoupMessage *message;
 };
-
+typedef struct _RestProxyCallAsyncClosure RestProxyCallAsyncClosure;
 
 struct _RestProxyCallContinuousClosure {
   RestProxyCall *call;
@@ -49,6 +45,7 @@ struct _RestProxyCallContinuousClosure {
   gpointer userdata;
   SoupMessage *message;
 };
+typedef struct _RestProxyCallContinuousClosure RestProxyCallContinuousClosure;
 
 struct _RestProxyCallUploadClosure {
   RestProxyCall *call;
@@ -58,6 +55,36 @@ struct _RestProxyCallUploadClosure {
   SoupMessage *message;
   gsize uploaded;
 };
+typedef struct _RestProxyCallUploadClosure RestProxyCallUploadClosure;
+
+
+G_DEFINE_TYPE (RestProxyCall, rest_proxy_call, G_TYPE_OBJECT)
+
+#define GET_PRIVATE(o) \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_PROXY_CALL, RestProxyCallPrivate))
+
+struct _RestProxyCallPrivate {
+  gchar *method;
+  gchar *function;
+  GHashTable *headers;
+  RestParams *params;
+  /* The real URL we're about to invoke */
+  gchar *url;
+
+  GHashTable *response_headers;
+  goffset length;
+  gchar *payload;
+  guint status_code;
+  gchar *status_message;
+
+  GCancellable *cancellable;
+  gulong cancel_sig;
+
+  RestProxy *proxy;
+
+  RestProxyCallAsyncClosure *cur_call_closure;
+};
+
 
 enum
 {
