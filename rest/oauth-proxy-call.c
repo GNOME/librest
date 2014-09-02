@@ -119,6 +119,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
 {
   OAuthProxyPrivate *priv;
   RestProxyCallPrivate *callpriv;
+  const char *url_str;
   char *key, *signature, *ep, *eep;
   const char *content_type;
   GString *text;
@@ -129,6 +130,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
 
   priv = PROXY_GET_PRIVATE (proxy);
   callpriv = call->priv;
+  url_str = rest_proxy_call_get_url (call);
 
   text = g_string_new (NULL);
   g_string_append (text, rest_proxy_call_get_method (REST_PROXY_CALL (call)));
@@ -136,7 +138,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   if (priv->oauth_echo) {
     g_string_append_uri_escaped (text, priv->service_url, NULL, FALSE);
   } else if (priv->signature_host != NULL) {
-    SoupURI *url = soup_uri_new (callpriv->url);
+    SoupURI *url = soup_uri_new (url_str);
     gchar *signing_url;
 
     soup_uri_set_host (url, priv->signature_host);
@@ -147,7 +149,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
     soup_uri_free (url);
     g_free (signing_url);
   } else {
-    g_string_append_uri_escaped (text, callpriv->url, NULL, FALSE);
+    g_string_append_uri_escaped (text, url_str, NULL, FALSE);
   }
   g_string_append_c (text, '&');
 

@@ -55,6 +55,8 @@ struct _RestProxyCallPrivate {
   RestProxyCallAsyncClosure *cur_call_closure;
 };
 
+const char *rest_proxy_call_get_url (RestProxyCall *call);
+
 G_END_DECLS
 
 #endif /* _REST_PROXY_CALL_PRIVATE */

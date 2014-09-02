@@ -1607,3 +1607,14 @@ rest_proxy_call_serialize_params (RestProxyCall *call,
 
   return FALSE;
 }
+
+G_GNUC_INTERNAL const char *
+rest_proxy_call_get_url (RestProxyCall *call)
+{
+  /* Ensure priv::url is current before returning it. This method is used
+   * by OAuthProxyCall::_prepare which expects set_url() to have been called,
+   * but this has been changed/broken by c66b6df
+   */
+  set_url(call);
+  return call->priv->url;
+}
