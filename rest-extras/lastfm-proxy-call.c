@@ -26,7 +26,6 @@
 #include <rest/rest-proxy-call.h>
 #include "lastfm-proxy-call.h"
 #include "lastfm-proxy-private.h"
-#include "rest/rest-proxy-call-private.h"
 #include "rest/sha1.h"
 
 G_DEFINE_TYPE (LastfmProxyCall, lastfm_proxy_call, REST_TYPE_PROXY_CALL)
@@ -36,17 +35,14 @@ _prepare (RestProxyCall *call, GError **error)
 {
   LastfmProxy *proxy = NULL;
   LastfmProxyPrivate *priv;
-  RestProxyCallPrivate *call_priv;
   GHashTable *params;
   char *s;
 
   g_object_get (call, "proxy", &proxy, NULL);
   priv = LASTFM_PROXY_GET_PRIVATE (proxy);
-  call_priv = call->priv;
-
 
   rest_proxy_call_add_params (call,
-                              "method", call_priv->function,
+                              "method", rest_proxy_call_get_function (call),
                               "api_key", priv->api_key,
                               NULL);
 
@@ -56,7 +52,7 @@ _prepare (RestProxyCall *call, GError **error)
   if (priv->session_key)
     rest_proxy_call_add_param (call, "sk", priv->session_key);
 
-  params = rest_params_as_string_hash_table (call_priv->params);
+  params = rest_params_as_string_hash_table (rest_proxy_call_get_params (call));
   s = lastfm_proxy_sign (proxy, params);
   g_hash_table_unref (params);
   rest_proxy_call_add_param (call, "api_sig", s);
