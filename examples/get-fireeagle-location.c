@@ -34,7 +34,9 @@ main (int argc, char **argv)
   RestXmlParser *parser;
   RestXmlNode *root, *node;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   /* Create the proxy */
   proxy = oauth_proxy_new (/* Consumer Key */

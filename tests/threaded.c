@@ -85,7 +85,9 @@ main (int argc, char **argv)
   char *url;
   int i;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   session = soup_session_sync_new ();
 

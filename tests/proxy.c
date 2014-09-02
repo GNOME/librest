@@ -283,7 +283,9 @@ main (int argc, char **argv)
   char *url;
   RestProxy *proxy;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   session = soup_session_async_new ();
 

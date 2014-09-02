@@ -37,7 +37,9 @@ main (int argc, char **argv)
   RestXmlParser *parser;
   RestXmlNode *root, *u_node, *node;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   /* Create the proxy */
   proxy = lastfm_proxy_new (API_KEY, SECRET);

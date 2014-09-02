@@ -47,7 +47,9 @@ test_extract_token ()
 int
 main (int argc, char **argv)
 {
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   test_extract_token ();
 

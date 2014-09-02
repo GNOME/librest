@@ -87,7 +87,9 @@ main (int argc, char **argv)
     { NULL }
   };
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   context = g_option_context_new ("- send a shout to a Last.fm user");
   g_option_context_add_main_entries (context, entries, NULL);

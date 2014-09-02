@@ -125,7 +125,9 @@ main (int argc, char **argv)
   int i;
   GError *error;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   session = soup_session_sync_new ();
 

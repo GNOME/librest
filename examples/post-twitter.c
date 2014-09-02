@@ -31,7 +31,9 @@ main (int argc, char **argv)
   GError *error = NULL;
   char pin[256];
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   if (argc != 2) {
     g_printerr ("$ post-twitter \"message\"\n");

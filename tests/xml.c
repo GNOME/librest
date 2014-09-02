@@ -33,7 +33,9 @@ main (int argc, char **argv)
   RestXmlNode *root, *node;
   char *xml;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
+#endif
 
   parser = rest_xml_parser_new ();
 
