@@ -44,13 +44,14 @@ _prepare (RestProxyCall *call, GError **error)
   priv = LASTFM_PROXY_GET_PRIVATE (proxy);
   call_priv = call->priv;
 
-  /* First reset the URL because Lastfm puts the function in the parameters */
-  call_priv->url = g_strdup (_rest_proxy_get_bound_url (REST_PROXY (proxy)));
 
   rest_proxy_call_add_params (call,
                               "method", call_priv->function,
                               "api_key", priv->api_key,
                               NULL);
+
+  /* Reset function because Lastfm puts the function in the parameters */
+  rest_proxy_call_set_function (call, NULL);
 
   if (priv->session_key)
     rest_proxy_call_add_param (call, "sk", priv->session_key);
