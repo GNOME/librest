@@ -79,6 +79,7 @@ main (int argc, char **argv)
   g_assert_cmpstr (node->content, ==, USERNAME);
 
   rest_xml_node_unref (root);
+  g_object_unref (parser);
   g_object_unref (call);
 
   g_object_unref (proxy);
