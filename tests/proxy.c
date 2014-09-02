@@ -152,18 +152,22 @@ echo_test (RestProxy *proxy)
   if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
     g_printerr ("wrong response code\n");
     errors++;
+    g_object_unref (call);
     return;
   }
   if (rest_proxy_call_get_payload_length (call) != 6) {
     g_printerr ("wrong length returned\n");
     errors++;
+    g_object_unref (call);
     return;
   }
   if (g_strcmp0 ("echome", rest_proxy_call_get_payload (call)) != 0) {
     g_printerr ("wrong string returned\n");
     errors++;
+    g_object_unref (call);
     return;
   }
+  g_object_unref (call);
 }
 
 static void
@@ -187,18 +191,22 @@ reverse_test (RestProxy *proxy)
   if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
     g_printerr ("wrong response code\n");
     errors++;
+    g_object_unref (call);
     return;
   }
   if (rest_proxy_call_get_payload_length (call) != 9) {
     g_printerr ("wrong length returned\n");
     errors++;
+    g_object_unref (call);
     return;
   }
   if (g_strcmp0 ("emesrever", rest_proxy_call_get_payload (call)) != 0) {
     g_printerr ("wrong string returned\n");
     errors++;
+    g_object_unref (call);
     return;
   }
+  g_object_unref (call);
 }
 
 static void
@@ -206,10 +214,13 @@ status_ok_test (RestProxy *proxy, int status)
 {
   RestProxyCall *call;
   GError *error = NULL;
+  char *status_str;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "status");
-  rest_proxy_call_add_param (call, "status", g_strdup_printf ("%d", status));
+  status_str = g_strdup_printf ("%d", status);
+  rest_proxy_call_add_param (call, "status", status_str);
+  g_free (status_str);
 
   if (!rest_proxy_call_run (call, NULL, &error)) {
     g_printerr ("Call failed: %s\n", error->message);
@@ -233,10 +244,13 @@ status_error_test (RestProxy *proxy, int status)
 {
   RestProxyCall *call;
   GError *error = NULL;
+  char *status_str;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "status");
-  rest_proxy_call_add_param (call, "status", g_strdup_printf ("%d", status));
+  status_str = g_strdup_printf ("%d", status);
+  rest_proxy_call_add_param (call, "status", status_str);
+  g_free (status_str);
 
   if (rest_proxy_call_run (call, NULL, &error)) {
     g_printerr ("Call succeeded should have failed");
@@ -244,6 +258,7 @@ status_error_test (RestProxy *proxy, int status)
     g_object_unref (call);
     return;
   }
+  g_error_free (error);
 
   if (rest_proxy_call_get_status_code (call) != status) {
     g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
