@@ -28,7 +28,6 @@
 int
 main (int argc, char **argv)
 {
-  GError *error = NULL;
   RestXmlParser *parser;
   RestXmlNode *root, *node;
   char *xml;

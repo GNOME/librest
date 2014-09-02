@@ -57,7 +57,6 @@ static void
 shout (RestProxy *proxy, const char *username, const char *message)
 {
   RestProxyCall *call;
-  RestXmlNode *root, *node;
   GError *error = NULL;
 
   call = rest_proxy_new_call (proxy);

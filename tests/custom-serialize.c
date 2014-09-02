@@ -108,12 +108,6 @@ server_callback (SoupServer *server, SoupMessage *msg,
   }
 }
 
-static gpointer
-func (gpointer data)
-{
-  return NULL;
-}
-
 int
 main (int argc, char **argv)
 {
@@ -121,7 +115,6 @@ main (int argc, char **argv)
   RestProxy *proxy;
   RestProxyCall *call;
   char *url;
-  int i;
   GError *error;
 
 #if !GLIB_CHECK_VERSION (2, 36, 0)
