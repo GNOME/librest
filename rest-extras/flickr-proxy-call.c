@@ -68,10 +68,10 @@ _prepare (RestProxyCall *call, GError **error)
   priv = FLICKR_PROXY_GET_PRIVATE (proxy);
 
   if (GET_PRIVATE (call)->upload) {
-    rest_proxy_bind (REST_PROXY(proxy), "upload");
+    rest_proxy_bind (REST_PROXY(proxy), "up", "upload");
     rest_proxy_call_set_function (call, NULL);
   } else {
-    rest_proxy_bind (REST_PROXY(proxy), "rest");
+    rest_proxy_bind (REST_PROXY(proxy), "api", "rest");
     rest_proxy_call_add_param (call, "method",
                                rest_proxy_call_get_function (call));
   /* We need to reset the function because Flickr puts the function in the
