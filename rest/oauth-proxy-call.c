@@ -25,7 +25,6 @@
 #include <rest/rest-proxy-call.h>
 #include "oauth-proxy-call.h"
 #include "oauth-proxy-private.h"
-#include "rest-proxy-call-private.h"
 #include "sha1.h"
 
 G_DEFINE_TYPE (OAuthProxyCall, oauth_proxy_call, REST_TYPE_PROXY_CALL)
@@ -118,7 +117,6 @@ static char *
 sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
 {
   OAuthProxyPrivate *priv;
-  RestProxyCallPrivate *callpriv;
   const char *url_str;
   char *key, *signature, *ep, *eep;
   const char *content_type;
@@ -129,7 +127,6 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   gboolean encode_query_params = TRUE;
 
   priv = PROXY_GET_PRIVATE (proxy);
-  callpriv = call->priv;
   url_str = rest_proxy_call_get_url (call);
 
   text = g_string_new (NULL);
@@ -157,7 +154,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
 
   /* If one of the call's parameters is a multipart/form-data parameter, the
      signature base string must be generated with only the oauth parameters */
-  rest_params_iter_init(&params_iter, callpriv->params);
+  rest_params_iter_init(&params_iter, rest_proxy_call_get_params (call));
   while(rest_params_iter_next(&params_iter, (gpointer)&key, (gpointer)&param)) {
     content_type = rest_param_get_content_type(param);
     if (strcmp(content_type, "multipart/form-data") == 0){
@@ -172,7 +169,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   all_params = g_hash_table_new (g_str_hash, g_str_equal);
   merge_hashes (all_params, oauth_params);
   if (encode_query_params && !priv->oauth_echo) {
-      merge_params (all_params, callpriv->params);
+      merge_params (all_params, rest_proxy_call_get_params (call));
   }
 
 
@@ -330,12 +327,15 @@ oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
 {
   OAuthProxyPrivate *priv;
   GHashTable *form;
+  OAuthProxy *proxy;
 
   /* TODO: sanity checks, error handling, probably return gboolean */
 
   g_return_if_fail (OAUTH_IS_PROXY_CALL (call));
 
-  priv = PROXY_GET_PRIVATE (REST_PROXY_CALL (call)->priv->proxy);
+  g_object_get (call, "proxy", &proxy, NULL);
+  priv = PROXY_GET_PRIVATE (proxy);
+  g_object_unref (proxy);
   g_assert (priv);
 
   form = soup_form_decode (rest_proxy_call_get_payload (REST_PROXY_CALL (call)));
