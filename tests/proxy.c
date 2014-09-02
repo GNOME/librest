@@ -36,6 +36,11 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
+#if SOUP_CHECK_VERSION (2, 28, 0)
+/* Avoid deprecation warning with newer libsoup */
+#define soup_message_headers_get soup_message_headers_get_one
+#endif
+
 static int errors = 0;
 
 static void
