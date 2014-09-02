@@ -340,6 +340,8 @@ oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
 
   form = soup_form_decode (rest_proxy_call_get_payload (REST_PROXY_CALL (call)));
 
+  g_free (priv->token);
+  g_free (priv->token_secret);
   priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
   priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
   /* This header should only exist for request_token replies, but its easier just to always check it */
