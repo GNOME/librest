@@ -188,8 +188,8 @@ flickr_proxy_new_with_token (const char *api_key,
                        "api-key", api_key,
                        "shared-secret", shared_secret,
                        "token", token,
-                       "url-format", "http://api.flickr.com/services/rest/",
-                       "binding-required", FALSE,
+                       "url-format", "http://api.flickr.com/services/%s/",
+                       "binding-required", TRUE,
                        NULL);
 }
 

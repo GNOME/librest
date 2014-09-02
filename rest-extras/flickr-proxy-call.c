@@ -70,13 +70,17 @@ _prepare (RestProxyCall *call, GError **error)
   priv = FLICKR_PROXY_GET_PRIVATE (proxy);
   call_priv = call->priv;
 
-  /* We need to reset the URL because Flickr puts the function in the parameters */
 
   if (GET_PRIVATE (call)->upload) {
-    call_priv->url = g_strdup ("http://api.flickr.com/services/upload/");
+    rest_proxy_bind (REST_PROXY(proxy), "upload");
+    rest_proxy_call_set_function (call, NULL);
   } else {
-    call_priv->url = g_strdup ("http://api.flickr.com/services/rest/");
-    rest_proxy_call_add_param (call, "method", call_priv->function);
+    rest_proxy_bind (REST_PROXY(proxy), "rest");
+    rest_proxy_call_add_param (call, "method",
+                               rest_proxy_call_get_function (call));
+  /* We need to reset the function because Flickr puts the function in the
+   * parameters, not in the base URL */
+    rest_proxy_call_set_function (call, NULL);
   }
 
   rest_proxy_call_add_param (call, "api_key", priv->api_key);
