@@ -164,7 +164,6 @@ stream_test (RestProxy *proxy)
 int
 main (int argc, char **argv)
 {
-  SoupSession *session;
   char *url;
   RestProxy *proxy;
 
@@ -172,8 +171,6 @@ main (int argc, char **argv)
   g_type_init ();
 #endif
   loop = g_main_loop_new (NULL, FALSE);
-
-  session = soup_session_async_new ();
 
   server = soup_server_new (NULL);
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);

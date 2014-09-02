@@ -283,7 +283,6 @@ test_status_ok (RestProxy *proxy, const char *function)
 int
 main (int argc, char **argv)
 {
-  SoupSession *session;
   SoupServer *server;
   char *url;
   RestProxy *proxy;
@@ -291,8 +290,6 @@ main (int argc, char **argv)
 #if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
 #endif
-
-  session = soup_session_async_new ();
 
   server = soup_server_new (NULL);
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);

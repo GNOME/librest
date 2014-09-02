@@ -79,7 +79,6 @@ func (gpointer data)
 int
 main (int argc, char **argv)
 {
-  SoupSession *session;
   SoupServer *server;
   GThread *threads[10];
   char *url;
@@ -88,8 +87,6 @@ main (int argc, char **argv)
 #if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
 #endif
-
-  session = soup_session_sync_new ();
 
   server = soup_server_new (NULL);
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
