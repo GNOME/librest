@@ -37,7 +37,7 @@ make_calls (OAuthProxy *oproxy)
   /* Make some test calls */
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "echo_api.php");
+  rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "foo", "bar");
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
@@ -45,7 +45,7 @@ make_calls (OAuthProxy *oproxy)
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "echo_api.php");
+  rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "numbers", "1234567890");
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
@@ -53,7 +53,7 @@ make_calls (OAuthProxy *oproxy)
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "echo_api.php");
+  rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "escape", "!£$%^&*()");
   if (!rest_proxy_call_run (call, NULL, &error))
     g_error ("Cannot make call: %s", error->message);
@@ -99,7 +99,7 @@ request_token_cb (OAuthProxy   *proxy,
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_access_token_async (proxy, "access_token.php", NULL,
+  oauth_proxy_access_token_async (proxy, "access-token", NULL,
                                   access_token_cb, NULL, NULL, &err);
   g_assert_no_error (err);
 }
@@ -130,13 +130,13 @@ main (int argc, char **argv)
 
   /* Create the proxy */
   proxy = oauth_proxy_new ("key", "secret",
-                           "http://term.ie/oauth/example/",
+                           "http://oauthbin.com/v1/",
                            FALSE);
   oproxy = OAUTH_PROXY (proxy);
   g_assert (oproxy);
 
   /* First stage authentication, this gets a request token */
-  oauth_proxy_request_token_async (oproxy, "request_token.php", NULL,
+  oauth_proxy_request_token_async (oproxy, "request-token", NULL,
                                    request_token_cb, NULL, NULL, &error);
   g_assert_no_error (error);
 

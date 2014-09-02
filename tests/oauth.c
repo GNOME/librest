@@ -39,14 +39,14 @@ main (int argc, char **argv)
 
   /* Create the proxy */
   proxy = oauth_proxy_new ("key", "secret",
-                           "http://term.ie/oauth/example/",
+                           "http://oauthbin.com/v1/",
                            FALSE);
   oproxy = OAUTH_PROXY (proxy);
   g_assert (oproxy);
   priv = PROXY_GET_PRIVATE (oproxy);
 
   /* First stage authentication, this gets a request token */
-  oauth_proxy_request_token (oproxy, "request_token.php", NULL, &error);
+  oauth_proxy_request_token (oproxy, "request-token", NULL, &error);
   if (error != NULL && g_error_matches (error, REST_PROXY_ERROR, REST_PROXY_ERROR_CONNECTION))
     return 0;
 
@@ -55,7 +55,7 @@ main (int argc, char **argv)
   g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
-  oauth_proxy_access_token (OAUTH_PROXY (proxy), "access_token.php", NULL, &error);
+  oauth_proxy_access_token (OAUTH_PROXY (proxy), "access-token", NULL, &error);
   g_assert_no_error (error);
 
   g_assert_cmpstr (priv->token, ==, "accesskey");
@@ -64,7 +64,7 @@ main (int argc, char **argv)
   /* Make some test calls */
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "echo_api.php");
+  rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "foo", "bar");
   if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
@@ -72,7 +72,7 @@ main (int argc, char **argv)
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "echo_api.php");
+  rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "numbers", "1234567890");
   if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
@@ -80,7 +80,7 @@ main (int argc, char **argv)
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "echo_api.php");
+  rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "escape", "!+£$%^&*()");
   if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
