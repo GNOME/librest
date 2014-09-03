@@ -16,7 +16,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_MACRO_DIR([build])
 
-AM_INIT_AUTOMAKE([1.11 foreign -Wno-portability no-define])
+AM_INIT_AUTOMAKE([1.11 foreign -Wno-portability no-define dist-xz])
 
 AM_SILENT_RULES([yes])
 
