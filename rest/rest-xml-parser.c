@@ -197,6 +197,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
         cur_node->content = g_strdup (G(xmlTextReaderConstValue (reader)));
         REST_DEBUG (XML_PARSER, "Text content found: %s",
                  cur_node->content);
+        break;
       default:
         REST_DEBUG (XML_PARSER, "Found unknown content with type: 0x%x", 
                  xmlTextReaderNodeType (reader));
