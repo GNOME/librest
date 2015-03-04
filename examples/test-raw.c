@@ -53,7 +53,7 @@ main (gint argc, gchar **argv)
 
   loop = g_main_loop_new (NULL, FALSE);
 
-  proxy = rest_proxy_new ("http://www.flickr.com/services/rest/", FALSE);
+  proxy = rest_proxy_new ("https://www.flickr.com/services/rest/", FALSE);
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_add_params (call,
                               "method", "flickr.test.echo",
