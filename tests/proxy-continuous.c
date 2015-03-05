@@ -139,7 +139,7 @@ static void
 stream_test (RestProxy *proxy)
 {
   RestProxyCall *call;
-  GError *error;
+  GError *error = NULL;
 
   client_count = 1;
 

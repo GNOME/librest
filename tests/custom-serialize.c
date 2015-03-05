@@ -115,7 +115,7 @@ main (int argc, char **argv)
   RestProxy *proxy;
   RestProxyCall *call;
   char *url;
-  GError *error;
+  GError *error = NULL;
 
 #if !GLIB_CHECK_VERSION (2, 36, 0)
   g_type_init ();
