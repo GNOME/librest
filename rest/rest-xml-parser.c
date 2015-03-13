@@ -40,6 +40,15 @@ rest_xml_parser_init (RestXmlParser *self)
 {
 }
 
+static void
+rest_xml_parser_xml_reader_error (void *arg,
+                                  const char *msg,
+                                  xmlParserSeverities severity,
+                                  xmlTextReaderLocatorPtr locator)
+{
+  REST_DEBUG(XML_PARSER, "%s", msg);
+}
+
 /**
  * rest_xml_parser_new:
  *
@@ -93,6 +102,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                NULL, /* URL? */
                                NULL, /* encoding */
                                XML_PARSE_RECOVER | XML_PARSE_NOCDATA);
+  xmlTextReaderSetErrorHandler(reader, rest_xml_parser_xml_reader_error, NULL);
 
   while (xmlTextReaderRead (reader) == 1)
   {
