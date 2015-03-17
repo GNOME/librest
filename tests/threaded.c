@@ -90,9 +90,9 @@ main (int argc, char **argv)
 
   server = soup_server_new (NULL);
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-  g_thread_create ((GThreadFunc)soup_server_run, server, FALSE, NULL);
-
   url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
+
+  g_thread_create ((GThreadFunc)soup_server_run, server, FALSE, NULL);
 
   for (i = 0; i < G_N_ELEMENTS (threads); i++) {
     threads[i] = g_thread_create (func, url, TRUE, NULL);
