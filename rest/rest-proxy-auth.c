@@ -135,6 +135,23 @@ rest_proxy_auth_unpause (RestProxyAuth *auth)
   auth->priv->paused = FALSE;
 }
 
+/**
+ * rest_proxy_auth_cancel:
+ * @auth: a #RestProxyAuth
+ *
+ * Cancel the authentication process
+ * by cancelling the associated #SoupMessage.
+ * It results in returning #GError REST_PROXY_ERROR_CANCELLED
+ * to the function that requested the authentication.
+ */
+void
+rest_proxy_auth_cancel (RestProxyAuth *auth)
+{
+  g_return_if_fail (REST_IS_PROXY_AUTH (auth));
+
+  soup_session_cancel_message (auth->priv->session, auth->priv->message, SOUP_STATUS_CANCELLED);
+}
+
 G_GNUC_INTERNAL gboolean rest_proxy_auth_is_paused (RestProxyAuth *auth)
 {
   g_return_val_if_fail (REST_IS_PROXY_AUTH (auth), FALSE);

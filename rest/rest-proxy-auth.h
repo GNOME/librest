@@ -66,6 +66,7 @@ GType rest_proxy_auth_get_type (void);
 
 void rest_proxy_auth_pause (RestProxyAuth *auth);
 void rest_proxy_auth_unpause (RestProxyAuth *auth);
+void rest_proxy_auth_cancel (RestProxyAuth *auth);
 
 G_END_DECLS
 
