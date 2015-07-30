@@ -245,6 +245,7 @@ steal_oauth_params (RestProxyCall *call, GHashTable *oauth_params)
 
   while (to_remove) {
     rest_params_remove (params, to_remove->data);
+    g_free (to_remove->data);
     to_remove = g_list_delete_link (to_remove, to_remove);
   }
 }
