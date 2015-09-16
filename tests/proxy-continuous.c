@@ -32,26 +32,31 @@ static int errors = 0;
 static GMainLoop *loop = NULL;
 
 #define NUM_CHUNKS 20
-static int server_count = 0;
-static gint client_count = 0;
+#define SIZE_CHUNK 4
+static guint8 server_count = 0;
+static guint8 client_count = 0;
 static SoupServer *server;
 
 static gboolean
 send_chunks (gpointer user_data)
 {
   SoupMessage *msg = SOUP_MESSAGE (user_data);
-  char *s;
   SoupBuffer *buf;
+  guint i;
+  guint8 data[SIZE_CHUNK];
 
-  s = g_strdup_printf ("%d %d %d %d\n",
-                       server_count, server_count,
-                       server_count, server_count);
-  buf = soup_buffer_new (SOUP_MEMORY_TAKE, s, strlen (s));
+  for (i = 0; i < SIZE_CHUNK; i++)
+  {
+    data[i] = server_count;
+    server_count++;
+  }
+
+  buf = soup_buffer_new (SOUP_MEMORY_COPY, data, SIZE_CHUNK);
 
   soup_message_body_append_buffer (msg->response_body, buf);
   soup_server_unpause_message (server, msg);
 
-  if (++server_count == NUM_CHUNKS)
+  if (server_count == NUM_CHUNKS * SIZE_CHUNK)
   {
     soup_message_body_complete (msg->response_body);
     return FALSE;
@@ -71,7 +76,6 @@ server_callback (SoupServer *server, SoupMessage *msg,
                                        SOUP_ENCODING_CHUNKED);
     soup_server_pause_message (server, msg);
 
-    server_count = 1;
     g_idle_add (send_chunks, msg);
   }
 }
@@ -84,7 +88,7 @@ _call_continuous_cb (RestProxyCall *call,
                      GObject       *weak_object,
                      gpointer       userdata)
 {
-  gint a = 0, b = 0, c = 0, d = 0;
+  guint i;
 
   if (error)
   {
@@ -102,7 +106,7 @@ _call_continuous_cb (RestProxyCall *call,
 
   if (buf == NULL && len == 0)
   {
-    if (client_count != NUM_CHUNKS)
+    if (client_count < NUM_CHUNKS * SIZE_CHUNK)
     {
       g_printerr ("stream ended prematurely\n");
       errors++;
@@ -110,25 +114,19 @@ _call_continuous_cb (RestProxyCall *call,
     goto out;
   }
 
-  if (sscanf (buf, "%d %d %d %d\n", &a, &b, &c, &d) != 4)
+  for (i = 0; i < len; i++)
   {
-    g_printerr ("stream data not formatted as expected\n");
-    errors++;
-    goto out;
+    if (buf[i] != client_count)
+    {
+      g_printerr ("stream data not as expected (got %d, expected %d)\n",
+                  (gint) buf[i], client_count);
+      errors++;
+      goto out;
+    }
+
+    client_count++;
   }
 
-  if (a != client_count ||
-      b != client_count ||
-      c != client_count ||
-      d != client_count)
-  {
-    g_printerr ("stream data not as expected (got %d %d %d %d, expected %d)\n",
-                a, b, c, d, client_count);
-    errors++;
-    goto out;
-  }
-
-  client_count++;
   return;
 out:
   g_main_loop_quit (loop);
@@ -140,8 +138,6 @@ stream_test (RestProxy *proxy)
 {
   RestProxyCall *call;
   GError *error = NULL;
-
-  client_count = 1;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "stream");
