@@ -41,7 +41,6 @@ static gboolean
 send_chunks (gpointer user_data)
 {
   SoupMessage *msg = SOUP_MESSAGE (user_data);
-  SoupBuffer *buf;
   guint i;
   guint8 data[SIZE_CHUNK];
 
@@ -51,9 +50,7 @@ send_chunks (gpointer user_data)
     server_count++;
   }
 
-  buf = soup_buffer_new (SOUP_MEMORY_COPY, data, SIZE_CHUNK);
-
-  soup_message_body_append_buffer (msg->response_body, buf);
+  soup_message_body_append (msg->response_body, SOUP_MEMORY_COPY, data, SIZE_CHUNK);
   soup_server_unpause_message (server, msg);
 
   if (server_count == NUM_CHUNKS * SIZE_CHUNK)
