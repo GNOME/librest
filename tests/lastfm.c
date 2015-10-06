@@ -71,8 +71,8 @@ main (int argc, char **argv)
   g_assert (u_node);
 
   node = rest_xml_node_find (u_node, "id");
-  g_assert (node);
-  g_assert_cmpstr (node->content, ==, "17038");
+  if (node != NULL)
+      g_assert_cmpstr (node->content, ==, "17038");
 
   node = rest_xml_node_find (u_node, "name");
   g_assert (node);
