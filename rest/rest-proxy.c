@@ -24,9 +24,6 @@
 #include <string.h>
 
 #include <libsoup/soup.h>
-#if WITH_GNOME
-#include <libsoup/soup-gnome.h>
-#endif
 
 #include "rest-marshal.h"
 #include "rest-proxy-auth-private.h"
@@ -412,11 +409,6 @@ rest_proxy_init (RestProxy *self)
   g_object_bind_property (self, "ssl-ca-file",
                           priv->session, "ssl-ca-file",
                           G_BINDING_BIDIRECTIONAL);
-
-#if WITH_GNOME
-  soup_session_add_feature_by_type (priv->session,
-                                    SOUP_TYPE_PROXY_RESOLVER_GNOME);
-#endif
 }
 
 /**
