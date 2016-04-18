@@ -1,8 +1,8 @@
-m4_define([api_major], [0])
-m4_define([api_minor], [7])
-m4_define([api_micro], [93])
+m4_define([rest_major], [0])
+m4_define([rest_minor], [9])
+m4_define([rest_micro], [0])
 
-m4_define([rest_version], [api_major.api_minor.api_micro])
+m4_define([rest_version], [rest_major.rest_minor.rest_micro])
 
 
 AC_PREREQ([2.63])
@@ -20,8 +20,8 @@ AM_INIT_AUTOMAKE([1.11 foreign -Wno-portability no-define dist-xz])
 
 AM_SILENT_RULES([yes])
 
-API_MAJOR=api_major
-API_MINOR=api_minor
+API_MAJOR=0
+API_MINOR=7
 AC_SUBST([API_VERSION],[$API_MAJOR.$API_MINOR])
 AC_SUBST([API_VERSION_AM],[$API_MAJOR\_$API_MINOR])
 AC_DEFINE_UNQUOTED(API_VERSION, [$API_VERSION], [API version])
