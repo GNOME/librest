@@ -169,6 +169,7 @@ void rest_proxy_call_invoke_async (RestProxyCall       *call,
                                    GCancellable        *cancellable,
                                    GAsyncReadyCallback  callback,
                                    gpointer             user_data);
+
 gboolean rest_proxy_call_invoke_finish (RestProxyCall *call,
                                         GAsyncResult  *result,
                                         GError       **error);

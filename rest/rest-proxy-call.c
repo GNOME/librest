@@ -1016,30 +1016,27 @@ _call_message_call_completed_cb (SoupSession *session,
                                  SoupMessage *message,
                                  gpointer     user_data)
 {
-  GSimpleAsyncResult *result = user_data;
+  GTask *task = user_data;
   RestProxyCall *call;
   GError *error = NULL;
 
-  call = REST_PROXY_CALL (
-      g_async_result_get_source_object (G_ASYNC_RESULT (result)));
+  call = REST_PROXY_CALL (g_task_get_source_object (task));
 
   finish_call (call, message, &error);
 
   if (error != NULL)
-    g_simple_async_result_take_error (result, error);
+    g_task_return_error (task, error);
   else
-    g_simple_async_result_set_op_res_gboolean (result, TRUE);
-
-  g_simple_async_result_complete (result);
+    g_task_return_boolean (task, TRUE);
 
   g_object_unref (call);
-  g_object_unref (result);
+  g_object_unref (task);
 }
 
 /**
  * rest_proxy_call_invoke_async:
  * @call: a #RestProxyCall
- * @cancellable: (allow-none): an optional #GCancellable that can be used to
+ * @cancellable: (nullable): an optional #GCancellable that can be used to
  *   cancel the call, or %NULL
  * @callback: (scope async): callback to call when the async call is finished
  * @user_data: (closure): user data for the callback
@@ -1052,25 +1049,22 @@ rest_proxy_call_invoke_async (RestProxyCall      *call,
                               GAsyncReadyCallback callback,
                               gpointer            user_data)
 {
-  GSimpleAsyncResult *result;
-  RestProxyCallPrivate *priv;
+  RestProxyCallPrivate *priv = rest_proxy_call_get_instance_private (call);
+  GTask *task;
   SoupMessage *message;
   GError *error = NULL;
 
   g_return_if_fail (REST_IS_PROXY_CALL (call));
-  priv = GET_PRIVATE (call);
+  g_return_if_fail (callback == NULL || G_IS_CANCELLABLE (cancellable));
   g_assert (priv->proxy);
 
   message = prepare_message (call, &error);
+  task = g_task_new (call, cancellable, callback, user_data);
   if (message == NULL)
     {
-      g_simple_async_report_take_gerror_in_idle (G_OBJECT (call), callback,
-                                                 user_data, error);
+      g_task_return_error (task, error);
       return;
     }
-
-  result = g_simple_async_result_new (G_OBJECT (call), callback,
-                                      user_data, rest_proxy_call_invoke_async);
 
   if (cancellable != NULL)
     {
@@ -1082,7 +1076,7 @@ rest_proxy_call_invoke_async (RestProxyCall      *call,
   _rest_proxy_queue_message (priv->proxy,
                              message,
                              _call_message_call_completed_cb,
-                             result);
+                             task);
 }
 
 /**
@@ -1094,24 +1088,16 @@ rest_proxy_call_invoke_async (RestProxyCall      *call,
  * Returns: %TRUE on success
  */
 gboolean
-rest_proxy_call_invoke_finish (RestProxyCall *call,
-                             GAsyncResult  *result,
-                             GError       **error)
+rest_proxy_call_invoke_finish (RestProxyCall  *call,
+                               GAsyncResult   *result,
+                               GError        **error)
 {
-  GSimpleAsyncResult *simple;
+
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
-  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, call), FALSE);
 
-  simple = G_SIMPLE_ASYNC_RESULT (result);
-
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-        G_OBJECT (call), rest_proxy_call_invoke_async), FALSE);
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return FALSE;
-
-  return g_simple_async_result_get_op_res_gboolean (simple);
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 static void
