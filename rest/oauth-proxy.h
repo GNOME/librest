@@ -106,20 +106,6 @@ typedef void (*OAuthProxyAuthCallback)(OAuthProxy   *proxy,
                                        GObject      *weak_object,
                                        gpointer      userdata);
 
-G_GNUC_DEPRECATED
-gboolean oauth_proxy_auth_step (OAuthProxy *proxy,
-                                const char *function,
-                                GError    **error);
-
-G_GNUC_DEPRECATED
-gboolean oauth_proxy_auth_step_async (OAuthProxy *proxy,
-                             const char *function,
-                             OAuthProxyAuthCallback callback,
-                             GObject *weak_object,
-                             gpointer user_data,
-                             GError **error_out);
-
-
 gboolean oauth_proxy_request_token (OAuthProxy *proxy,
                                     const char *function,
                                     const char *callback_uri,
