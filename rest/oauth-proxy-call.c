@@ -352,15 +352,6 @@ oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
   g_hash_table_destroy (form);
 }
 
-/*
- * Stub to keep ABI because this was the original (typo'd) function name.
- */
-void
-oauth_proxy_call_parse_token_reponse (OAuthProxyCall *call)
-{
-  oauth_proxy_call_parse_token_response (call);
-}
-
 #if BUILD_TESTS
 /* Test cases from http://wiki.oauth.net/TestCases */
 void
