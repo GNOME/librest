@@ -117,10 +117,6 @@ main (int argc, char **argv)
   char *url;
   GError *error = NULL;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   server = soup_server_new (NULL);
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
   url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
@@ -146,7 +142,7 @@ main (int argc, char **argv)
   }
 
   done:
-  
+
   g_object_unref (call);
   g_object_unref (proxy);
   soup_server_quit (server);

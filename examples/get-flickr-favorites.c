@@ -106,10 +106,6 @@ main (int argc, char **argv)
   char *frob, *url;
   const char *token;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   proxy = flickr_proxy_new ("cf4e02fc57240a9b07346ad26e291080", "cdfa2329cb206e50");
 
   if (argc > 1) {

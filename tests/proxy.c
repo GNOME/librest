@@ -325,10 +325,6 @@ main (int argc, char **argv)
   char *url;
   RestProxy *proxy;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   server = soup_server_new ("", NULL);
   g_thread_new ("Server Thread", server_thread_func, NULL);
 

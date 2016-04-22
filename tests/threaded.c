@@ -84,10 +84,6 @@ main (int argc, char **argv)
   char *url;
   int i;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   server = soup_server_new (NULL);
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
   url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
