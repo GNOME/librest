@@ -41,7 +41,12 @@
 #define soup_message_headers_get soup_message_headers_get_one
 #endif
 
+#define PORT 8080
+
 static int errors = 0;
+
+SoupServer *server;
+GMainLoop *server_loop;
 
 static void
 server_callback (SoupServer *server, SoupMessage *msg,
@@ -108,8 +113,8 @@ ping_test (RestProxy *proxy)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "ping");
 
-  if (!rest_proxy_call_run (call, NULL, &error)) {
-    g_printerr ("Call failed: %s\n", error->message);
+  if (!rest_proxy_call_sync (call, &error)) {
+    g_printerr ("2: Call failed: %s\n", error->message);
     g_error_free (error);
     errors++;
     g_object_unref (call);
@@ -142,8 +147,8 @@ echo_test (RestProxy *proxy)
   rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "value", "echome");
 
-  if (!rest_proxy_call_run (call, NULL, &error)) {
-    g_printerr ("Call failed: %s\n", error->message);
+  if (!rest_proxy_call_sync (call, &error)) {
+    g_printerr ("3: Call failed: %s\n", error->message);
     g_error_free (error);
     errors++;
     g_object_unref (call);
@@ -182,8 +187,8 @@ reverse_test (RestProxy *proxy)
   rest_proxy_call_set_function (call, "reverse");
   rest_proxy_call_add_param (call, "value", "reverseme");
 
-  if (!rest_proxy_call_run (call, NULL, &error)) {
-    g_printerr ("Call failed: %s\n", error->message);
+  if (!rest_proxy_call_sync (call, &error)) {
+    g_printerr ("4: Call failed: %s\n", error->message);
     g_error_free (error);
     errors++;
     g_object_unref (call);
@@ -213,7 +218,7 @@ reverse_test (RestProxy *proxy)
 }
 
 static void
-status_ok_test (RestProxy *proxy, int status)
+status_ok_test (RestProxy *proxy, guint status)
 {
   RestProxyCall *call;
   GError *error = NULL;
@@ -225,8 +230,8 @@ status_ok_test (RestProxy *proxy, int status)
   rest_proxy_call_add_param (call, "status", status_str);
   g_free (status_str);
 
-  if (!rest_proxy_call_run (call, NULL, &error)) {
-    g_printerr ("Call failed: %s\n", error->message);
+  if (!rest_proxy_call_sync (call, &error)) {
+    g_printerr ("1: Call failed: %s\n", error->message);
     g_error_free (error);
     errors++;
     g_object_unref (call);
@@ -244,7 +249,7 @@ status_ok_test (RestProxy *proxy, int status)
 }
 
 static void
-status_error_test (RestProxy *proxy, int status)
+status_error_test (RestProxy *proxy, guint status)
 {
   RestProxyCall *call;
   GError *error = NULL;
@@ -256,7 +261,7 @@ status_error_test (RestProxy *proxy, int status)
   rest_proxy_call_add_param (call, "status", status_str);
   g_free (status_str);
 
-  if (rest_proxy_call_run (call, NULL, &error)) {
+  if (rest_proxy_call_sync (call, &error)) {
     g_printerr ("Call succeeded should have failed");
     errors++;
     g_object_unref (call);
@@ -282,7 +287,7 @@ test_status_ok (RestProxy *proxy, const char *function)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, function);
 
-  if (!rest_proxy_call_run (call, NULL, &error)) {
+  if (!rest_proxy_call_sync (call, &error)) {
     g_printerr ("%s call failed: %s\n", function, error->message);
     g_error_free (error);
     errors++;
@@ -300,18 +305,30 @@ test_status_ok (RestProxy *proxy, const char *function)
   g_object_unref (call);
 }
 
+static void *
+server_thread_func (gpointer data)
+{
+  GSocketAddress *address = g_inet_socket_address_new_from_string ("127.0.0.1", 8080);
+  server_loop = g_main_loop_new (NULL, TRUE);
+  /*SoupServer *server = soup_server_new (NULL);*/
+  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
+
+  soup_server_listen (server, address, 0, NULL);
+  g_main_loop_run (server_loop);
+
+  return NULL;
+}
+
 int
 main (int argc, char **argv)
 {
-  SoupServer *server;
   char *url;
   RestProxy *proxy;
 
-  server = soup_server_new (NULL);
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-  soup_server_run_async (server);
+  server = soup_server_new ("", NULL);
+  g_thread_new ("Server Thread", server_thread_func, NULL);
 
-  url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
+  url = g_strdup_printf ("http://127.0.0.1:%d/", PORT);
   proxy = rest_proxy_new (url, FALSE);
   g_free (url);
 
@@ -320,7 +337,6 @@ main (int argc, char **argv)
   reverse_test (proxy);
   status_ok_test (proxy, SOUP_STATUS_OK);
   status_ok_test (proxy, SOUP_STATUS_NO_CONTENT);
-  /* status_ok_test (proxy, SOUP_STATUS_MULTIPLE_CHOICES); */
   status_error_test (proxy, SOUP_STATUS_BAD_REQUEST);
   status_error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
 
@@ -328,5 +344,6 @@ main (int argc, char **argv)
   rest_proxy_set_user_agent (proxy, "TestSuite-1.0");
   test_status_ok (proxy, "useragent/testsuite");
 
+  g_main_loop_quit (server_loop);
   return errors != 0;
 }

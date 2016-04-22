@@ -68,7 +68,7 @@ main (int argc, char **argv)
 
   node = rest_xml_node_find (u_node, "id");
   if (node != NULL)
-      g_assert_cmpstr (node->content, ==, "17038");
+    g_assert_cmpstr (node->content, ==, "17038");
 
   node = rest_xml_node_find (u_node, "name");
   g_assert (node);

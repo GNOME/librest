@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -64,11 +64,11 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
 
   do {
     attrs_output = _generate_attrs_output (node->attrs);
-    g_print ("%*s[%s, %s, %s]\n", 
-             depth, 
-             "", 
-             node->name, 
-             node->content, 
+    g_print ("%*s[%s, %s, %s]\n",
+             depth,
+             "",
+             node->name,
+             node->content,
              attrs_output);
     g_free (attrs_output);
     values = g_hash_table_get_values (node->children);
@@ -83,11 +83,11 @@ _rest_xml_node_output (RestXmlNode *node, gint depth)
 }
 
 static void
-proxy_call_raw_async_cb (RestProxyCall *call,
-                         const GError  *error,
-                         GObject       *weak_object,
-                         gpointer       userdata)
+proxy_call_raw_async_cb (GObject      *source_object,
+                         GAsyncResult *result,
+                         gpointer      user_data)
 {
+  RestProxyCall *call = REST_PROXY_CALL (source_object);
   RestXmlParser *parser;
   RestXmlNode *node;
   const gchar *payload;
@@ -103,7 +103,7 @@ proxy_call_raw_async_cb (RestProxyCall *call,
   _rest_xml_node_output (node, 0);
   rest_xml_node_unref (node);
   g_object_unref (parser);
-  g_main_loop_quit ((GMainLoop *)userdata);
+  g_main_loop_quit ((GMainLoop *)user_data);
 }
 
 gint
@@ -123,11 +123,10 @@ main (gint argc, gchar **argv)
                               "api_key", "314691be2e63a4d58994b2be01faacfb",
                               "photo_id", "2658808091",
                               NULL);
-  rest_proxy_call_async (call, 
-                         proxy_call_raw_async_cb,
-                         NULL,
-                         loop,
-                         NULL);
+  rest_proxy_call_invoke_async (call,
+                                NULL,
+                                proxy_call_raw_async_cb,
+                                loop);
 
   g_main_loop_run (loop);
   g_object_unref (call);
@@ -137,13 +136,12 @@ main (gint argc, gchar **argv)
   rest_proxy_call_add_params (call,
                               "method", "flickr.people.getPublicPhotos",
                               "api_key", "314691be2e63a4d58994b2be01faacfb",
-                              "user_id","66598853@N00", 
+                              "user_id","66598853@N00",
                               NULL);
-  rest_proxy_call_async (call, 
-                         proxy_call_raw_async_cb,
-                         NULL,
-                         loop,
-                         NULL);
+  rest_proxy_call_invoke_async (call,
+                                NULL,
+                                proxy_call_raw_async_cb,
+                                loop);
 
   g_main_loop_run (loop);
   g_object_unref (call);

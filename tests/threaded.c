@@ -28,7 +28,7 @@
 #include <rest/rest-proxy.h>
 
 static volatile int errors = 0;
-static const gboolean verbose = FALSE;
+static const gboolean verbose = TRUE;
 
 static void
 server_callback (SoupServer *server, SoupMessage *msg,
