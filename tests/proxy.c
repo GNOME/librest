@@ -307,10 +307,6 @@ main (int argc, char **argv)
   char *url;
   RestProxy *proxy;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   server = soup_server_new (NULL);
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
   soup_server_run_async (server);

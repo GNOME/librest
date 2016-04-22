@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -32,10 +32,6 @@ main (int argc, char **argv)
   RestParam *img_param;
   GError *error = NULL;
   char pin[256];
-
-#if !GLIB_CHECK_VERSION (2, 36 ,0)
-  g_type_init ();
-#endif
 
   if (argc != 2) {
     g_printerr ("$ post-twitter-media \"message\"\n");

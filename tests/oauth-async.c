@@ -119,10 +119,6 @@ main (int argc, char **argv)
   OAuthProxy *oproxy;
   GError *error = NULL;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   /* Install a timeout so that we don't hang or infinite loop */
   g_timeout_add_seconds (10, on_timeout, NULL);
 

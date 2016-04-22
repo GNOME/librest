@@ -94,10 +94,6 @@ main (int argc, char **argv)
     return 1;
   }
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   if (!g_file_get_contents (argv[1], &data, &length, &error)) {
     g_printerr ("%s\n", error->message);
     g_error_free (error);

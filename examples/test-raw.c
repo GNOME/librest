@@ -47,10 +47,6 @@ main (gint argc, gchar **argv)
   const gchar *payload;
   gssize len;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-  g_type_init ();
-#endif
-
   loop = g_main_loop_new (NULL, FALSE);
 
   proxy = rest_proxy_new ("https://www.flickr.com/services/rest/", FALSE);
