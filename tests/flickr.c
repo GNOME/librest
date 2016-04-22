@@ -59,7 +59,7 @@ main (int argc, char **argv)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "flickr.people.getInfo");
   rest_proxy_call_add_param (call, "user_id", ROSS_ID);
-  if (!rest_proxy_call_run (call, NULL, &error))
+  if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
 
   parser = rest_xml_parser_new ();
@@ -87,7 +87,7 @@ main (int argc, char **argv)
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "flickr.auth.getFrob");
-  if (!rest_proxy_call_run (call, NULL, &error))
+  if (!rest_proxy_call_sync (call, &error))
     g_error ("Cannot make call: %s", error->message);
 
   parser = rest_xml_parser_new ();
