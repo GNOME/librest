@@ -844,6 +844,10 @@ prepare_message (RestProxyCall *call, GError **error_out)
                                                hash);
 
     g_hash_table_unref (hash);
+
+    if (!message)
+      return NULL;
+
   } else {
     SoupMultipart *mp;
     RestParamsIter iter;
