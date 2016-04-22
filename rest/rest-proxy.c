@@ -4,7 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -74,8 +74,8 @@ enum {
 static guint signals[LAST_SIGNAL] = { 0 };
 
 
-static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
-                                               char     **payload, 
+static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy,
+                                               char     **payload,
                                                goffset   *len,
                                                GError   **error,
                                                va_list    params);
@@ -307,12 +307,12 @@ rest_proxy_class_init (RestProxyClass *klass)
   proxy_class->new_call = _rest_proxy_new_call;
   proxy_class->bind_valist = _rest_proxy_bind_valist;
 
-  pspec = g_param_spec_string ("url-format", 
+  pspec = g_param_spec_string ("url-format",
                                "url-format",
                                "Format string for the RESTful url",
                                NULL,
                                G_PARAM_READWRITE);
-  g_object_class_install_property (object_class, 
+  g_object_class_install_property (object_class,
                                    PROP_URL_FORMAT,
                                    pspec);
 
@@ -422,6 +422,7 @@ rest_proxy_init (RestProxy *self)
   RestProxyPrivate *priv = GET_PRIVATE (self);
 
   priv->session = soup_session_async_new ();
+  priv->session = soup_session_new ();
   priv->session_sync = soup_session_sync_new ();
 
 #ifdef REST_SYSTEM_CA_FILE
@@ -660,8 +661,8 @@ _rest_proxy_get_bound_url (RestProxy *proxy)
 }
 
 static gboolean
-_rest_proxy_simple_run_valist (RestProxy *proxy, 
-                               gchar     **payload, 
+_rest_proxy_simple_run_valist (RestProxy *proxy,
+                               gchar     **payload,
                                goffset   *len,
                                GError   **error,
                                va_list    params)
@@ -676,7 +677,7 @@ _rest_proxy_simple_run_valist (RestProxy *proxy,
 
   rest_proxy_call_add_params_from_valist (call, params);
 
-  ret = rest_proxy_call_run (call, NULL, error);
+  ret = rest_proxy_call_sync (call, error);
   if (ret) {
     *payload = g_strdup (rest_proxy_call_get_payload (call));
     if (len) *len = rest_proxy_call_get_payload_length (call);
@@ -684,15 +685,15 @@ _rest_proxy_simple_run_valist (RestProxy *proxy,
     *payload = NULL;
     if (len) *len = 0;
   }
- 
+
   g_object_unref (call);
 
   return ret;
 }
 
 gboolean
-rest_proxy_simple_run_valist (RestProxy *proxy, 
-                              char     **payload, 
+rest_proxy_simple_run_valist (RestProxy *proxy,
+                              char     **payload,
                               goffset   *len,
                               GError   **error,
                               va_list    params)
@@ -702,7 +703,7 @@ rest_proxy_simple_run_valist (RestProxy *proxy,
 }
 
 gboolean
-rest_proxy_simple_run (RestProxy *proxy, 
+rest_proxy_simple_run (RestProxy *proxy,
                        gchar    **payload,
                        goffset   *len,
                        GError   **error,
@@ -770,5 +771,6 @@ _rest_proxy_send_message (RestProxy   *proxy,
 
   priv = GET_PRIVATE (proxy);
 
-  return soup_session_send_message (priv->session_sync, message);
+  /*return soup_session_send_message (priv->session_sync, message);*/
+  return soup_session_send_message (priv->session, message);
 }

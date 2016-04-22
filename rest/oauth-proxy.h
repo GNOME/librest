@@ -111,13 +111,12 @@ gboolean oauth_proxy_request_token (OAuthProxy *proxy,
                                     const char *callback_uri,
                                     GError    **error);
 
-gboolean oauth_proxy_request_token_async (OAuthProxy            *proxy,
-                                          const char            *function,
-                                          const char            *callback_uri,
-                                          OAuthProxyAuthCallback callback,
-                                          GObject               *weak_object,
-                                          gpointer               user_data,
-                                          GError               **error);
+RestProxyCall *oauth_proxy_request_token_async (OAuthProxy          *proxy,
+                                                const char          *function,
+                                                const char          *callback_uri,
+                                                GCancellable        *cancellable,
+                                                GAsyncReadyCallback  callback,
+                                                gpointer             user_data);
 
 gboolean oauth_proxy_is_oauth10a (OAuthProxy *proxy);
 
@@ -126,13 +125,12 @@ gboolean oauth_proxy_access_token (OAuthProxy *proxy,
                                    const char *verifier,
                                    GError    **error);
 
-gboolean oauth_proxy_access_token_async (OAuthProxy            *proxy,
-                                         const char            *function,
-                                         const char            *verifier,
-                                         OAuthProxyAuthCallback callback,
-                                         GObject               *weak_object,
-                                         gpointer               user_data,
-                                         GError               **error);
+RestProxyCall *oauth_proxy_access_token_async (OAuthProxy          *proxy,
+                                               const char          *function,
+                                               const char          *verifier,
+                                               GCancellable        *cancellable,
+                                               GAsyncReadyCallback  callback,
+                                               gpointer             user_data);
 
 const char * oauth_proxy_get_token (OAuthProxy *proxy);
 
