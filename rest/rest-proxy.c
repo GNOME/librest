@@ -178,9 +178,6 @@ rest_proxy_set_property (GObject      *object,
       g_object_set (G_OBJECT(priv->session),
                     "ssl-strict", g_value_get_boolean (value),
                     NULL);
-      g_object_set (G_OBJECT(priv->session_sync),
-                    "ssl-strict", g_value_get_boolean (value),
-                    NULL);
       break;
     case PROP_SSL_CA_FILE:
       g_free(priv->ssl_ca_file);
@@ -200,12 +197,6 @@ rest_proxy_dispose (GObject *object)
   {
     g_object_unref (priv->session);
     priv->session = NULL;
-  }
-
-  if (priv->session_sync)
-  {
-    g_object_unref (priv->session_sync);
-    priv->session_sync = NULL;
   }
 
   G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
@@ -250,7 +241,6 @@ rest_proxy_constructed (GObject *object)
     SoupSessionFeature *cookie_jar =
       (SoupSessionFeature *)soup_cookie_jar_new ();
     soup_session_add_feature (priv->session, cookie_jar);
-    soup_session_add_feature (priv->session_sync, cookie_jar);
     g_object_unref (cookie_jar);
   }
 
@@ -258,16 +248,10 @@ rest_proxy_constructed (GObject *object)
     SoupSessionFeature *logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0);
     soup_session_add_feature (priv->session, logger);
     g_object_unref (logger);
-
-    logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0);
-    soup_session_add_feature (priv->session_sync, logger);
-    g_object_unref (logger);
   }
 
   /* session lifetime is same as self, no need to keep signalid */
   g_signal_connect_swapped (priv->session, "authenticate",
-                            G_CALLBACK(authenticate), object);
-  g_signal_connect_swapped (priv->session_sync, "authenticate",
                             G_CALLBACK(authenticate), object);
 }
 
@@ -421,9 +405,7 @@ rest_proxy_init (RestProxy *self)
 {
   RestProxyPrivate *priv = GET_PRIVATE (self);
 
-  priv->session = soup_session_async_new ();
   priv->session = soup_session_new ();
-  priv->session_sync = soup_session_sync_new ();
 
 #ifdef REST_SYSTEM_CA_FILE
   /* with ssl-strict (defaults TRUE) setting ssl-ca-file forces all
@@ -431,21 +413,13 @@ rest_proxy_init (RestProxy *self)
   g_object_set (priv->session,
                 "ssl-ca-file", REST_SYSTEM_CA_FILE,
                 NULL);
-  g_object_set (priv->session_sync,
-                "ssl-ca-file", REST_SYSTEM_CA_FILE,
-                NULL);
 #endif
   g_object_bind_property (self, "ssl-ca-file",
                           priv->session, "ssl-ca-file",
                           G_BINDING_BIDIRECTIONAL);
-  g_object_bind_property (self, "ssl-ca-file",
-                          priv->session_sync, "ssl-ca-file",
-                          G_BINDING_BIDIRECTIONAL);
 
 #if WITH_GNOME
   soup_session_add_feature_by_type (priv->session,
-                                    SOUP_TYPE_PROXY_RESOLVER_GNOME);
-  soup_session_add_feature_by_type (priv->session_sync,
                                     SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
 }
@@ -597,10 +571,8 @@ rest_proxy_add_soup_feature (RestProxy *proxy, SoupSessionFeature *feature)
   g_return_if_fail (REST_IS_PROXY(proxy));
   priv = GET_PRIVATE (proxy);
   g_return_if_fail (priv->session != NULL);
-  g_return_if_fail (priv->session_sync != NULL);
 
   soup_session_add_feature (priv->session, feature);
-  soup_session_add_feature (priv->session_sync, feature);
 }
 
 static RestProxyCall *
@@ -771,6 +743,5 @@ _rest_proxy_send_message (RestProxy   *proxy,
 
   priv = GET_PRIVATE (proxy);
 
-  /*return soup_session_send_message (priv->session_sync, message);*/
   return soup_session_send_message (priv->session, message);
 }
