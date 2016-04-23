@@ -562,9 +562,7 @@ oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
   g_return_if_fail (OAUTH_IS_PROXY (proxy));
   priv = PROXY_GET_PRIVATE (proxy);
 
-  if (priv->token)
-    g_free (priv->token);
-
+  g_free (priv->token);
   priv->token = g_strdup (token);
 }
 
