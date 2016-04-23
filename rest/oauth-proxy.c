@@ -263,11 +263,11 @@ oauth_proxy_new (const char *consumer_key,
  */
 RestProxy *
 oauth_proxy_new_with_token (const char *consumer_key,
-                 const char *consumer_secret,
-                 const char *token,
-                 const char *token_secret,
-                 const gchar *url_format,
-                 gboolean binding_required)
+                            const char *consumer_secret,
+                            const char *token,
+                            const char *token_secret,
+                            const gchar *url_format,
+                            gboolean binding_required)
 {
   return g_object_new (OAUTH_TYPE_PROXY,
                        "consumer-key", consumer_key,

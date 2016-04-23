@@ -33,10 +33,8 @@
 #include "rest-proxy.h"
 #include "rest-private.h"
 
-G_DEFINE_TYPE (RestProxy, rest_proxy, G_TYPE_OBJECT)
 
-#define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_PROXY, RestProxyPrivate))
+#define GET_PRIVATE(o) rest_proxy_get_instance_private(REST_PROXY(o))
 
 typedef struct _RestProxyPrivate RestProxyPrivate;
 
@@ -52,6 +50,9 @@ struct _RestProxyPrivate {
   gboolean disable_cookies;
   char *ssl_ca_file;
 };
+
+
+G_DEFINE_TYPE_WITH_PRIVATE (RestProxy, rest_proxy, G_TYPE_OBJECT)
 
 enum
 {
@@ -278,8 +279,6 @@ rest_proxy_class_init (RestProxyClass *klass)
   RestProxyClass *proxy_class = REST_PROXY_CLASS (klass);
 
   _rest_setup_debugging ();
-
-  g_type_class_add_private (klass, sizeof (RestProxyPrivate));
 
   object_class->get_property = rest_proxy_get_property;
   object_class->set_property = rest_proxy_set_property;
@@ -532,11 +531,9 @@ rest_proxy_set_user_agent (RestProxy  *proxy,
 const gchar *
 rest_proxy_get_user_agent (RestProxy *proxy)
 {
-  RestProxyPrivate *priv;
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
-
-  priv = GET_PRIVATE (proxy);
 
   return priv->user_agent;
 }
@@ -566,10 +563,9 @@ rest_proxy_get_user_agent (RestProxy *proxy)
 void
 rest_proxy_add_soup_feature (RestProxy *proxy, SoupSessionFeature *feature)
 {
-  RestProxyPrivate *priv;
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_if_fail (REST_IS_PROXY(proxy));
-  priv = GET_PRIVATE (proxy);
   g_return_if_fail (priv->session != NULL);
 
   soup_session_add_feature (priv->session, feature);
@@ -606,11 +602,9 @@ rest_proxy_new_call (RestProxy *proxy)
 gboolean
 _rest_proxy_get_binding_required (RestProxy *proxy)
 {
-  RestProxyPrivate *priv;
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
-
-  priv = GET_PRIVATE (proxy);
 
   return priv->binding_required;
 }
@@ -618,11 +612,9 @@ _rest_proxy_get_binding_required (RestProxy *proxy)
 const gchar *
 _rest_proxy_get_bound_url (RestProxy *proxy)
 {
-  RestProxyPrivate *priv;
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
-
-  priv = GET_PRIVATE (proxy);
 
   if (!priv->url && !priv->binding_required)
   {
@@ -704,12 +696,10 @@ _rest_proxy_queue_message (RestProxy   *proxy,
                            SoupSessionCallback callback,
                            gpointer user_data)
 {
-  RestProxyPrivate *priv;
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_if_fail (REST_IS_PROXY (proxy));
   g_return_if_fail (SOUP_IS_MESSAGE (message));
-
-  priv = GET_PRIVATE (proxy);
 
   soup_session_queue_message (priv->session,
                               message,
@@ -721,12 +711,11 @@ void
 _rest_proxy_cancel_message (RestProxy   *proxy,
                             SoupMessage *message)
 {
-  RestProxyPrivate *priv;
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_if_fail (REST_IS_PROXY (proxy));
   g_return_if_fail (SOUP_IS_MESSAGE (message));
 
-  priv = GET_PRIVATE (proxy);
   soup_session_cancel_message (priv->session,
                                message,
                                SOUP_STATUS_CANCELLED);
@@ -736,12 +725,10 @@ guint
 _rest_proxy_send_message (RestProxy   *proxy,
                           SoupMessage *message)
 {
-  RestProxyPrivate *priv;
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), 0);
   g_return_val_if_fail (SOUP_IS_MESSAGE (message), 0);
-
-  priv = GET_PRIVATE (proxy);
 
   return soup_session_send_message (priv->session, message);
 }
