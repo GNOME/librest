@@ -68,8 +68,6 @@ void         rest_xml_node_add_attr (RestXmlNode *node,
                                      const char  *value);
 void         rest_xml_node_set_content (RestXmlNode *node, const char *value);
 
-G_GNUC_DEPRECATED void rest_xml_node_free (RestXmlNode *node);
-
 G_END_DECLS
 
 #endif /* _REST_XML_NODE */
