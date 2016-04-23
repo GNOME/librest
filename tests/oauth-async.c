@@ -26,10 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static GMainLoop *loop;
-
 static void
-make_calls (OAuthProxy *oproxy)
+make_calls (OAuthProxy *oproxy, GMainLoop *loop)
 {
   RestProxy *proxy = REST_PROXY (oproxy);
   RestProxyCall *call;
@@ -40,24 +38,24 @@ make_calls (OAuthProxy *oproxy)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "foo", "bar");
-  if (!rest_proxy_call_sync (call, &error))
-    g_error ("Cannot make call: %s", error->message);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "foo=bar");
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "numbers", "1234567890");
-  if (!rest_proxy_call_sync (call, &error))
-    g_error ("Cannot make call: %s", error->message);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "numbers=1234567890");
   g_object_unref (call);
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "escape", "!£$%^&*()");
-  if (!rest_proxy_call_sync (call, &error))
-    g_error ("Cannot make call: %s", error->message);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "escape=%21%C2%A3%24%25%5E%26%2A%28%29");
   g_object_unref (call);
 
@@ -65,49 +63,133 @@ make_calls (OAuthProxy *oproxy)
 }
 
 static void
-access_token_cb (GObject      *source_object,
-                 GAsyncResult *result,
-                 gpointer      user_data)
-{
-  OAuthProxyCall *call = OAUTH_PROXY_CALL (source_object);
-  OAuthProxy *proxy;
-  OAuthProxyPrivate *priv;
-  GError *error = NULL;
-
-  rest_proxy_call_invoke_finish (REST_PROXY_CALL (call), result, &error);
-  g_assert_no_error (error);
-
-  g_object_get (G_OBJECT (call), "proxy", &proxy, NULL);
-  priv = PROXY_GET_PRIVATE (proxy);
-
-  g_assert_cmpstr (priv->token, ==, "accesskey");
-  g_assert_cmpstr (priv->token_secret, ==, "accesssecret");
-
-  make_calls (proxy);
-}
-
-static void
-request_token_cb (GObject      *source_object,
+access_token_cb2 (GObject      *source_object,
                   GAsyncResult *result,
                   gpointer      user_data)
 {
   OAuthProxyCall *call = OAUTH_PROXY_CALL (source_object);
   OAuthProxy *proxy;
-  OAuthProxyPrivate *priv;
+  const gchar *token, *token_secret;
+  GError *error = NULL;
+  GMainLoop *loop = user_data;
+
+  rest_proxy_call_invoke_finish (REST_PROXY_CALL (call), result, &error);
+  g_assert_no_error (error);
+
+  g_object_get (G_OBJECT (call), "proxy", &proxy, NULL);
+
+  token = oauth_proxy_get_token (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token, ==, "accesskey");
+  token_secret = oauth_proxy_get_token_secret (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token_secret, ==, "accesssecret");
+
+  make_calls (OAUTH_PROXY (proxy), loop);
+}
+
+
+
+static void
+access_token_cb1 (GObject      *source_object,
+                  GAsyncResult *result,
+                  gpointer      user_data)
+{
+  OAuthProxyCall *call = OAUTH_PROXY_CALL (source_object);
+  OAuthProxy *proxy;
+  const gchar *token, *token_secret;
+  GError *error = NULL;
+  GMainLoop *loop = user_data;
+
+  rest_proxy_call_invoke_finish (REST_PROXY_CALL (call), result, &error);
+  g_assert_no_error (error);
+
+  g_object_get (G_OBJECT (call), "proxy", &proxy, NULL);
+  g_assert (OAUTH_IS_PROXY (proxy));
+
+  token = oauth_proxy_get_token (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token, ==, "accesskey");
+  token_secret = oauth_proxy_get_token_secret (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token_secret, ==, "accesssecret");
+
+  g_main_loop_quit (loop);
+}
+
+static void
+request_token_cb3 (GObject      *source_object,
+                   GAsyncResult *result,
+                   gpointer      user_data)
+{
+  OAuthProxyCall *call = OAUTH_PROXY_CALL (source_object);
+  GMainLoop *loop = user_data;
+  const char *token, *token_secret;
+  OAuthProxy *proxy;
   GError *error = NULL;
 
   rest_proxy_call_invoke_finish (REST_PROXY_CALL (call), result, &error);
   g_assert_no_error (error);
 
   g_object_get (G_OBJECT (call), "proxy", &proxy, NULL);
-  priv = PROXY_GET_PRIVATE (proxy);
 
-  g_assert_cmpstr (priv->token, ==, "requestkey");
-  g_assert_cmpstr (priv->token_secret, ==, "requestsecret");
+  g_assert (OAUTH_IS_PROXY (proxy));
+
+  token = oauth_proxy_get_token (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token, ==, "requestkey");
+  token_secret = oauth_proxy_get_token_secret (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token_secret, ==, "requestsecret");
 
   /* Second stage authentication, this gets an access token */
   oauth_proxy_access_token_async (proxy, "access-token", NULL,
-                                  NULL, access_token_cb, NULL);
+                                  NULL, access_token_cb2, loop);
+}
+
+static void
+request_token_cb2 (GObject      *source_object,
+                   GAsyncResult *result,
+                   gpointer      user_data)
+{
+  OAuthProxyCall *call = OAUTH_PROXY_CALL (source_object);
+  GMainLoop *loop = user_data;
+  const char *token, *token_secret;
+  OAuthProxy *proxy;
+  GError *error = NULL;
+
+  rest_proxy_call_invoke_finish (REST_PROXY_CALL (call), result, &error);
+  g_assert_no_error (error);
+
+  g_object_get (G_OBJECT (call), "proxy", &proxy, NULL);
+
+  g_assert (OAUTH_IS_PROXY (proxy));
+
+  token = oauth_proxy_get_token (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token, ==, "requestkey");
+  token_secret = oauth_proxy_get_token_secret (OAUTH_PROXY (proxy));
+  g_assert_cmpstr (token_secret, ==, "requestsecret");
+
+  /* Second stage authentication, this gets an access token */
+  oauth_proxy_access_token_async (proxy, "access-token", NULL,
+                                  NULL, access_token_cb1, loop);
+}
+
+static void
+request_token_cb1 (GObject      *source_object,
+                   GAsyncResult *result,
+                   gpointer      user_data)
+{
+  OAuthProxyCall *call = OAUTH_PROXY_CALL (source_object);
+  GMainLoop *loop = user_data;
+  OAuthProxy *proxy;
+  GError *error = NULL;
+
+  rest_proxy_call_invoke_finish (REST_PROXY_CALL (call), result, &error);
+  g_assert_no_error (error);
+
+  g_object_get (G_OBJECT (call), "proxy", &proxy, NULL);
+
+  g_assert (OAUTH_IS_PROXY (proxy));
+
+  g_assert_cmpstr (oauth_proxy_get_token (OAUTH_PROXY (proxy)), ==, "requestkey");
+  g_assert_cmpstr (oauth_proxy_get_token_secret (OAUTH_PROXY (proxy)), ==, "requestsecret");
+
+  g_main_loop_quit (loop);
 }
 
 static gboolean
@@ -117,9 +199,65 @@ on_timeout (gpointer data)
   return FALSE;
 }
 
+static void
+test_request_token ()
+{
+  GMainLoop *loop = g_main_loop_new (NULL, TRUE);
+  RestProxy *proxy;
+
+  /* Install a timeout so that we don't hang or infinite loop */
+  g_timeout_add_seconds (10, on_timeout, NULL);
+  proxy = oauth_proxy_new ("key", "secret", "http://oauthbin.com/v1/", FALSE);
+
+  oauth_proxy_request_token_async (OAUTH_PROXY (proxy), "request-token", NULL,
+                                   NULL, request_token_cb1, loop);
+
+  g_main_loop_run (loop);
+}
+
+static void
+test_access_token ()
+{
+  GMainLoop *loop = g_main_loop_new (NULL, TRUE);
+  RestProxy *proxy;
+
+  /* Install a timeout so that we don't hang or infinite loop */
+  g_timeout_add_seconds (10, on_timeout, NULL);
+  proxy = oauth_proxy_new ("key", "secret", "http://oauthbin.com/v1/", FALSE);
+
+  oauth_proxy_request_token_async (OAUTH_PROXY (proxy), "request-token", NULL,
+                                   NULL, request_token_cb2, loop);
+
+  g_main_loop_run (loop);
+}
+
+static void
+test_calls ()
+{
+  GMainLoop *loop = g_main_loop_new (NULL, TRUE);
+  RestProxy *proxy;
+
+  /* Install a timeout so that we don't hang or infinite loop */
+  g_timeout_add_seconds (10, on_timeout, NULL);
+  proxy = oauth_proxy_new ("key", "secret", "http://oauthbin.com/v1/", FALSE);
+
+  oauth_proxy_request_token_async (OAUTH_PROXY (proxy), "request-token", NULL,
+                                   NULL, request_token_cb3, loop);
+
+  g_main_loop_run (loop);
+}
+
 int
 main (int argc, char **argv)
 {
+  g_test_init (&argc, &argv, NULL);
+
+  g_test_add_func ("/oauth-async/request-token", test_request_token);
+  g_test_add_func ("/oauth-async/access-token", test_access_token);
+  g_test_add_func ("/oauth-async/calls", test_calls);
+
+  return g_test_run ();
+#if 0
   RestProxy *proxy;
   OAuthProxy *oproxy;
 
@@ -141,4 +279,5 @@ main (int argc, char **argv)
   g_main_loop_run (loop);
 
   return 0;
+#endif
 }
