@@ -194,11 +194,7 @@ rest_proxy_dispose (GObject *object)
 {
   RestProxyPrivate *priv = GET_PRIVATE (object);
 
-  if (priv->session)
-  {
-    g_object_unref (priv->session);
-    priv->session = NULL;
-  }
+  g_clear_object (&priv->session);
 
   G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
 }
