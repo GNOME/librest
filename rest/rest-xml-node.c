@@ -200,12 +200,6 @@ rest_xml_node_unref (RestXmlNode *node)
   }
 }
 
-G_GNUC_DEPRECATED void
-rest_xml_node_free (RestXmlNode *node)
-{
-  rest_xml_node_unref (node);
-}
-
 /**
  * rest_xml_node_get_attr:
  * @node: a #RestXmlNode
