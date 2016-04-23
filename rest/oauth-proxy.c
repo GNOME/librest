@@ -344,7 +344,7 @@ request_token_cb (GObject      *source_object,
 
   oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
 
-  data->callback (source_object, result, user_data);
+  data->callback (source_object, result, data->user_data);
 
   g_slice_free (AuthData, data);
   g_object_unref (call);
@@ -461,7 +461,7 @@ access_token_cb (GObject      *source_object,
     oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
   /*}*/
 
-  data->callback (source_object, result, user_data);
+  data->callback (source_object, result, data->user_data);
 
   g_slice_free (AuthData, data);
   g_object_unref (call);
