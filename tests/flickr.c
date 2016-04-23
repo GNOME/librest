@@ -27,8 +27,9 @@
 #define API_KEY "cf4e02fc57240a9b07346ad26e291080"
 #define SHARED_SECRET "cdfa2329cb206e50"
 #define ROSS_ID "35468147630@N01"
-int
-main (int argc, char **argv)
+
+static void
+test_flickr ()
 {
   RestProxy *proxy;
   RestProxyCall *call;
@@ -55,23 +56,23 @@ main (int argc, char **argv)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "flickr.people.getInfo");
   rest_proxy_call_add_param (call, "user_id", ROSS_ID);
-  if (!rest_proxy_call_sync (call, &error))
-    g_error ("Cannot make call: %s", error->message);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
 
   parser = rest_xml_parser_new ();
   root = rest_xml_parser_parse_from_data (parser,
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
-  g_assert (root);
+  g_assert_nonnull (root);
   g_assert_cmpstr (root->name, ==, "rsp");
   g_assert_cmpstr (rest_xml_node_get_attr (root, "stat"), ==, "ok");
 
   node = rest_xml_node_find (root, "person");
-  g_assert (node);
+  g_assert_nonnull (node);
   g_assert_cmpstr (rest_xml_node_get_attr (node, "nsid"), ==, ROSS_ID);
 
   node = rest_xml_node_find (node, "username");
-  g_assert (node);
+  g_assert_nonnull (node);
   g_assert_cmpstr (node->content, ==, "Ross Burton");
 
   rest_xml_node_unref (root);
@@ -83,22 +84,33 @@ main (int argc, char **argv)
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "flickr.auth.getFrob");
-  if (!rest_proxy_call_sync (call, &error))
-    g_error ("Cannot make call: %s", error->message);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
 
   parser = rest_xml_parser_new ();
   root = rest_xml_parser_parse_from_data (parser,
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
-  g_assert (root);
+  g_assert_nonnull (root);
   g_assert_cmpstr (root->name, ==, "rsp");
   g_assert_cmpstr (rest_xml_node_get_attr (root, "stat"), ==, "ok");
 
   node = rest_xml_node_find (root, "frob");
-  g_assert (node);
-  g_assert (node->content);
+  g_assert_nonnull (node);
+  g_assert_nonnull (node->content);
   g_assert_cmpstr (node->content, !=, "");
 
   g_object_unref (proxy);
-  return 0;
+
+}
+
+
+int
+main (int argc, char **argv)
+{
+  g_test_init (&argc, &argv, NULL);
+
+  g_test_add_func ("/flickr/flickr", test_flickr);
+
+  return g_test_run ();
 }
