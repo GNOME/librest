@@ -121,8 +121,8 @@ server_func (gpointer data)
   return NULL;
 }
 
-int
-main (int argc, char **argv)
+static void
+test_custom_serialize ()
 {
   RestProxy *proxy;
   RestProxyCall *call;
@@ -146,6 +146,13 @@ main (int argc, char **argv)
   g_object_unref (call);
   g_object_unref (proxy);
   g_free (url);
+}
 
-  return 0;
+int
+main (int argc, char **argv)
+{
+  g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/custom-serialize/custom-serialize", test_custom_serialize);
+
+  return g_test_run ();
 }
