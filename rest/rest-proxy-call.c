@@ -921,14 +921,12 @@ _call_message_call_completed_cb (SoupSession *session,
 
   finish_call (call, message, &error);
 
-  /*if (error != NULL)*/
-    /*g_task_return_error (task, error);*/
-  /*else*/
-  g_assert (task);
-  g_assert (G_IS_TASK (task));
+  if (error != NULL)
+    g_task_return_error (task, error);
+  else
     g_task_return_boolean (task, TRUE);
 
-  /*g_object_unref (task);*/
+  g_object_unref (task);
 }
 
 /**
