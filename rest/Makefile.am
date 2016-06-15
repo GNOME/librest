@@ -101,7 +101,7 @@ test_runner_LDFLAGS = $(librest_@API_VERSION@_la_LIBADD) $(GCOV_LDFLAGS)
 
 # TODO: use gtester
 
-# intospection
+# introspection
 -include $(INTROSPECTION_MAKEFILE)
 
 if HAVE_INTROSPECTION
