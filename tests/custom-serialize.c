@@ -27,8 +27,7 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
-static volatile int errors = 0;
-static const gboolean verbose = FALSE;
+#define PORT 8080
 
 #define REST_TYPE_CUSTOM_PROXY_CALL custom_proxy_call_get_type()
 
@@ -108,45 +107,45 @@ server_callback (SoupServer *server, SoupMessage *msg,
   }
 }
 
+static void *
+server_func (gpointer data)
+{
+  GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+  SoupServer *server = soup_server_new (NULL, NULL);
+  GSocketAddress *address = g_inet_socket_address_new_from_string ("127.0.0.1", PORT);
+
+  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
+  soup_server_listen (server, address, 0, NULL);
+
+  g_main_loop_run (loop);
+  return NULL;
+}
+
 int
 main (int argc, char **argv)
 {
-  SoupServer *server;
   RestProxy *proxy;
   RestProxyCall *call;
   char *url;
   GError *error = NULL;
 
-  server = soup_server_new (NULL);
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-  url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
+  url = g_strdup_printf ("http://127.0.0.1:%d/", PORT);
 
-  g_thread_create ((GThreadFunc)soup_server_run, server, FALSE, NULL);
+  g_thread_new ("Server Thread", server_func, NULL);
 
   proxy = rest_proxy_new (url, FALSE);
   call = g_object_new (REST_TYPE_CUSTOM_PROXY_CALL, "proxy", proxy, NULL);
 
   rest_proxy_call_set_function (call, "wrong-function");
 
-  if (!rest_proxy_call_sync (call, &error)) {
-    g_printerr ("Call failed: %s\n", error->message);
-    g_error_free (error);
-    g_atomic_int_add (&errors, 1);
-    goto done;
-  }
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
 
-  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
-    g_printerr ("Wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
-    g_atomic_int_add (&errors, 1);
-    goto done;
-  }
-
-  done:
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
 
   g_object_unref (call);
   g_object_unref (proxy);
-  soup_server_quit (server);
   g_free (url);
 
-  return errors != 0;
+  return 0;
 }
