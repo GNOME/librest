@@ -25,6 +25,39 @@
 #include <stdio.h>
 
 static void
+test_auth ()
+{
+  RestProxy *proxy;
+  OAuthProxy *oproxy;
+  GError *error = NULL;
+
+  /* Create the proxy */
+  proxy = oauth_proxy_new ("key", "secret",
+                           "http://oauthbin.com/v1/",
+                           FALSE);
+  oproxy = OAUTH_PROXY (proxy);
+  g_assert (oproxy);
+
+  /* First stage authentication, this gets a request token */
+  oauth_proxy_request_token (oproxy, "request-token", NULL, &error);
+  if (error != NULL && g_error_matches (error, REST_PROXY_ERROR, REST_PROXY_ERROR_CONNECTION))
+    return;
+
+  g_assert_no_error (error);
+  g_assert_cmpstr (oauth_proxy_get_token (oproxy), ==, "requestkey");
+  g_assert_cmpstr (oauth_proxy_get_token_secret (oproxy), ==, "requestsecret");
+
+  /* Second stage authentication, this gets an access token */
+  oauth_proxy_access_token (OAUTH_PROXY (proxy), "access-token", NULL, &error);
+  g_assert_no_error (error);
+
+  g_assert_cmpstr (oauth_proxy_get_token (oproxy), ==, "accesskey");
+  g_assert_cmpstr (oauth_proxy_get_token_secret (oproxy), ==, "accesssecret");
+
+  g_object_unref (proxy);
+}
+
+static void
 test_calls ()
 {
   RestProxy *proxy;
@@ -90,6 +123,7 @@ int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/oauth/first-stage-auth", test_auth);
   g_test_add_func ("/oauth/test-calls", test_calls);
 
   return g_test_run ();
