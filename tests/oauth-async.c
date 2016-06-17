@@ -25,10 +25,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static GMainLoop *loop;
-
 static void
-make_calls (OAuthProxy *oproxy)
+make_calls (OAuthProxy *oproxy, GMainLoop *loop)
 {
   RestProxy *proxy = REST_PROXY (oproxy);
   RestProxyCall *call;
@@ -71,11 +69,12 @@ access_token_cb (OAuthProxy   *proxy,
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   g_assert_no_error ((GError *)error);
+  GMainLoop *loop = user_data;
 
   g_assert_cmpstr (priv->token, ==, "accesskey");
   g_assert_cmpstr (priv->token_secret, ==, "accesssecret");
 
-  make_calls (proxy);
+  make_calls (proxy, loop);
 }
 
 static void
@@ -86,6 +85,7 @@ request_token_cb (OAuthProxy   *proxy,
 {
   OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
   GError *err = NULL;
+  GMainLoop *loop = user_data;
 
   if (error != NULL && g_error_matches (error, REST_PROXY_ERROR, REST_PROXY_ERROR_CONNECTION))
     {
@@ -100,7 +100,7 @@ request_token_cb (OAuthProxy   *proxy,
 
   /* Second stage authentication, this gets an access token */
   oauth_proxy_access_token_async (proxy, "access-token", NULL,
-                                  access_token_cb, NULL, NULL, &err);
+                                  access_token_cb, NULL, loop, &err);
   g_assert_no_error (err);
 }
 
@@ -115,6 +115,7 @@ on_timeout (gpointer data)
 int
 main (int argc, char **argv)
 {
+  GMainLoop *loop = g_main_loop_new (NULL, TRUE);
   RestProxy *proxy;
   OAuthProxy *oproxy;
   GError *error = NULL;
@@ -133,7 +134,7 @@ main (int argc, char **argv)
 
   /* First stage authentication, this gets a request token */
   oauth_proxy_request_token_async (oproxy, "request-token", NULL,
-                                   request_token_cb, NULL, NULL, &error);
+                                   request_token_cb, NULL, loop, &error);
   g_assert_no_error (error);
 
   g_main_loop_run (loop);
