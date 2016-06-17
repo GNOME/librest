@@ -91,33 +91,20 @@ RestProxy* oauth_proxy_new_with_token (const char *consumer_key,
                                        const gchar *url_format,
                                        gboolean binding_required);
 
-/**
- * OAuthProxyAuthCallback:
- * @proxy: the #OAuthProxy
- * @error: a #GError if the authentication failed, otherwise %NULL
- * @weak_object: the weak object passed to the caller
- * @userdata: the user data passed to the caller
- *
- * Callback from oauth_proxy_request_token_async() and
- * oauth_proxy_access_token_async().
- */
-typedef void (*OAuthProxyAuthCallback)(OAuthProxy   *proxy,
-                                       const GError *error,
-                                       GObject      *weak_object,
-                                       gpointer      userdata);
-
 gboolean oauth_proxy_request_token (OAuthProxy *proxy,
                                     const char *function,
                                     const char *callback_uri,
                                     GError    **error);
 
-gboolean oauth_proxy_request_token_async (OAuthProxy            *proxy,
-                                          const char            *function,
-                                          const char            *callback_uri,
-                                          OAuthProxyAuthCallback callback,
-                                          GObject               *weak_object,
-                                          gpointer               user_data,
-                                          GError               **error);
+void oauth_proxy_request_token_async (OAuthProxy          *proxy,
+                                      const char          *function,
+                                      const char          *callback_uri,
+                                      GCancellable        *cancellable,
+                                      GAsyncReadyCallback  callback,
+                                      gpointer             user_data);
+gboolean oauth_proxy_request_token_finish (OAuthProxy *proxy,
+                                           GAsyncResult *result,
+                                           GError **error);
 
 gboolean oauth_proxy_is_oauth10a (OAuthProxy *proxy);
 
@@ -126,13 +113,15 @@ gboolean oauth_proxy_access_token (OAuthProxy *proxy,
                                    const char *verifier,
                                    GError    **error);
 
-gboolean oauth_proxy_access_token_async (OAuthProxy            *proxy,
-                                         const char            *function,
-                                         const char            *verifier,
-                                         OAuthProxyAuthCallback callback,
-                                         GObject               *weak_object,
-                                         gpointer               user_data,
-                                         GError               **error);
+void oauth_proxy_access_token_async (OAuthProxy          *proxy,
+                                     const char          *function,
+                                     const char          *verifier,
+                                     GCancellable        *cancellable,
+                                     GAsyncReadyCallback  callback,
+                                     gpointer             user_data);
+gboolean oauth_proxy_access_token_finish (OAuthProxy *proxy,
+                                          GAsyncResult *result,
+                                          GError **error);
 
 const char * oauth_proxy_get_token (OAuthProxy *proxy);
 

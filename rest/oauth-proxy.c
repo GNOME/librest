@@ -279,11 +279,6 @@ oauth_proxy_new_with_token (const char *consumer_key,
                        NULL);
 }
 
-typedef struct {
-  OAuthProxyAuthCallback callback;
-  gpointer user_data;
-} AuthData;
-
 /**
  * oauth_proxy_request_token:
  * @proxy: an #OAuthProxy
@@ -335,32 +330,31 @@ request_token_cb (RestProxyCall *call,
                   GObject       *weak_object,
                   gpointer       user_data)
 {
-  AuthData *data = user_data;
   OAuthProxy *proxy = NULL;
+  GTask *task = G_TASK (user_data);
 
   g_object_get (call, "proxy", &proxy, NULL);
   g_assert (proxy);
 
-  if (!error) {
+  if (error != NULL) {
+    g_task_return_error (task, g_error_copy (error));
+  } else {
     oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
+    g_task_return_boolean (task, TRUE);
   }
 
-  data->callback (proxy, error, weak_object, data->user_data);
-
-  g_slice_free (AuthData, data);
   g_object_unref (call);
   g_object_unref (proxy);
+  g_object_unref (task);
 }
 
 /**
  * oauth_proxy_request_token_async:
  * @proxy: an #OAuthProxy
- * @function: the function name to invoke
- * @callback_uri: the callback URI
+ * @function: (nullable): the function name to invoke
+ * @callback_uri: (nullable): the callback URI
  * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
- * @weak_object: #GObject to weakly reference and tie the lifecycle of the method call too
  * @user_data: user data to pass to @callback
- * @error: a #GError, or %NULL
  *
  * Perform the Request Token phase of OAuth, invoking @function (defaulting to
  * "request_token" if @function is NULL).
@@ -375,17 +369,17 @@ request_token_cb (RestProxyCall *call,
  * Returns: %TRUE if the method was successfully queued, or %FALSE on
  * failure. On failure @error is set.
  */
-gboolean
-oauth_proxy_request_token_async (OAuthProxy            *proxy,
-                                 const char            *function,
-                                 const char            *callback_uri,
-                                 OAuthProxyAuthCallback callback,
-                                 GObject               *weak_object,
-                                 gpointer               user_data,
-                                 GError               **error)
+void
+oauth_proxy_request_token_async (OAuthProxy          *proxy,
+                                 const char          *function,
+                                 const char          *callback_uri,
+                                 GCancellable        *cancellable,
+                                 GAsyncReadyCallback  callback,
+                                 gpointer             user_data)
 {
   RestProxyCall *call;
-  AuthData *data;
+  GTask *task;
+  GError *error = NULL;
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
@@ -394,11 +388,23 @@ oauth_proxy_request_token_async (OAuthProxy            *proxy,
   if (callback_uri)
     rest_proxy_call_add_param (call, "oauth_callback", callback_uri);
 
-  data = g_slice_new0 (AuthData);
-  data->callback = callback;
-  data->user_data = user_data;
+  task = g_task_new (proxy, cancellable, callback, user_data);
 
-  return rest_proxy_call_async (call, request_token_cb, weak_object, data, error);
+  rest_proxy_call_async (call, request_token_cb, NULL, task, &error);
+  if (error != NULL) {
+    g_task_return_error (task, error);
+  }
+}
+
+gboolean
+oauth_proxy_request_token_finish (OAuthProxy *proxy,
+                                  GAsyncResult *result,
+                                  GError **error)
+{
+  g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, proxy), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 /**
@@ -452,21 +458,22 @@ access_token_cb (RestProxyCall *call,
                  GObject       *weak_object,
                  gpointer       user_data)
 {
-  AuthData *data = user_data;
   OAuthProxy *proxy = NULL;
+  GTask *task = G_TASK (user_data);
 
   g_object_get (call, "proxy", &proxy, NULL);
   g_assert (proxy);
 
-  if (!error) {
+  if (error != NULL) {
+    g_task_return_error (task, g_error_copy (error));
+  } else {
     oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
+    g_task_return_boolean (task, TRUE);
   }
 
-  data->callback (proxy, error, weak_object, data->user_data);
-
-  g_slice_free (AuthData, data);
   g_object_unref (call);
   g_object_unref (proxy);
+  g_object_unref (task);
 }
 
 /**
@@ -493,17 +500,17 @@ access_token_cb (RestProxyCall *call,
  * Returns: %TRUE if the method was successfully queued, or %FALSE on
  * failure. On failure @error is set.
  */
-gboolean
-oauth_proxy_access_token_async (OAuthProxy            *proxy,
-                                const char            *function,
-                                const char            *verifier,
-                                OAuthProxyAuthCallback callback,
-                                GObject               *weak_object,
-                                gpointer               user_data,
-                                GError               **error)
+void
+oauth_proxy_access_token_async (OAuthProxy          *proxy,
+                                const char          *function,
+                                const char          *verifier,
+                                GCancellable        *cancellable,
+                                GAsyncReadyCallback  callback,
+                                gpointer             user_data)
 {
   RestProxyCall *call;
-  AuthData *data;
+  GTask *task;
+  GError *error = NULL;
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
@@ -512,11 +519,23 @@ oauth_proxy_access_token_async (OAuthProxy            *proxy,
   if (verifier)
     rest_proxy_call_add_param (call, "oauth_verifier", verifier);
 
-  data = g_slice_new0 (AuthData);
-  data->callback = callback;
-  data->user_data = user_data;
+  task = g_task_new (proxy, cancellable, callback, user_data);
 
-  return rest_proxy_call_async (call, access_token_cb, weak_object, data, error);
+  rest_proxy_call_async (call, access_token_cb, NULL, task, &error);
+  if (error != NULL) {
+    g_task_return_error (task, error);
+  }
+}
+
+gboolean
+oauth_proxy_access_token_finish (OAuthProxy *proxy,
+                                 GAsyncResult *result,
+                                 GError **error)
+{
+  g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, proxy), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 /**
