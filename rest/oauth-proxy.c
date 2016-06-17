@@ -311,10 +311,11 @@ oauth_proxy_request_token (OAuthProxy *proxy,
   if (callback_uri)
     rest_proxy_call_add_param (call, "oauth_callback", callback_uri);
 
-  if (!rest_proxy_call_run (call, NULL, error)) {
-    g_object_unref (call);
-    return FALSE;
-  }
+  if (!rest_proxy_call_sync (call, error))
+    {
+      g_object_unref (call);
+      return FALSE;
+    }
 
   /* TODO: sanity check response */
   oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
@@ -325,26 +326,24 @@ oauth_proxy_request_token (OAuthProxy *proxy,
 }
 
 static void
-request_token_cb (RestProxyCall *call,
-                  const GError  *error,
-                  GObject       *weak_object,
-                  gpointer       user_data)
+request_token_cb (GObject      *source_object,
+                  GAsyncResult *result,
+                  gpointer      user_data)
 {
-  OAuthProxy *proxy = NULL;
   GTask *task = G_TASK (user_data);
+  RestProxyCall *call = REST_PROXY_CALL (source_object);
+  GError *error = NULL;
+  gboolean call_status;
 
-  g_object_get (call, "proxy", &proxy, NULL);
-  g_assert (proxy);
+  call_status = rest_proxy_call_invoke_finish (call, result, &error);
 
   if (error != NULL) {
-    g_task_return_error (task, g_error_copy (error));
+    g_task_return_error (task, error);
   } else {
     oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
-    g_task_return_boolean (task, TRUE);
+    g_task_return_boolean (task, call_status);
   }
 
-  g_object_unref (call);
-  g_object_unref (proxy);
   g_object_unref (task);
 }
 
@@ -379,7 +378,6 @@ oauth_proxy_request_token_async (OAuthProxy          *proxy,
 {
   RestProxyCall *call;
   GTask *task;
-  GError *error = NULL;
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
@@ -390,10 +388,9 @@ oauth_proxy_request_token_async (OAuthProxy          *proxy,
 
   task = g_task_new (proxy, cancellable, callback, user_data);
 
-  rest_proxy_call_async (call, request_token_cb, NULL, task, &error);
-  if (error != NULL) {
-    g_task_return_error (task, error);
-  }
+  rest_proxy_call_invoke_async (call, cancellable, request_token_cb, task);
+
+  g_object_unref (call);
 }
 
 gboolean
@@ -439,10 +436,11 @@ oauth_proxy_access_token (OAuthProxy *proxy,
   if (verifier)
     rest_proxy_call_add_param (call, "oauth_verifier", verifier);
 
-  if (!rest_proxy_call_run (call, NULL, error)) {
-    g_object_unref (call);
-    return FALSE;
-  }
+  if (!rest_proxy_call_sync (call, error))
+    {
+      g_object_unref (call);
+      return FALSE;
+    }
 
   /* TODO: sanity check response */
   oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
@@ -453,26 +451,24 @@ oauth_proxy_access_token (OAuthProxy *proxy,
 }
 
 static void
-access_token_cb (RestProxyCall *call,
-                 const GError  *error,
-                 GObject       *weak_object,
-                 gpointer       user_data)
+access_token_cb (GObject      *source_object,
+                 GAsyncResult *result,
+                 gpointer      user_data)
 {
-  OAuthProxy *proxy = NULL;
   GTask *task = G_TASK (user_data);
+  RestProxyCall *call = REST_PROXY_CALL (source_object);
+  GError *error = NULL;
+  gboolean call_status;
 
-  g_object_get (call, "proxy", &proxy, NULL);
-  g_assert (proxy);
+  call_status = rest_proxy_call_invoke_finish (call, result, &error);
 
   if (error != NULL) {
-    g_task_return_error (task, g_error_copy (error));
+    g_task_return_error (task, error);
   } else {
     oauth_proxy_call_parse_token_response (OAUTH_PROXY_CALL (call));
-    g_task_return_boolean (task, TRUE);
+    g_task_return_boolean (task, call_status);
   }
 
-  g_object_unref (call);
-  g_object_unref (proxy);
   g_object_unref (task);
 }
 
@@ -510,7 +506,6 @@ oauth_proxy_access_token_async (OAuthProxy          *proxy,
 {
   RestProxyCall *call;
   GTask *task;
-  GError *error = NULL;
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
@@ -521,10 +516,8 @@ oauth_proxy_access_token_async (OAuthProxy          *proxy,
 
   task = g_task_new (proxy, cancellable, callback, user_data);
 
-  rest_proxy_call_async (call, access_token_cb, NULL, task, &error);
-  if (error != NULL) {
-    g_task_return_error (task, error);
-  }
+  rest_proxy_call_invoke_async (call, cancellable, access_token_cb, task);
+  g_object_unref (call);
 }
 
 gboolean

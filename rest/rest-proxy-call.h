@@ -150,20 +150,10 @@ void rest_proxy_call_remove_param (RestProxyCall *call,
 
 RestParams *rest_proxy_call_get_params (RestProxyCall *call);
 
-gboolean rest_proxy_call_run (RestProxyCall *call,
-                              GMainLoop    **loop,
-                              GError       **error);
-
 typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
                                            const GError  *error,
                                            GObject       *weak_object,
                                            gpointer       userdata);
-
-gboolean rest_proxy_call_async (RestProxyCall                *call,
-                                RestProxyCallAsyncCallback    callback,
-                                GObject                      *weak_object,
-                                gpointer                      userdata,
-                                GError                      **error);
 
 void rest_proxy_call_invoke_async (RestProxyCall       *call,
                                    GCancellable        *cancellable,

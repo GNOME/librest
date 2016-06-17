@@ -676,7 +676,7 @@ _rest_proxy_simple_run_valist (RestProxy *proxy,
 
   rest_proxy_call_add_params_from_valist (call, params);
 
-  ret = rest_proxy_call_run (call, NULL, error);
+  ret = rest_proxy_call_sync (call, error);
   if (ret) {
     *payload = g_strdup (rest_proxy_call_get_payload (call));
     if (len) *len = rest_proxy_call_get_payload_length (call);
