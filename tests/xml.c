@@ -49,6 +49,7 @@ main (int argc, char **argv)
                TEST_XML, xml);
     }
 
+  g_free (xml);
   rest_xml_node_unref (root);
 
   root = rest_xml_node_add_child (NULL, "node0");
@@ -75,7 +76,9 @@ main (int argc, char **argv)
                TEST_XML, xml);
     }
 
+  g_free (xml);
   rest_xml_node_unref (root);
+  g_object_unref (parser);
 
   return 0;
 }
