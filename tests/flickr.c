@@ -77,6 +77,7 @@ test_flickr ()
 
   rest_xml_node_unref (root);
   g_object_unref (call);
+  g_object_unref (parser);
 
   /*
    * Test a call which requires a signature.
@@ -100,7 +101,10 @@ test_flickr ()
   g_assert_nonnull (node->content);
   g_assert_cmpstr (node->content, !=, "");
 
+  rest_xml_node_unref (root);
+  g_object_unref (call);
   g_object_unref (proxy);
+  g_object_unref (parser);
 
 }
 
