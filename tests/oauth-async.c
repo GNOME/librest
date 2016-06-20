@@ -191,6 +191,7 @@ test_request_token ()
                                    NULL, request_token_cb1, loop);
 
   g_main_loop_run (loop);
+  g_main_loop_unref (loop);
 }
 
 static void
@@ -207,6 +208,7 @@ test_access_token ()
                                    NULL, request_token_cb2, loop);
 
   g_main_loop_run (loop);
+  g_main_loop_unref (loop);
 }
 
 static void
@@ -223,6 +225,7 @@ test_calls ()
                                    NULL, request_token_cb3, loop);
 
   g_main_loop_run (loop);
+  g_main_loop_unref (loop);
 }
 
 int
