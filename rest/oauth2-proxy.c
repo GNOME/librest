@@ -394,6 +394,7 @@ oauth2_proxy_extract_access_token (const char *url)
       g_hash_table_destroy (params);
     }
   }
+  soup_uri_free (soupuri);
 
   return token;
 }
