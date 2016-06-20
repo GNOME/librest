@@ -36,6 +36,7 @@ test_url_fragment_no_access_token ()
   char *token = oauth2_proxy_extract_access_token ("http://example.com/foo?foo=1#bar");
 
   g_assert_null (token);
+  g_free (token);
 }
 
 static void
@@ -44,6 +45,7 @@ test_access_token_simple ()
   char *token = oauth2_proxy_extract_access_token ("http://example.com/foo?foo=1#access_token=1234567890_12.34561abcdefg&bar");
 
   g_assert_cmpstr (token, ==, "1234567890_12.34561abcdefg");
+  g_free (token);
 }
 
 static void test_url_encoding_access_token ()
@@ -51,6 +53,7 @@ static void test_url_encoding_access_token ()
   char *token = oauth2_proxy_extract_access_token ("http://example.com/foo?foo=1#access_token=1234567890%5F12%2E34561abcdefg&bar");
 
   g_assert_cmpstr (token, ==, "1234567890_12.34561abcdefg");
+  g_free (token);
 }
 
 int
