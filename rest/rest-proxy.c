@@ -437,6 +437,8 @@ RestProxy *
 rest_proxy_new (const gchar *url_format,
                 gboolean     binding_required)
 {
+  g_return_val_if_fail (url_format != NULL, NULL);
+
   return g_object_new (REST_TYPE_PROXY,
                        "url-format", url_format,
                        "binding-required", binding_required,
@@ -465,6 +467,10 @@ rest_proxy_new_with_authentication (const gchar *url_format,
                                     const gchar *username,
                                     const gchar *password)
 {
+  g_return_val_if_fail (url_format != NULL, NULL);
+  g_return_val_if_fail (username != NULL, NULL);
+  g_return_val_if_fail (password != NULL, NULL);
+
   return g_object_new (REST_TYPE_PROXY,
                        "url-format", url_format,
                        "binding-required", binding_required,
@@ -503,10 +509,10 @@ rest_proxy_bind_valist (RestProxy *proxy,
 gboolean
 rest_proxy_bind (RestProxy *proxy, ...)
 {
-  g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
-
   gboolean res;
   va_list params;
+
+  g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
 
   va_start (params, proxy);
   res = rest_proxy_bind_valist (proxy, params);
@@ -562,6 +568,7 @@ rest_proxy_add_soup_feature (RestProxy *proxy, SoupSessionFeature *feature)
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_if_fail (REST_IS_PROXY(proxy));
+  g_return_if_fail (feature != NULL);
   g_return_if_fail (priv->session != NULL);
 
   soup_session_add_feature (priv->session, feature);
