@@ -79,7 +79,7 @@ main (int argc, char **argv)
   RestProxy *proxy;
   RestProxyCall *call;
   RestXmlNode *root;
-  char *token, *url, *userid = NULL, *session = NULL;;
+  char *token, *url, *userid = NULL, *session = NULL;
   GOptionEntry entries[] = {
     { "session", 's', 0, G_OPTION_ARG_STRING, &session, "Session key (optional)", "KEY" },
     { "user", 'u', 0, G_OPTION_ARG_STRING, &userid, "User to send a message to", "USERNAME" },

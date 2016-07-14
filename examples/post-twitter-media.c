@@ -32,6 +32,8 @@ main (int argc, char **argv)
   RestParam *img_param;
   GError *error = NULL;
   char pin[256];
+  gsize length;
+  gchar *contents;
 
   if (argc != 2) {
     g_printerr ("$ post-twitter-media \"message\"\n");
@@ -64,8 +66,6 @@ main (int argc, char **argv)
 
 
   /* In order to send an image to twitter, we first need to load it ourselves. */
-  gsize length;
-  gchar *contents;
   if (!g_file_get_contents("test-media.png", &contents, &length, NULL)){
     g_error("reading file failed.");
     return -1;
