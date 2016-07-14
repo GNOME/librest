@@ -390,6 +390,17 @@ oauth_proxy_request_token_async (OAuthProxy          *proxy,
   g_object_unref (call);
 }
 
+/**
+ * oauth_proxy_request_token_finish:
+ * @proxy: a #OAuthProxy
+ * @result: a #GAsyncResult
+ * @error: a #GError or %NULL
+ *
+ * Finishes an operation started with oauth_proxy_request_token_async()
+ *
+ * Returns: %TRUE on success, %FALSE if an error occurred, in which case
+ *   @error will be set.
+ */
 gboolean
 oauth_proxy_request_token_finish (OAuthProxy *proxy,
                                   GAsyncResult *result,
