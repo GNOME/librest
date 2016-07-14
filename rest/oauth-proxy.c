@@ -364,9 +364,6 @@ request_token_cb (GObject      *source_object,
  *
  * This method will return once the method has been queued, @callback will be
  * invoked when it has completed.
- *
- * Returns: %TRUE if the method was successfully queued, or %FALSE on
- * failure. On failure @error is set.
  */
 void
 oauth_proxy_request_token_async (OAuthProxy          *proxy,
@@ -478,9 +475,7 @@ access_token_cb (GObject      *source_object,
  * @function: the function name to invoke
  * @verifier: the verifier
  * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
- * @weak_object: #GObject to weakly reference and tie the lifecycle of the method call too
  * @user_data: user data to pass to @callback
- * @error: a #GError, or %NULL
  *
  * Perform the Access Token phase of OAuth, invoking @function (defaulting to
  * "access_token" if @function is NULL).
@@ -492,9 +487,6 @@ access_token_cb (GObject      *source_object,
  *
  * This method will return once the method has been queued, @callback will be
  * invoked when it has completed.
- *
- * Returns: %TRUE if the method was successfully queued, or %FALSE on
- * failure. On failure @error is set.
  */
 void
 oauth_proxy_access_token_async (OAuthProxy          *proxy,
