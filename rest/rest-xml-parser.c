@@ -91,6 +91,7 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
   GQueue nodes = G_QUEUE_INIT;
 
   g_return_val_if_fail (REST_IS_XML_PARSER (parser), NULL);
+  g_return_val_if_fail (data != NULL, NULL);
 
   if (len == -1)
     len = strlen (data);

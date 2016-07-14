@@ -215,6 +215,8 @@ const gchar *
 rest_xml_node_get_attr (RestXmlNode *node,
                         const gchar *attr_name)
 {
+  g_return_val_if_fail (attr_name != NULL, NULL);
+
   return g_hash_table_lookup (node->attrs, attr_name);
 }
 
@@ -238,6 +240,7 @@ rest_xml_node_find (RestXmlNode *start,
   const char *tag_interned;
 
   g_return_val_if_fail (start, NULL);
+  g_return_val_if_fail (tag != NULL, NULL);
   g_return_val_if_fail (start->ref_count > 0, NULL);
 
   tag_interned = g_intern_string (tag);
@@ -331,6 +334,7 @@ rest_xml_node_add_child (RestXmlNode *parent, const char *tag)
   RestXmlNode *node;
   char        *escaped;
 
+  g_return_val_if_fail (parent, NULL);
   g_return_val_if_fail (tag && *tag, NULL);
 
   escaped = g_markup_escape_text (tag, -1);
@@ -372,7 +376,11 @@ rest_xml_node_add_attr (RestXmlNode *node,
                         const char  *attribute,
                         const char  *value)
 {
-  g_return_if_fail (node && attribute && *attribute);
+  g_return_if_fail (node);
+  g_return_if_fail (attribute);
+  g_return_if_fail (*attribute);
+  g_return_if_fail (value);
+  g_return_if_fail (*value);
 
   g_hash_table_insert (node->attrs,
                        g_markup_escape_text (attribute, -1),
@@ -389,7 +397,9 @@ rest_xml_node_add_attr (RestXmlNode *node,
 void
 rest_xml_node_set_content (RestXmlNode *node, const char *value)
 {
-  g_return_if_fail (node && value && *value);
+  g_return_if_fail (node);
+  g_return_if_fail (value);
+  g_return_if_fail (*value);
 
   g_free (node->content);
   node->content = g_markup_escape_text (value, -1);

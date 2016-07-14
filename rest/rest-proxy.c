@@ -526,6 +526,7 @@ rest_proxy_set_user_agent (RestProxy  *proxy,
                            const char *user_agent)
 {
   g_return_if_fail (REST_IS_PROXY (proxy));
+  g_return_if_fail (user_agent != NULL);
 
   g_object_set (proxy, "user-agent", user_agent, NULL);
 }
