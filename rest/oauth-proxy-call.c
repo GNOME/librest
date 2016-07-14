@@ -131,7 +131,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   url_str = rest_proxy_call_get_url (call);
 
   text = g_string_new (NULL);
-  g_string_append (text, rest_proxy_call_get_method (REST_PROXY_CALL (call)));
+  g_string_append (text, rest_proxy_call_get_method (call));
   g_string_append_c (text, '&');
   if (priv->oauth_echo) {
     g_string_append_uri_escaped (text, priv->service_url, NULL, FALSE);
