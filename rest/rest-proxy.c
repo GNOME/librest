@@ -598,7 +598,11 @@ _rest_proxy_new_call (RestProxy *proxy)
 RestProxyCall *
 rest_proxy_new_call (RestProxy *proxy)
 {
-  RestProxyClass *proxy_class = REST_PROXY_GET_CLASS (proxy);
+  RestProxyClass *proxy_class;
+
+  g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
+
+  proxy_class = REST_PROXY_GET_CLASS (proxy);
   return proxy_class->new_call (proxy);
 }
 
