@@ -62,7 +62,7 @@ G_DEFINE_BOXED_TYPE (RestParam, rest_param, rest_param_ref, rest_param_unref)
  *   the start of the data
  * @length: the length of the data
  * @content_type: the content type of the data
- * @filename: the original filename, or %NULL
+ * @filename: (nullable): the original filename, or %NULL
  *
  * Create a new #RestParam called @name with @length bytes of @data as the
  * value.  @content_type is the type of the data as a MIME type, for example
@@ -81,6 +81,10 @@ rest_param_new_full (const char    *name,
                      const char    *filename)
 {
   RestParam *param;
+
+  g_return_val_if_fail (name != NULL, NULL);
+  g_return_val_if_fail (content_type != NULL, NULL);
+  g_return_val_if_fail (data != NULL, NULL);
 
   param = g_slice_new0 (RestParam);
 
@@ -152,6 +156,10 @@ rest_param_new_with_owner (const char     *name,
 {
   RestParam *param;
 
+  g_return_val_if_fail (name, NULL);
+  g_return_val_if_fail (data, NULL);
+  g_return_val_if_fail (content_type, NULL);
+
   param = g_slice_new0 (RestParam);
 
   param->name = g_strdup (name);
@@ -187,6 +195,8 @@ rest_param_new_string (const char    *name,
                        RestMemoryUse  use,
                        const char    *string)
 {
+  g_return_val_if_fail (name != NULL, NULL);
+  g_return_val_if_fail (string != NULL, NULL);
 
   if (string == NULL) {
     use = REST_MEMORY_STATIC;
@@ -210,6 +220,8 @@ rest_param_new_string (const char    *name,
 const char *
 rest_param_get_name (RestParam *param)
 {
+  g_return_val_if_fail (param != NULL, NULL);
+
   return param->name;
 }
 
@@ -225,6 +237,8 @@ rest_param_get_name (RestParam *param)
 const char *
 rest_param_get_content_type (RestParam *param)
 {
+  g_return_val_if_fail (param != NULL, NULL);
+
   return param->content_type;
 }
 
@@ -239,6 +253,8 @@ rest_param_get_content_type (RestParam *param)
 const char *
 rest_param_get_file_name (RestParam *param)
 {
+  g_return_val_if_fail (param != NULL, FALSE);
+
   return param->filename;
 }
 
@@ -253,6 +269,7 @@ rest_param_get_file_name (RestParam *param)
 gboolean
 rest_param_is_string (RestParam *param)
 {
+  g_return_val_if_fail (param != NULL, FALSE);
   return param->content_type == g_intern_static_string ("text/plain");
 }
 
@@ -268,6 +285,7 @@ rest_param_is_string (RestParam *param)
 gconstpointer
 rest_param_get_content (RestParam *param)
 {
+  g_return_val_if_fail (param != NULL, NULL);
   return param->data;
 }
 
@@ -282,6 +300,8 @@ rest_param_get_content (RestParam *param)
 gsize
 rest_param_get_content_length (RestParam *param)
 {
+  g_return_val_if_fail (param != NULL, 0);
+
   return param->length;
 }
 
@@ -297,7 +317,7 @@ RestParam *
 rest_param_ref (RestParam *param)
 {
   /* TODO: bring back REST_MEMORY_TEMPORARY? */
-  g_return_val_if_fail (param, NULL);
+  g_return_val_if_fail (param != NULL, NULL);
   g_return_val_if_fail (param->ref_count > 0, NULL);
 
   g_atomic_int_inc (&param->ref_count);
