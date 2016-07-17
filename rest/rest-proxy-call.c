@@ -1194,12 +1194,6 @@ rest_proxy_call_cancel (RestProxyCall *call)
   return TRUE;
 }
 
-typedef struct
-{
-  GMainLoop *loop;
-  GError *error;
-} RestProxyCallRunClosure;
-
 gboolean
 rest_proxy_call_sync (RestProxyCall *call,
                       GError       **error_out)
