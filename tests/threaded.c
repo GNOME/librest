@@ -88,10 +88,10 @@ main (int argc, char **argv)
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
   url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
 
-  g_thread_create ((GThreadFunc)soup_server_run, server, FALSE, NULL);
+  g_thread_new ("server thread", (GThreadFunc)soup_server_run, server);
 
   for (i = 0; i < G_N_ELEMENTS (threads); i++) {
-    threads[i] = g_thread_create (func, url, TRUE, NULL);
+    threads[i] = g_thread_new ("client thread", func, url);
     if (verbose)
       g_print ("Starting thread %p\n", threads[i]);
   }
