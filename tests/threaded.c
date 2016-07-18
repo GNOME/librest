@@ -29,7 +29,6 @@
 
 const int N_THREADS = 10;
 
-static volatile int errors = 0;
 static volatile int threads_done = 0;
 static const gboolean verbose = FALSE;
 
@@ -66,46 +65,32 @@ func (gpointer data)
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "ping");
 
-  if (!rest_proxy_call_sync (call, &error)) {
-    g_printerr ("Call failed: %s\n", error->message);
-    g_error_free (error);
-    g_atomic_int_add (&errors, 1);
-    goto done;
-  }
+  g_assert (rest_proxy_call_sync (call, &error));
+  g_assert_no_error (error);
 
-  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
-    g_printerr ("Wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
-    g_atomic_int_add (&errors, 1);
-    goto done;
-  }
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
 
   if (verbose)
     g_print ("Thread %p done\n", g_thread_self ());
 
- done:
   g_object_unref (call);
   g_object_unref (proxy);
+
   return NULL;
 }
 
-int
-main (int argc, char **argv)
+
+static void ping ()
 {
   GThread *threads[N_THREADS];
   GError *error = NULL;
   char *url;
   int i;
   GSList *uris;
-  GSocketAddress *address;
 
-  server = soup_server_new (NULL);
+  server = soup_server_new (NULL, NULL);
   soup_server_listen_all (server, 0, 0, &error);
-
-  if (error)
-    {
-      g_critical ("listen failed: %s", error->message);
-      return -1;
-    }
+  g_assert_no_error (error);
 
   soup_server_add_handler (server, "/ping", server_callback,
                            NULL, NULL);
@@ -128,6 +113,15 @@ main (int argc, char **argv)
   g_free (url);
   g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
   g_object_unref (server);
+  g_main_loop_unref (main_loop);
+}
 
-  return errors != 0;
+int
+main (int argc, char **argv)
+{
+
+  g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/threaded/ping", ping);
+
+  return g_test_run ();
 }
