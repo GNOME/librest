@@ -27,8 +27,14 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
+const int N_THREADS = 10;
+
 static volatile int errors = 0;
-static const gboolean verbose = TRUE;
+static volatile int threads_done = 0;
+static const gboolean verbose = FALSE;
+
+GMainLoop *main_loop;
+SoupServer *server;
 
 static void
 server_callback (SoupServer *server, SoupMessage *msg,
@@ -37,6 +43,11 @@ server_callback (SoupServer *server, SoupMessage *msg,
 {
   if (g_str_equal (path, "/ping")) {
     soup_message_set_status (msg, SOUP_STATUS_OK);
+    g_atomic_int_add (&threads_done, 1);
+
+    if (threads_done == N_THREADS) {
+      g_main_loop_quit (main_loop);
+    }
   } else {
     soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
@@ -49,6 +60,7 @@ func (gpointer data)
   RestProxyCall *call;
   const char *url = data;
   GError *error = NULL;
+
 
   proxy = rest_proxy_new (url, FALSE);
   call = rest_proxy_new_call (proxy);
@@ -79,29 +91,43 @@ func (gpointer data)
 int
 main (int argc, char **argv)
 {
-  SoupServer *server;
-  GThread *threads[10];
+  GThread *threads[N_THREADS];
+  GError *error = NULL;
   char *url;
   int i;
+  GSList *uris;
+  GSocketAddress *address;
 
   server = soup_server_new (NULL);
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-  url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
+  soup_server_listen_all (server, 0, 0, &error);
 
-  g_thread_new ("server thread", (GThreadFunc)soup_server_run, server);
+  if (error)
+    {
+      g_critical ("listen failed: %s", error->message);
+      return -1;
+    }
 
-  for (i = 0; i < G_N_ELEMENTS (threads); i++) {
+  soup_server_add_handler (server, "/ping", server_callback,
+                           NULL, NULL);
+
+  uris = soup_server_get_uris (server);
+  g_assert (g_slist_length (uris) > 0);
+
+  url = soup_uri_to_string (uris->data, FALSE);
+
+  main_loop = g_main_loop_new (NULL, TRUE);
+
+  for (i = 0; i < N_THREADS; i++) {
     threads[i] = g_thread_new ("zomg", func, url);
     if (verbose)
       g_print ("Starting thread %p\n", threads[i]);
   }
 
-  for (i = 0; i < G_N_ELEMENTS (threads); i++) {
-    g_thread_join (threads[i]);
-  }
+  g_main_loop_run (main_loop);
 
-  soup_server_quit (server);
   g_free (url);
+  g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
+  g_object_unref (server);
 
   return errors != 0;
 }
