@@ -753,6 +753,10 @@ prepare_message (RestProxyCall *call, GError **error_out)
     {
         g_free (content);
         g_free (content_type);
+        g_set_error_literal (error_out,
+                             REST_PROXY_ERROR,
+                             REST_PROXY_ERROR_BINDING_REQUIRED,
+                             "URL is unbound");
         return NULL;
     }
 
@@ -775,6 +779,10 @@ prepare_message (RestProxyCall *call, GError **error_out)
 
     if (!set_url (call))
     {
+        g_set_error_literal (error_out,
+                             REST_PROXY_ERROR,
+                             REST_PROXY_ERROR_BINDING_REQUIRED,
+                             "URL is unbound");
         return NULL;
     }
 
@@ -786,8 +794,14 @@ prepare_message (RestProxyCall *call, GError **error_out)
 
     g_hash_table_unref (hash);
 
-    if (!message)
-      return NULL;
+    if (!message) {
+        g_set_error (error_out,
+                     REST_PROXY_ERROR,
+                     REST_PROXY_ERROR_URL_INVALID,
+                     "URL '%s' is not valid",
+                     priv->url);
+        return NULL;
+    }
 
   } else {
     SoupMultipart *mp;
@@ -822,6 +836,10 @@ prepare_message (RestProxyCall *call, GError **error_out)
     if (!set_url (call))
     {
         soup_multipart_free (mp);
+        g_set_error_literal (error_out,
+                             REST_PROXY_ERROR,
+                             REST_PROXY_ERROR_BINDING_REQUIRED,
+                             "URL is unbound");
         return NULL;
     }
 
