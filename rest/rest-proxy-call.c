@@ -1212,6 +1212,20 @@ rest_proxy_call_cancel (RestProxyCall *call)
   return TRUE;
 }
 
+/**
+ * rest_proxy_call_sync:
+ * @call: a #RestProxycall
+ * @error_out: a #GError or %NULL
+ *
+ * Synchronously invokes @call. After this function has returned,
+ * rest_proxy_call_get_payload() will return the result of this call.
+ *
+ * Note that this will block an undefined amount of time, so
+ * rest_proxy_call_invoke_async() is generally recommended.
+ *
+ * Returns: %TRUE on success, %FALSE if a failure occurred,
+ *   in which case @error_out will be set.
+ */
 gboolean
 rest_proxy_call_sync (RestProxyCall *call,
                       GError       **error_out)
