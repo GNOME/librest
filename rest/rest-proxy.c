@@ -43,7 +43,6 @@ struct _RestProxyPrivate {
   gchar *password;
   gboolean binding_required;
   SoupSession *session;
-  SoupSession *session_sync;
   gboolean disable_cookies;
   char *ssl_ca_file;
 };
