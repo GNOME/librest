@@ -28,7 +28,6 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
-static int errors = 0;
 static GMainLoop *loop = NULL;
 
 #define NUM_CHUNKS 20
@@ -67,14 +66,13 @@ server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
 {
-  if (g_str_equal (path, "/stream")) {
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_headers_set_encoding (msg->response_headers,
-                                       SOUP_ENCODING_CHUNKED);
-    soup_server_pause_message (server, msg);
+  g_assert_cmpstr (path, ==, "/stream");
+  soup_message_set_status (msg, SOUP_STATUS_OK);
+  soup_message_headers_set_encoding (msg->response_headers,
+                                     SOUP_ENCODING_CHUNKED);
+  soup_server_pause_message (server, msg);
 
-    g_idle_add (send_chunks, msg);
-  }
+  g_idle_add (send_chunks, msg);
 }
 
 static void
@@ -87,47 +85,21 @@ _call_continuous_cb (RestProxyCall *call,
 {
   guint i;
 
-  if (error)
-  {
-    g_printerr ("Error: %s\n", error->message);
-    errors++;
-    goto out;
-  }
-
-  if (!REST_IS_PROXY (weak_object))
-  {
-    g_printerr ("weak object not as expected\n");
-    errors++;
-    goto out;
-  }
+  g_assert_no_error (error);
+  g_assert (REST_IS_PROXY (weak_object));
 
   if (buf == NULL && len == 0)
-  {
-    if (client_count < NUM_CHUNKS * SIZE_CHUNK)
-    {
-      g_printerr ("stream ended prematurely\n");
-      errors++;
-    }
-    goto out;
-  }
+    g_assert (client_count == NUM_CHUNKS * SIZE_CHUNK);
 
   for (i = 0; i < len; i++)
   {
-    if (buf[i] != client_count)
-    {
-      g_printerr ("stream data not as expected (got %d, expected %d)\n",
-                  (gint) buf[i], client_count);
-      errors++;
-      goto out;
-    }
-
+    g_assert_cmpint (buf[i], ==, client_count);
     client_count++;
   }
 
-  return;
-out:
-  g_main_loop_quit (loop);
-  return;
+
+  if (client_count == NUM_CHUNKS * SIZE_CHUNK)
+    g_main_loop_quit (loop);
 }
 
 static void
@@ -135,43 +107,59 @@ stream_test (RestProxy *proxy)
 {
   RestProxyCall *call;
   GError *error = NULL;
+  gboolean result;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "stream");
 
-  if (!rest_proxy_call_continuous (call,
-                                   _call_continuous_cb,
-                                   (GObject *)proxy,
-                                   NULL,
-                                   &error))
-  {
-    g_printerr ("Making stream failed: %s", error->message);
-    g_error_free (error);
-    errors++;
-    return;
-  }
+  result = rest_proxy_call_continuous (call,
+                                       _call_continuous_cb,
+                                       (GObject *)proxy,
+                                       NULL,
+                                       &error);
+
+  g_assert_no_error (error);
+  g_assert (result);
 
   g_object_unref (call);
+}
+
+static void
+continuous ()
+{
+  char *url;
+  RestProxy *proxy;
+  GError *error = NULL;
+  GSList *uris;
+
+
+  server = soup_server_new (NULL);
+  soup_server_listen_local (server, 0, 0, &error);
+  g_assert_no_error (error);
+
+  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
+
+  uris = soup_server_get_uris (server);
+  g_assert (g_slist_length (uris) > 0);
+
+  url = soup_uri_to_string (uris->data, FALSE);
+
+  loop = g_main_loop_new (NULL, FALSE);
+
+  proxy = rest_proxy_new (url, FALSE);
+  stream_test (proxy);
+  g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
+
+  g_main_loop_run (loop);
+  g_free (url);
+  g_main_loop_unref (loop);
 }
 
 int
 main (int argc, char **argv)
 {
-  char *url;
-  RestProxy *proxy;
+  g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/proxy/continuous", continuous);
 
-  loop = g_main_loop_new (NULL, FALSE);
-
-  server = soup_server_new (NULL);
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-  soup_server_run_async (server);
-
-  url = g_strdup_printf ("http://127.0.0.1:%d/", soup_server_get_port (server));
-  proxy = rest_proxy_new (url, FALSE);
-  g_free (url);
-
-  stream_test (proxy);
-  g_main_loop_run (loop);
-
-  return errors != 0;
+  return g_test_run ();
 }
