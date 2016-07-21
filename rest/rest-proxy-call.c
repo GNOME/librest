@@ -1008,6 +1008,9 @@ _continuous_call_message_got_chunk_cb (SoupMessage                    *msg,
  *
  * You may unref the call after calling this function since there is an
  * internal reference, or you may unref in the callback.
+ *
+ * Returns: %TRUE on success, %FALSE on failure, in which case
+ *   @error will be set.
  */
 gboolean
 rest_proxy_call_continuous (RestProxyCall                    *call,
@@ -1143,6 +1146,9 @@ _upload_call_message_wrote_data_cb (SoupMessage                *msg,
  *
  * You may unref the call after calling this function since there is an
  * internal reference, or you may unref in the callback.
+ *
+ * Returns: %TRUE on success, %FALSE on failure, in which case
+ *   @error will be set.
  */
 gboolean
 rest_proxy_call_upload (RestProxyCall                *call,
