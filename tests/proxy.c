@@ -22,7 +22,6 @@
 
 /*
  * TODO:
- * - port to gtest
  * - decide if status 3xx is success or failure
  * - test query params
  * - test request headers
@@ -43,10 +42,42 @@
 
 #define PORT 8080
 
-static int errors = 0;
+typedef struct {
+  SoupServer *server;
+  GMainLoop  *main_loop;
+  char *url;
+  GThread *thread;
+} TestServer;
 
-SoupServer *server;
-GMainLoop *server_loop;
+static void
+test_server_stop (TestServer *server)
+{
+  g_assert (server->thread);
+  g_main_loop_quit (server->main_loop);
+  g_thread_join (server->thread);
+  g_object_unref (server->server);
+  g_main_loop_unref (server->main_loop);
+  g_free (server->url);
+  g_slice_free (TestServer, server);
+}
+
+static void *
+test_server_thread_func (gpointer data)
+{
+  TestServer *server = data;
+
+  g_main_context_push_thread_default (g_main_loop_get_context (server->main_loop));
+  g_main_loop_run (server->main_loop);
+  g_main_context_pop_thread_default (g_main_loop_get_context (server->main_loop));
+
+  return NULL;
+}
+
+static void
+test_server_run (TestServer *server)
+{
+  server->thread = g_thread_new ("Server Thread", test_server_thread_func, server);
+}
 
 static void
 server_callback (SoupServer *server, SoupMessage *msg,
@@ -104,125 +135,132 @@ server_callback (SoupServer *server, SoupMessage *msg,
   }
 }
 
-static void
-ping_test (RestProxy *proxy)
+static TestServer *
+create_server ()
 {
-  RestProxyCall *call;
+  TestServer *test_server;
+  GMainLoop *main_loop;
+  GMainContext *context;
+  SoupServer *server;
   GError *error = NULL;
+  GSList *uris;
+  char *url;
 
-  call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "ping");
+  context = g_main_context_new ();
+  g_main_context_push_thread_default (context);
+  main_loop = g_main_loop_new (context, FALSE);
+  server = soup_server_new (NULL);
 
-  if (!rest_proxy_call_sync (call, &error)) {
-    g_printerr ("2: Call failed: %s\n", error->message);
-    g_error_free (error);
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  g_assert(error == NULL);
+  soup_server_listen_local (server, 0, 0, &error);
+  g_assert_no_error (error);
 
-  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
-    g_printerr ("wrong response code\n");
-    errors++;
-    return;
-  }
+  soup_server_add_handler (server, "/", server_callback,
+                           NULL, NULL);
 
-  if (rest_proxy_call_get_payload_length (call) != 0) {
-    g_printerr ("wrong length returned\n");
-    errors++;
-    return;
-  }
+  uris = soup_server_get_uris (server);
+  g_assert (g_slist_length (uris) > 0);
+  url = soup_uri_to_string (uris->data, FALSE);
 
-  g_object_unref (call);
+  test_server = g_slice_alloc (sizeof (TestServer));
+  test_server->server = server;
+  test_server->main_loop = main_loop;
+  test_server->url = url;
+  test_server->thread = NULL;
+
+  g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
+
+  g_main_context_pop_thread_default (context);
+
+  return test_server;
 }
 
 static void
-echo_test (RestProxy *proxy)
+ping ()
 {
+  TestServer *server = create_server ();
+  RestProxy *proxy = rest_proxy_new (server->url, FALSE);
+  RestProxyCall *call = rest_proxy_new_call (proxy);
+  GError *error = NULL;
+
+  test_server_run (server);
+
+  rest_proxy_call_set_function (call, "ping");
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
+
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
+  g_assert_cmpint (rest_proxy_call_get_payload_length (call), ==, 0);
+
+  g_object_unref (call);
+  g_object_unref (proxy);
+
+  test_server_stop (server);
+}
+
+static void
+echo ()
+{
+  TestServer *server = create_server ();
+  RestProxy *proxy;
   RestProxyCall *call;
   GError *error = NULL;
 
+  test_server_run (server);
+
+  proxy = rest_proxy_new (server->url, FALSE);
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "echo");
   rest_proxy_call_add_param (call, "value", "echome");
 
-  if (!rest_proxy_call_sync (call, &error)) {
-    g_printerr ("3: Call failed: %s\n", error->message);
-    g_error_free (error);
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  g_assert(error == NULL);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
 
-  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
-    g_printerr ("wrong response code\n");
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  if (rest_proxy_call_get_payload_length (call) != 6) {
-    g_printerr ("wrong length returned\n");
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  if (g_strcmp0 ("echome", rest_proxy_call_get_payload (call)) != 0) {
-    g_printerr ("wrong string returned\n");
-    errors++;
-    g_object_unref (call);
-    return;
-  }
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
+  g_assert_cmpint (rest_proxy_call_get_payload_length (call), ==, 6);
+  g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "echome");
+
+  test_server_stop (server);
+  g_object_unref (proxy);
   g_object_unref (call);
 }
 
 static void
-reverse_test (RestProxy *proxy)
+reverse ()
 {
+  TestServer *server = create_server ();
+  RestProxy *proxy = rest_proxy_new (server->url, FALSE);
   RestProxyCall *call;
   GError *error = NULL;
+
+  test_server_run (server);
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "reverse");
   rest_proxy_call_add_param (call, "value", "reverseme");
 
-  if (!rest_proxy_call_sync (call, &error)) {
-    g_printerr ("4: Call failed: %s\n", error->message);
-    g_error_free (error);
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  g_assert(error == NULL);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
 
-  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
-    g_printerr ("wrong response code\n");
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  if (rest_proxy_call_get_payload_length (call) != 9) {
-    g_printerr ("wrong length returned\n");
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  if (g_strcmp0 ("emesrever", rest_proxy_call_get_payload (call)) != 0) {
-    g_printerr ("wrong string returned\n");
-    errors++;
-    g_object_unref (call);
-    return;
-  }
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
+  g_assert_cmpint (rest_proxy_call_get_payload_length (call), ==, 9);
+  g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "emesrever");
+
+  test_server_stop (server);
+  g_object_unref (proxy);
   g_object_unref (call);
 }
 
 static void
-status_ok_test (RestProxy *proxy, guint status)
+params ()
 {
+  TestServer *server = create_server ();
+  RestProxy *proxy = rest_proxy_new (server->url, FALSE);
   RestProxyCall *call;
   GError *error = NULL;
   char *status_str;
+  int status = SOUP_STATUS_OK;
+
+  test_server_run (server);
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "status");
@@ -230,30 +268,42 @@ status_ok_test (RestProxy *proxy, guint status)
   rest_proxy_call_add_param (call, "status", status_str);
   g_free (status_str);
 
-  if (!rest_proxy_call_sync (call, &error)) {
-    g_printerr ("1: Call failed: %s\n", error->message);
-    g_error_free (error);
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  g_assert(error == NULL);
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
 
-  if (rest_proxy_call_get_status_code (call) != status) {
-    g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
-    errors++;
-    return;
-  }
-
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, status);
   g_object_unref (call);
+
+
+  status = SOUP_STATUS_NO_CONTENT;
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "status");
+  status_str = g_strdup_printf ("%d", status);
+  rest_proxy_call_add_param (call, "status", status_str);
+  g_free (status_str);
+
+  rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
+
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, status);
+
+
+  g_object_unref (proxy);
+  g_object_unref (call);
+  test_server_stop (server);
 }
 
 static void
-status_error_test (RestProxy *proxy, guint status)
+fail ()
 {
+  TestServer *server = create_server ();
+  RestProxy *proxy = rest_proxy_new (server->url, FALSE);
   RestProxyCall *call;
   GError *error = NULL;
+  int status = SOUP_STATUS_BAD_REQUEST;
   char *status_str;
+
+  test_server_run (server);
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "status");
@@ -261,89 +311,62 @@ status_error_test (RestProxy *proxy, guint status)
   rest_proxy_call_add_param (call, "status", status_str);
   g_free (status_str);
 
-  if (rest_proxy_call_sync (call, &error)) {
-    g_printerr ("Call succeeded should have failed");
-    errors++;
-    g_object_unref (call);
-    return;
-  }
+  g_assert (!rest_proxy_call_sync (call, &error));
+  g_assert_nonnull (error);
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, status);
+
   g_error_free (error);
-
-  if (rest_proxy_call_get_status_code (call) != status) {
-    g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
-    errors++;
-    return;
-  }
-
+  g_object_unref (proxy);
   g_object_unref (call);
+  test_server_stop (server);
 }
 
 static void
-test_status_ok (RestProxy *proxy, const char *function)
+useragent ()
 {
+  TestServer *server = create_server ();
+  RestProxy *proxy = rest_proxy_new (server->url, FALSE);
   RestProxyCall *call;
   GError *error = NULL;
+  gboolean result;
+
+  test_server_run (server);
 
   call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, function);
+  rest_proxy_call_set_function (call, "useragent/none");
 
-  if (!rest_proxy_call_sync (call, &error)) {
-    g_printerr ("%s call failed: %s\n", function, error->message);
-    g_error_free (error);
-    errors++;
-    g_object_unref (call);
-    return;
-  }
-  g_assert(error == NULL);
+  result = rest_proxy_call_sync (call, &error);
+  g_assert_no_error (error);
+  g_assert (result);
 
-  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_OK) {
-    g_printerr ("wrong response code, got %d\n", rest_proxy_call_get_status_code (call));
-    errors++;
-    return;
-  }
-
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
   g_object_unref (call);
-}
 
-static void *
-server_thread_func (gpointer data)
-{
-  GSocketAddress *address = g_inet_socket_address_new_from_string ("127.0.0.1", 8080);
-  server_loop = g_main_loop_new (NULL, TRUE);
-  /*SoupServer *server = soup_server_new (NULL);*/
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
 
-  soup_server_listen (server, address, 0, NULL);
-  g_main_loop_run (server_loop);
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "useragent/testsuite");
+  rest_proxy_set_user_agent (proxy, "TestSuite-1.0");
 
-  return NULL;
+  result = rest_proxy_call_sync (call, &error);
+  g_assert (result);
+  g_assert_no_error (error);
+  g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
+
+  g_object_unref (proxy);
+  g_object_unref (call);
+  test_server_stop (server);
 }
 
 int
 main (int argc, char **argv)
 {
-  char *url;
-  RestProxy *proxy;
+  g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/proxy/ping", ping);
+  g_test_add_func ("/proxy/echo", echo);
+  g_test_add_func ("/proxy/reverse", reverse);
+  g_test_add_func ("/proxy/params", params);
+  g_test_add_func ("/proxy/fail", fail);
+  g_test_add_func ("/proxy/useragent", useragent);
 
-  server = soup_server_new ("", NULL);
-  g_thread_new ("Server Thread", server_thread_func, NULL);
-
-  url = g_strdup_printf ("http://127.0.0.1:%d/", PORT);
-  proxy = rest_proxy_new (url, FALSE);
-  g_free (url);
-
-  ping_test (proxy);
-  echo_test (proxy);
-  reverse_test (proxy);
-  status_ok_test (proxy, SOUP_STATUS_OK);
-  status_ok_test (proxy, SOUP_STATUS_NO_CONTENT);
-  status_error_test (proxy, SOUP_STATUS_BAD_REQUEST);
-  status_error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
-
-  test_status_ok (proxy, "useragent/none");
-  rest_proxy_set_user_agent (proxy, "TestSuite-1.0");
-  test_status_ok (proxy, "useragent/testsuite");
-
-  g_main_loop_quit (server_loop);
-  return errors != 0;
+  return g_test_run ();
 }
