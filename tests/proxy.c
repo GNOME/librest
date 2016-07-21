@@ -357,6 +357,55 @@ useragent ()
   test_server_stop (server);
 }
 
+static void
+cancel_cb (GObject      *source_object,
+           GAsyncResult *result,
+           gpointer      user_data)
+{
+  RestProxyCall *call = REST_PROXY_CALL (source_object);
+  GMainLoop *main_loop = user_data;
+  GError *error = NULL;
+  gboolean success;
+
+  /* This call has been cancelled and should have failed */
+  success = rest_proxy_call_invoke_finish (call, result, &error);
+  g_assert (!success);
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+
+  g_error_free (error);
+  g_main_loop_quit (main_loop);
+}
+
+static void
+cancel ()
+{
+  TestServer *server = create_server ();
+  RestProxy *proxy = rest_proxy_new (server->url, FALSE);
+  RestProxyCall *call;
+  GMainLoop *main_loop;
+  GCancellable *cancellable;
+
+  test_server_run (server);
+
+  main_loop = g_main_loop_new (NULL, FALSE);
+  cancellable = g_cancellable_new ();
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "useragent/none");
+
+  rest_proxy_call_invoke_async (call,
+                                cancellable,
+                                cancel_cb,
+                                main_loop);
+
+  g_cancellable_cancel (cancellable);
+  g_main_loop_run (main_loop);
+
+  g_main_loop_unref (main_loop);
+  g_object_unref (proxy);
+  g_object_unref (call);
+  test_server_stop (server);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -367,6 +416,7 @@ main (int argc, char **argv)
   g_test_add_func ("/proxy/params", params);
   g_test_add_func ("/proxy/fail", fail);
   g_test_add_func ("/proxy/useragent", useragent);
+  g_test_add_func ("/proxy/cancel", cancel);
 
   return g_test_run ();
 }
