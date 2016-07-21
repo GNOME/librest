@@ -188,8 +188,6 @@ gboolean rest_proxy_call_upload (RestProxyCall                *call,
                                  gpointer                      userdata,
                                  GError                      **error);
 
-gboolean rest_proxy_call_cancel (RestProxyCall *call);
-
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
 
 /* Functions for dealing with responses */

@@ -584,6 +584,28 @@ _handle_error_from_message (SoupMessage *message, GError **error)
   return FALSE;
 }
 
+static void
+_rest_proxy_call_cancel (RestProxyCall *call)
+{
+  RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  RestProxyCallAsyncClosure *closure;
+
+  closure = priv->cur_call_closure;
+
+  if (priv->cancellable)
+    {
+      g_signal_handler_disconnect (priv->cancellable, priv->cancel_sig);
+      g_clear_object (&priv->cancellable);
+    }
+
+  if (closure)
+  {
+    /* This will cause the _call_message_completed_cb to be fired which will
+     * tidy up the closure and so forth */
+    _rest_proxy_cancel_message (priv->proxy, closure->message);
+  }
+}
+
 static gboolean
 finish_call (RestProxyCall *call, SoupMessage *message, GError **error)
 {
@@ -660,7 +682,7 @@ _call_async_weak_notify_cb (gpointer *data,
   closure = (RestProxyCallAsyncClosure *)data;
 
   /* Will end up freeing the closure */
-  rest_proxy_call_cancel (closure->call);
+  _rest_proxy_call_cancel (closure->call);
 }
 
 static void
@@ -864,7 +886,7 @@ static void
 _call_message_call_cancelled_cb (GCancellable  *cancellable,
                                  RestProxyCall *call)
 {
-  rest_proxy_call_cancel (call);
+  _rest_proxy_call_cancel (call);
 }
 
 static void
@@ -1173,42 +1195,6 @@ rest_proxy_call_upload (RestProxyCall                *call,
                              message,
                              _upload_call_message_completed_cb,
                              closure);
-  return TRUE;
-}
-
-/**
- * rest_proxy_call_cancel: (skip)
- * @call: The #RestProxyCall
- *
- * Cancel this call.  It may be too late to not actually send the message, but
- * the callback will not be invoked.
- *
- * N.B. this method should only be used with rest_proxy_call_async() and NOT
- * rest_proxy_call_invoke_async().
- */
-gboolean
-rest_proxy_call_cancel (RestProxyCall *call)
-{
-  RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  RestProxyCallAsyncClosure *closure;
-
-  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
-
-  closure = priv->cur_call_closure;
-
-  if (priv->cancellable)
-    {
-      g_signal_handler_disconnect (priv->cancellable, priv->cancel_sig);
-      g_clear_object (&priv->cancellable);
-    }
-
-  if (closure)
-  {
-    /* This will cause the _call_message_completed_cb to be fired which will
-     * tidy up the closure and so forth */
-    _rest_proxy_cancel_message (priv->proxy, closure->message);
-  }
-
   return TRUE;
 }
 
