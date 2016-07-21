@@ -35,13 +35,6 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
-#if SOUP_CHECK_VERSION (2, 28, 0)
-/* Avoid deprecation warning with newer libsoup */
-#define soup_message_headers_get soup_message_headers_get_one
-#endif
-
-#define PORT 8080
-
 typedef struct {
   SoupServer *server;
   GMainLoop  *main_loop;
@@ -118,7 +111,7 @@ server_callback (SoupServer *server, SoupMessage *msg,
     }
   }
   else if (g_str_equal (path, "/useragent/none")) {
-    if (soup_message_headers_get (msg->request_headers, "User-Agent") == NULL) {
+    if (soup_message_headers_get_one (msg->request_headers, "User-Agent") == NULL) {
       soup_message_set_status (msg, SOUP_STATUS_OK);
     } else {
       soup_message_set_status (msg, SOUP_STATUS_EXPECTATION_FAILED);
@@ -126,7 +119,7 @@ server_callback (SoupServer *server, SoupMessage *msg,
   }
   else if (g_str_equal (path, "/useragent/testsuite")) {
     const char *value;
-    value = soup_message_headers_get (msg->request_headers, "User-Agent");
+    value = soup_message_headers_get_one (msg->request_headers, "User-Agent");
     if (g_strcmp0 (value, "TestSuite-1.0") == 0) {
       soup_message_set_status (msg, SOUP_STATUS_OK);
     } else {
