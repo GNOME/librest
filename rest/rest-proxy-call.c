@@ -1248,6 +1248,9 @@ rest_proxy_call_sync (RestProxyCall *call,
  *
  * Get the string value of the header @header or %NULL if that header is not
  * present or there are no headers.
+ *
+ * Returns: (nullable): The string value of the header @header, or %NULL
+ *   if no header with that name exists.
  */
 const gchar *
 rest_proxy_call_lookup_response_header (RestProxyCall *call,
@@ -1256,6 +1259,7 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+  g_return_val_if_fail (header != NULL);
 
   if (!priv->response_headers)
   {
