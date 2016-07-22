@@ -282,8 +282,8 @@ oauth_proxy_new_with_token (const char *consumer_key,
 /**
  * oauth_proxy_request_token:
  * @proxy: an #OAuthProxy
- * @function: the function name to invoke
- * @callback_uri: the callback URI
+ * @function: (nullable): the function name to invoke
+ * @callback_uri: (nullable): the callback URI
  * @error: a #GError, or %NULL
  *
  * Perform the Request Token phase of OAuth, invoking @function (defaulting to
@@ -303,6 +303,8 @@ oauth_proxy_request_token (OAuthProxy *proxy,
                            GError    **error)
 {
   RestProxyCall *call;
+
+  g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
@@ -352,6 +354,7 @@ request_token_cb (GObject      *source_object,
  * @proxy: an #OAuthProxy
  * @function: (nullable): the function name to invoke
  * @callback_uri: (nullable): the callback URI
+ * @cancellable: (nullable): A #GCancellable to cancel the call, or %NULL
  * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
  * @user_data: user data to pass to @callback
  *
@@ -375,6 +378,9 @@ oauth_proxy_request_token_async (OAuthProxy          *proxy,
 {
   RestProxyCall *call;
   GTask *task;
+
+  g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "request_token");
@@ -415,8 +421,8 @@ oauth_proxy_request_token_finish (OAuthProxy *proxy,
 /**
  * oauth_proxy_access_token:
  * @proxy: an #OAuthProxy
- * @function: the function name to invoke
- * @verifier: the verifier
+ * @function: (nullable): the function name to invoke
+ * @verifier: (nullable):  the verifier
  * @error: a #GError, or %NULL
  *
  * Perform the Access Token phase of OAuth, invoking @function (defaulting to
@@ -436,6 +442,8 @@ oauth_proxy_access_token (OAuthProxy *proxy,
                           GError    **error)
 {
   RestProxyCall *call;
+
+  g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
@@ -483,8 +491,9 @@ access_token_cb (GObject      *source_object,
 /**
  * oauth_proxy_access_token_async:
  * @proxy: an #OAuthProxy
- * @function: the function name to invoke
- * @verifier: the verifier
+ * @function: (nullable): the function name to invoke
+ * @verifier: (nullable): the verifier
+ * @cancellable: (nullable): A #GCancellable or %NULL
  * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
  * @user_data: user data to pass to @callback
  *
@@ -509,6 +518,9 @@ oauth_proxy_access_token_async (OAuthProxy          *proxy,
 {
   RestProxyCall *call;
   GTask *task;
+
+  g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
 
   call = rest_proxy_new_call (REST_PROXY (proxy));
   rest_proxy_call_set_function (call, function ? function : "access_token");
@@ -540,8 +552,9 @@ oauth_proxy_access_token_finish (OAuthProxy *proxy,
  *
  * Get the current request or access token.
  *
- * Returns: the token, or %NULL if there is no token yet.  This string is owned
- * by #OAuthProxy and should not be freed.
+ * Returns: (nullable): the token, or %NULL
+ *   if there is no token yet. This string is owned by #OAuthProxy
+ *   and should not be freed.
  */
 const char *
 oauth_proxy_get_token (OAuthProxy *proxy)
@@ -563,6 +576,8 @@ oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
   OAuthProxyPrivate *priv;
 
   g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  g_return_if_fail (token != NULL);
+
   priv = PROXY_GET_PRIVATE (proxy);
 
   g_free (priv->token);
@@ -575,8 +590,9 @@ oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
  *
  * Get the current request or access token secret.
  *
- * Returns: the token secret, or %NULL if there is no token secret yet.  This
- * string is owned by #OAuthProxy and should not be freed.
+ * Returns: (nullable): the token secret,
+ *   or %NULL if there is no token secret yet.
+ *   This string is owned by #OAuthProxy and should not be freed.
  */
 const char *
 oauth_proxy_get_token_secret (OAuthProxy *proxy)
@@ -598,11 +614,11 @@ oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
   OAuthProxyPrivate *priv;
 
   g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  g_return_if_fail (token_secret != NULL);
+
   priv = PROXY_GET_PRIVATE (proxy);
 
-  if (priv->token_secret)
-    g_free (priv->token_secret);
-
+  g_free (priv->token_secret);
   priv->token_secret = g_strdup (token_secret);
 }
 
@@ -630,8 +646,9 @@ oauth_proxy_is_oauth10a (OAuthProxy *proxy)
  *
  * Get the signature hostname used when creating a signature base string.
  *
- * Returns: the signature hostname, or %NULL if there is none set.
- *  This string is owned by #OAuthProxy and should not be freed.
+ * Returns: (nullable): the signature hostname,
+ *   or %NULL if there is none set. This string is owned by
+ *   #OAuthProxy and should not be freed.
  */
 const char *
 oauth_proxy_get_signature_host (OAuthProxy *proxy)
@@ -658,6 +675,8 @@ oauth_proxy_set_signature_host (OAuthProxy *proxy,
   OAuthProxyPrivate *priv;
 
   g_return_if_fail (OAUTH_IS_PROXY (proxy));
+  g_return_if_fail (signature_host != NULL);
+
   priv = PROXY_GET_PRIVATE (proxy);
 
   g_free (priv->signature_host);
