@@ -512,6 +512,13 @@ rest_proxy_bind (RestProxy *proxy, ...)
   return res;
 }
 
+/**
+ * rest_proxy_set_user_agent:
+ * @proxy: a #RestProxy
+ * @user_agent: the user agent to set
+ *
+ * Sets the user agent of @proxy.
+ */
 void
 rest_proxy_set_user_agent (RestProxy  *proxy,
                            const char *user_agent)
@@ -522,6 +529,14 @@ rest_proxy_set_user_agent (RestProxy  *proxy,
   g_object_set (proxy, "user-agent", user_agent, NULL);
 }
 
+/**
+ * rest_proxy_get_user_agent:
+ * @proxy: a #RestProxy
+ *
+ * Returns: (nullable): The user agent set
+ *   using rest_proxy_set_user_agent() or %NULL if no user
+ *   agent has been set
+ */
 const gchar *
 rest_proxy_get_user_agent (RestProxy *proxy)
 {
