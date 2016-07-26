@@ -29,13 +29,11 @@
 #include <rest/rest-proxy.h>
 #include "test-server.h"
 
-static GMainLoop *loop = NULL;
-
 #define NUM_CHUNKS 20
 #define SIZE_CHUNK 4
 static guint8 server_count = 0;
 static guint8 client_count = 0;
-static TestServer *server;
+static TestServer *test_server;
 
 static gboolean
 send_chunks (gpointer user_data)
@@ -51,14 +49,13 @@ send_chunks (gpointer user_data)
   }
 
   soup_message_body_append (msg->response_body, SOUP_MEMORY_COPY, data, SIZE_CHUNK);
-  soup_server_unpause_message (server->server, msg);
+  soup_server_unpause_message (test_server->server, msg);
 
-  if (server_count == NUM_CHUNKS * SIZE_CHUNK)
-  {
+  if (server_count == NUM_CHUNKS * SIZE_CHUNK) {
     soup_message_body_complete (msg->response_body);
-    return FALSE;
+    return G_SOURCE_REMOVE;
   } else {
-    return TRUE;
+    return G_SOURCE_CONTINUE;
   }
 }
 
@@ -67,13 +64,20 @@ server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
 {
+  GSource *source;
+
   g_assert_cmpstr (path, ==, "/stream");
   soup_message_set_status (msg, SOUP_STATUS_OK);
   soup_message_headers_set_encoding (msg->response_headers,
                                      SOUP_ENCODING_CHUNKED);
   soup_server_pause_message (server, msg);
 
-  g_idle_add (send_chunks, msg);
+  /* The server is running in its own thread with its own GMainContext,
+   * so schedule the sending there */
+  source = g_idle_source_new ();
+  g_source_set_callback (source, send_chunks, msg, NULL);
+  g_source_attach (source, g_main_loop_get_context (test_server->main_loop));
+  g_source_unref (source);
 }
 
 static void
@@ -81,13 +85,11 @@ _call_continuous_cb (RestProxyCall *call,
                      const gchar   *buf,
                      gsize          len,
                      const GError  *error,
-                     GObject       *weak_object,
                      gpointer       userdata)
 {
   guint i;
 
   g_assert_no_error (error);
-  g_assert (REST_IS_PROXY (weak_object));
 
   if (buf == NULL && len == 0)
     g_assert (client_count == NUM_CHUNKS * SIZE_CHUNK);
@@ -97,56 +99,49 @@ _call_continuous_cb (RestProxyCall *call,
     g_assert_cmpint (buf[i], ==, client_count);
     client_count++;
   }
-
-
-  if (client_count == NUM_CHUNKS * SIZE_CHUNK)
-    g_main_loop_quit (loop);
 }
 
 static void
-stream_test (RestProxy *proxy)
+call_done_cb (GObject      *source_object,
+              GAsyncResult *result,
+              gpointer      user_data)
 {
-  RestProxyCall *call;
+  RestProxyCall *call = REST_PROXY_CALL (source_object);
+  GMainLoop *loop = user_data;
   GError *error = NULL;
-  gboolean result;
 
-  call = rest_proxy_new_call (proxy);
-  rest_proxy_call_set_function (call, "stream");
-
-  result = rest_proxy_call_continuous (call,
-                                       _call_continuous_cb,
-                                       (GObject *)proxy,
-                                       NULL,
-                                       &error);
-
+  rest_proxy_call_continuous_finish (call, result, &error);
   g_assert_no_error (error);
-  g_assert (result);
 
-  g_object_unref (call);
+  g_main_loop_quit (loop);
 }
 
 static void
 continuous ()
 {
-  server = test_server_create (server_callback);
+  test_server = test_server_create (server_callback);
   RestProxy *proxy;
   RestProxyCall *call;
+  GMainLoop *loop;
 
-  test_server_run (server);
+  test_server_run (test_server);
 
   loop = g_main_loop_new (NULL, FALSE);
 
-  proxy = rest_proxy_new (server->url, FALSE);
+  proxy = rest_proxy_new (test_server->url, FALSE);
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "stream");
   rest_proxy_call_continuous (call,
                               _call_continuous_cb,
                               NULL,
                               call_done_cb,
-                              NULL);
+                              loop);
   g_main_loop_run (loop);
-  g_free (url);
+
+  test_server_stop (test_server);
   g_main_loop_unref (loop);
+  g_object_unref (call);
+  g_object_unref (proxy);
 }
 
 int
