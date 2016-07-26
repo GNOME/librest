@@ -78,7 +78,7 @@ void youtube_proxy_set_user_auth (YoutubeProxy *proxy,
 typedef void (*YoutubeProxyUploadCallback)(YoutubeProxy  *proxy,
                                            const gchar   *payload,
                                            gsize          total,
-                                           gsize          uploaded,
+                                           goffset        uploaded,
                                            const GError  *error,
                                            GObject       *weak_object,
                                            gpointer       user_data);

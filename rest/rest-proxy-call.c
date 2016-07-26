@@ -53,7 +53,7 @@ struct _RestProxyCallUploadClosure {
   GObject *weak_object;
   gpointer userdata;
   SoupMessage *message;
-  gsize uploaded;
+  goffset uploaded;
 };
 typedef struct _RestProxyCallUploadClosure RestProxyCallUploadClosure;
 
@@ -645,14 +645,15 @@ finish_call (RestProxyCall *call, SoupMessage *message, GError **error)
 static void
 _continuous_call_message_completed_cb (SoupSession *session,
                                        SoupMessage *message,
-                                       gpointer     userdata)
+                                       gpointer     user_data)
 {
+  GTask *task = user_data;
   RestProxyCallContinuousClosure *closure;
   RestProxyCall *call;
   RestProxyCallPrivate *priv;
   GError *error = NULL;
 
-  closure = (RestProxyCallContinuousClosure *)userdata;
+  closure = (RestProxyCallContinuousClosure *)g_task_get_task_data (task);
   call = closure->call;
   priv = GET_PRIVATE (call);
 
@@ -661,22 +662,10 @@ _continuous_call_message_completed_cb (SoupSession *session,
 
   _handle_error_from_message (message, &error);
 
-  closure->callback (closure->call,
-                     NULL,
-                     0,
-                     error,
-                     closure->weak_object,
-                     closure->userdata);
-
-  g_clear_error (&error);
-
-  /* Success. We don't need the weak reference any more */
-  if (closure->weak_object)
-  {
-    g_object_weak_unref (closure->weak_object,
-        (GWeakNotify)_call_async_weak_notify_cb,
-        closure);
-  }
+  if (error != NULL)
+    g_task_return_error (task, error);
+  else
+    g_task_return_boolean (task, TRUE);
 
   priv->cur_call_closure = NULL;
   g_object_unref (closure->call);

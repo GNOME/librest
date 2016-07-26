@@ -245,7 +245,7 @@ typedef struct {
   SoupMessage *message;
   GObject *weak_object;
   gpointer user_data;
-  gsize uploaded;
+  goffset uploaded;
 } YoutubeProxyUploadClosure;
 
 static void
