@@ -32,8 +32,7 @@
 struct _RestProxyCallAsyncClosure {
   RestProxyCall *call;
   RestProxyCallAsyncCallback callback;
-  GObject *weak_object;
-  gpointer userdata;
+  gpointer user_data;
   SoupMessage *message;
 };
 typedef struct _RestProxyCallAsyncClosure RestProxyCallAsyncClosure;
@@ -41,8 +40,7 @@ typedef struct _RestProxyCallAsyncClosure RestProxyCallAsyncClosure;
 struct _RestProxyCallContinuousClosure {
   RestProxyCall *call;
   RestProxyCallContinuousCallback callback;
-  GObject *weak_object;
-  gpointer userdata;
+  gpointer user_data;
   SoupMessage *message;
 };
 typedef struct _RestProxyCallContinuousClosure RestProxyCallContinuousClosure;
@@ -50,8 +48,7 @@ typedef struct _RestProxyCallContinuousClosure RestProxyCallContinuousClosure;
 struct _RestProxyCallUploadClosure {
   RestProxyCall *call;
   RestProxyCallUploadCallback callback;
-  GObject *weak_object;
-  gpointer userdata;
+  gpointer user_data;
   SoupMessage *message;
   goffset uploaded;
 };
@@ -532,11 +529,6 @@ rest_proxy_call_get_params (RestProxyCall *call)
   return GET_PRIVATE (call)->params;
 }
 
-
-
-static void _call_async_weak_notify_cb (gpointer *data,
-                                        GObject  *dead_object);
-
 static void
 _populate_headers_hash_table (const gchar *name,
                               const gchar *value,
@@ -669,20 +661,7 @@ _continuous_call_message_completed_cb (SoupSession *session,
 
   priv->cur_call_closure = NULL;
   g_object_unref (closure->call);
-  g_slice_free (RestProxyCallContinuousClosure, closure);
-}
-
-
-static void
-_call_async_weak_notify_cb (gpointer *data,
-                            GObject  *dead_object)
-{
-  RestProxyCallAsyncClosure *closure;
-
-  closure = (RestProxyCallAsyncClosure *)data;
-
-  /* Will end up freeing the closure */
-  _rest_proxy_call_cancel (closure->call);
+  g_object_unref (task);
 }
 
 static void
@@ -985,79 +964,77 @@ _continuous_call_message_got_chunk_cb (SoupMessage                    *msg,
                      chunk->data,
                      chunk->length,
                      NULL,
-                     closure->weak_object,
-                     closure->userdata);
+                     closure->user_data);
 }
 
 
 /**
- * rest_proxy_call_continuous: (skip)
+ * rest_proxy_call_continuous:
  * @call: The #RestProxyCall
- * @callback: a #RestProxyCallContinuousCallback to invoke when data is available
- * @weak_object: The #GObject to weakly reference and tie the lifecycle to
- * @userdata: (closure): data to pass to @callback
- * @error: (out) (allow-none): a #GError, or %NULL
+ * @continuous_callback: (scope call): a #RestProxyCallContinuousCallback to invoke when data is available
+ * @cancellable: (nullable): a #GCancellable that can be used to cancel this call, or %NULL
+ * @callback: (scope async): Callback to be invoked when the call finishes
+ * @user_data: (closure): data to pass to @callback
  *
  * Asynchronously invoke @call but expect a continuous stream of content. This
  * means that the body data will not be accumulated and thus you cannot use
  * rest_proxy_call_get_payload()
  *
- * When there is data @callback will be called and when the connection is
- * closed or the stream ends @callback will also be called.
- *
- * If @weak_object is disposed during the call then this call will be
- * cancelled. If the call is cancelled then the callback will be invoked with
- * an error state.
- *
- * You may unref the call after calling this function since there is an
- * internal reference, or you may unref in the callback.
- *
- * Returns: %TRUE on success, %FALSE on failure, in which case
- *   @error will be set.
+ * When there is data @continuous_callback will be called and when the connection is
+ * closed or the stream ends @callback will be called.
  */
-gboolean
+void
 rest_proxy_call_continuous (RestProxyCall                    *call,
-                            RestProxyCallContinuousCallback   callback,
-                            GObject                          *weak_object,
-                            gpointer                          userdata,
-                            GError                          **error)
+                            RestProxyCallContinuousCallback   continuous_callback,
+                            GCancellable                     *cancellable,
+                            GAsyncReadyCallback               callback,
+                            gpointer                          user_data)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  GTask *task;
+  GError *error = NULL;
   SoupMessage *message;
   RestProxyCallContinuousClosure *closure;
 
-  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
   g_assert (priv->proxy);
+
+  task = g_task_new (call, cancellable, callback, user_data);
 
   if (priv->cur_call_closure)
   {
     g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
-    return FALSE;
+    g_task_return_boolean (task, FALSE);
+    return;
   }
 
-  message = prepare_message (call, error);
+  message = prepare_message (call, &error);
   if (message == NULL)
-    return FALSE;
+    {
+      g_task_return_error (task, error);
+      return;
+    }
 
   /* Must turn off accumulation */
   soup_message_body_set_accumulate (message->response_body, FALSE);
 
-  closure = g_slice_new0 (RestProxyCallContinuousClosure);
+  closure = g_malloc (sizeof (RestProxyCallContinuousClosure));
   closure->call = g_object_ref (call);
-  closure->callback = callback;
-  closure->weak_object = weak_object;
+  closure->callback = continuous_callback;
   closure->message = message;
-  closure->userdata = userdata;
+  closure->user_data = user_data;
 
   priv->cur_call_closure = (RestProxyCallAsyncClosure *)closure;
 
-  /* Weakly reference this object. We remove our callback if it goes away. */
-  if (closure->weak_object)
-  {
-    g_object_weak_ref (closure->weak_object,
-        (GWeakNotify)_call_async_weak_notify_cb,
-        closure);
-  }
+  g_task_set_task_data (task, closure, g_free);
+
+  if (cancellable != NULL)
+    {
+      priv->cancel_sig = g_signal_connect (cancellable, "cancelled",
+          G_CALLBACK (_call_message_call_cancelled_cb), call);
+      priv->cancellable = g_object_ref (cancellable);
+    }
 
   g_signal_connect (message,
                     "got-chunk",
@@ -1067,8 +1044,18 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
   _rest_proxy_queue_message (priv->proxy,
                              message,
                              _continuous_call_message_completed_cb,
-                             closure);
-  return TRUE;
+                             task);
+}
+
+gboolean
+rest_proxy_call_continuous_finish (RestProxyCall *call,
+                                   GAsyncResult  *result,
+                                   GError        **error)
+{
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, call), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 static void
@@ -1076,12 +1063,13 @@ _upload_call_message_completed_cb (SoupSession *session,
                                    SoupMessage *message,
                                    gpointer     user_data)
 {
+  GTask *task = user_data;
   RestProxyCall *call;
   RestProxyCallPrivate *priv;
   GError *error = NULL;
   RestProxyCallUploadClosure *closure;
 
-  closure = (RestProxyCallUploadClosure *) user_data;
+  closure = (RestProxyCallUploadClosure *) g_task_get_task_data (task);
   call = closure->call;
   priv = GET_PRIVATE (call);
 
@@ -1090,26 +1078,14 @@ _upload_call_message_completed_cb (SoupSession *session,
 
   _handle_error_from_message (message, &error);
 
-  closure->callback (closure->call,
-                     closure->uploaded,
-                     closure->uploaded,
-                     error,
-                     closure->weak_object,
-                     closure->userdata);
-
-  g_clear_error (&error);
-
-  /* Success. We don't need the weak reference any more */
-  if (closure->weak_object)
-  {
-    g_object_weak_unref (closure->weak_object,
-        (GWeakNotify)_call_async_weak_notify_cb,
-        closure);
-  }
+  if (error != NULL)
+    g_task_return_error (task, error);
+  else
+    g_task_return_boolean (task, TRUE);
 
   priv->cur_call_closure = NULL;
   g_object_unref (closure->call);
-  g_slice_free (RestProxyCallUploadClosure, closure);
+  g_object_unref (task);
 }
 
 static void
@@ -1124,76 +1100,73 @@ _upload_call_message_wrote_data_cb (SoupMessage                *msg,
                        msg->request_body->length,
                        closure->uploaded,
                        NULL,
-                       closure->weak_object,
-                       closure->userdata);
+                       closure->user_data);
 }
 
 /**
  * rest_proxy_call_upload:
  * @call: The #RestProxyCall
- * @callback: (scope async): a #RestProxyCallUploadCallback to invoke when a chunk
+ * @upload_callback: (scope call): a #RestProxyCallUploadCallback to invoke when a chunk
  *   of data was uploaded
- * @weak_object: The #GObject to weakly reference and tie the lifecycle to
- * @userdata: data to pass to @callback
- * @error: a #GError, or %NULL
+ * @cancellable: (nullable): a #GCancellable to cancel the call. or %NULL
+ * @callback: (scope async): foo
+ * @user_data: (closure): data to pass to @callback
  *
  * Asynchronously invoke @call but expect to have the callback invoked every time a
  * chunk of our request's body is written.
  *
  * When the callback is invoked with the uploaded byte count equaling the message
  * byte count, the call has completed.
- *
- * If @weak_object is disposed during the call then this call will be
- * cancelled. If the call is cancelled then the callback will be invoked with
- * an error state.
- *
- * You may unref the call after calling this function since there is an
- * internal reference, or you may unref in the callback.
- *
- * Returns: %TRUE on success, %FALSE on failure, in which case
- *   @error will be set.
  */
-gboolean
+void
 rest_proxy_call_upload (RestProxyCall                *call,
-                        RestProxyCallUploadCallback   callback,
-                        GObject                      *weak_object,
-                        gpointer                      userdata,
-                        GError                      **error)
+                        RestProxyCallUploadCallback   upload_callback,
+                        GCancellable                 *cancellable,
+                        GAsyncReadyCallback           callback,
+                        gpointer                      user_data)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
+  GError *error = NULL;
+  GTask *task;
   SoupMessage *message;
   RestProxyCallUploadClosure *closure;
 
-  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
   g_assert (priv->proxy);
+
+  task = g_task_new (call, cancellable, callback, user_data);
 
   if (priv->cur_call_closure)
   {
     g_warning (G_STRLOC ": re-use of RestProxyCall %p, don't do this", call);
-    return FALSE;
+    g_task_return_boolean (task, FALSE);
+    return;
   }
 
-  message = prepare_message (call, error);
+  message = prepare_message (call, &error);
   if (message == NULL)
-    return FALSE;
+    {
+      g_task_return_error (task, error);
+      return;
+    }
 
-  closure = g_slice_new0 (RestProxyCallUploadClosure);
+  closure = g_malloc (sizeof (RestProxyCallUploadClosure));
   closure->call = g_object_ref (call);
-  closure->callback = callback;
-  closure->weak_object = weak_object;
+  closure->callback = upload_callback;
   closure->message = message;
-  closure->userdata = userdata;
   closure->uploaded = 0;
 
   priv->cur_call_closure = (RestProxyCallAsyncClosure *)closure;
 
-  /* Weakly reference this object. We remove our callback if it goes away. */
-  if (closure->weak_object)
-  {
-    g_object_weak_ref (closure->weak_object,
-        (GWeakNotify)_call_async_weak_notify_cb,
-        closure);
-  }
+  g_task_set_task_data (task, closure, g_free);
+
+  if (cancellable != NULL)
+    {
+      priv->cancel_sig = g_signal_connect (cancellable, "cancelled",
+          G_CALLBACK (_call_message_call_cancelled_cb), call);
+      priv->cancellable = g_object_ref (cancellable);
+    }
 
   g_signal_connect (message,
                     "wrote-body-data",
@@ -1204,7 +1177,17 @@ rest_proxy_call_upload (RestProxyCall                *call,
                              message,
                              _upload_call_message_completed_cb,
                              closure);
-  return TRUE;
+}
+
+gboolean
+rest_proxy_call_upload_finish (RestProxyCall *call,
+                               GAsyncResult  *result,
+                               GError       **error)
+{
+  g_return_val_if_fail (REST_IS_PROXY_CALL (call), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, call), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 /**

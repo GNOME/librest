@@ -182,10 +182,15 @@ typedef void (*RestProxyCallUploadCallback) (RestProxyCall *call,
                                              const GError  *error,
                                              gpointer       userdata);
 
-gboolean rest_proxy_call_upload (RestProxyCall                *call,
-                                 RestProxyCallUploadCallback   callback,
-                                 gpointer                      userdata,
-                                 GError                      **error);
+void  rest_proxy_call_upload (RestProxyCall                *call,
+                              RestProxyCallUploadCallback   upload_callback,
+                              GCancellable                 *cancellable,
+                              GAsyncReadyCallback           callback,
+                              gpointer                      user_data);
+
+gboolean rest_proxy_call_upload_finish (RestProxyCall *source_object,
+                                        GAsyncResult  *result,
+                                        GError       **error);
 
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
 
