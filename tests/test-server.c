@@ -39,8 +39,6 @@ test_server_create (SoupServerCallback server_cb)
   soup_server_listen_local (server, 0, 0, &error);
   g_assert_no_error (error);
 
-  soup_server_add_handler (server, "/", server_cb,
-                           NULL, NULL);
 
   uris = soup_server_get_uris (server);
   g_assert (g_slist_length (uris) > 0);
@@ -51,6 +49,10 @@ test_server_create (SoupServerCallback server_cb)
   test_server->main_loop = main_loop;
   test_server->url = url;
   test_server->thread = NULL;
+
+  soup_server_add_handler (server, "/", server_cb,
+                           test_server, NULL);
+
 
   g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
 
@@ -80,6 +82,7 @@ test_server_run (TestServer *server)
 void
 test_server_stop (TestServer *server)
 {
+  g_message (__FUNCTION__);
   g_assert (server->thread);
   g_main_loop_quit (server->main_loop);
   g_thread_join (server->thread);
