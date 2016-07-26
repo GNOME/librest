@@ -8,13 +8,13 @@ AM_LDFLAGS = $(SOUP_LIBS) $(GCOV_LDFLAGS) \
 
 check_PROGRAMS = $(TESTS)
 
-proxy_SOURCES = proxy.c
-proxy_continuous_SOURCES = proxy-continuous.c
-threaded_SOURCES = threaded.c
+proxy_SOURCES = proxy.c test-server.c
+proxy_continuous_SOURCES = proxy-continuous.c test-server.c
+threaded_SOURCES = threaded.c test-server.c
 oauth_SOURCES = oauth.c
 oauth_async_SOURCES = oauth-async.c
 oauth2_SOURCES = oauth2.c
 flickr_SOURCES = flickr.c
 lastfm_SOURCES = lastfm.c
 xml_SOURCES = xml.c
-custom_serialize_SOURCES = custom-serialize.c
+custom_serialize_SOURCES = custom-serialize.c test-server.c

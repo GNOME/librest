@@ -26,11 +26,12 @@
 #include <stdlib.h>
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
+#include "test-server.h"
 
 const int N_THREADS = 10;
 
 static volatile int threads_done = 0;
-static const gboolean verbose = FALSE;
+static const gboolean verbose = TRUE;
 
 GMainLoop *main_loop;
 SoupServer *server;
@@ -80,37 +81,23 @@ func (gpointer data)
 
 static void ping ()
 {
+  TestServer *server = test_server_create (server_callback);
   GThread *threads[N_THREADS];
-  GError *error = NULL;
-  char *url;
   int i;
-  GSList *uris;
-
-  server = soup_server_new (NULL);
-  soup_server_listen_local (server, 0, 0, &error);
-  g_assert_no_error (error);
-
-  soup_server_add_handler (server, "/ping", server_callback,
-                           NULL, NULL);
-
-  uris = soup_server_get_uris (server);
-  g_assert (g_slist_length (uris) > 0);
-
-  url = soup_uri_to_string (uris->data, FALSE);
 
   main_loop = g_main_loop_new (NULL, TRUE);
 
+  test_server_run (server);
+
   for (i = 0; i < N_THREADS; i++) {
-    threads[i] = g_thread_new ("client thread", func, url);
+    threads[i] = g_thread_new ("client thread", func, server->url);
     if (verbose)
       g_print ("Starting thread %p\n", threads[i]);
   }
 
   g_main_loop_run (main_loop);
 
-  g_free (url);
-  g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
-  g_object_unref (server);
+  test_server_stop (server);
   g_main_loop_unref (main_loop);
 }
 

@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
+#include "test-server.h"
 
 static GMainLoop *loop = NULL;
 
@@ -34,7 +35,7 @@ static GMainLoop *loop = NULL;
 #define SIZE_CHUNK 4
 static guint8 server_count = 0;
 static guint8 client_count = 0;
-static SoupServer *server;
+static TestServer *server;
 
 static gboolean
 send_chunks (gpointer user_data)
@@ -50,7 +51,7 @@ send_chunks (gpointer user_data)
   }
 
   soup_message_body_append (msg->response_body, SOUP_MEMORY_COPY, data, SIZE_CHUNK);
-  soup_server_unpause_message (server, msg);
+  soup_server_unpause_message (server->server, msg);
 
   if (server_count == NUM_CHUNKS * SIZE_CHUNK)
   {
@@ -127,29 +128,22 @@ stream_test (RestProxy *proxy)
 static void
 continuous ()
 {
-  char *url;
+  server = test_server_create (server_callback);
   RestProxy *proxy;
-  GError *error = NULL;
-  GSList *uris;
+  RestProxyCall *call;
 
-
-  server = soup_server_new (NULL);
-  soup_server_listen_local (server, 0, 0, &error);
-  g_assert_no_error (error);
-
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-
-  uris = soup_server_get_uris (server);
-  g_assert (g_slist_length (uris) > 0);
-
-  url = soup_uri_to_string (uris->data, FALSE);
+  test_server_run (server);
 
   loop = g_main_loop_new (NULL, FALSE);
 
-  proxy = rest_proxy_new (url, FALSE);
-  stream_test (proxy);
-  g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
-
+  proxy = rest_proxy_new (server->url, FALSE);
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "stream");
+  rest_proxy_call_continuous (call,
+                              _call_continuous_cb,
+                              NULL,
+                              call_done_cb,
+                              NULL);
   g_main_loop_run (loop);
   g_free (url);
   g_main_loop_unref (loop);

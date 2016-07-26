@@ -26,8 +26,7 @@
 #include <stdlib.h>
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
-
-#define PORT 8080
+#include "test-server.h"
 
 #define REST_TYPE_CUSTOM_PROXY_CALL custom_proxy_call_get_type()
 
@@ -107,33 +106,17 @@ server_callback (SoupServer *server, SoupMessage *msg,
   }
 }
 
-static void *
-server_func (gpointer data)
-{
-  GMainLoop *loop = g_main_loop_new (NULL, FALSE);
-  SoupServer *server = soup_server_new (NULL, NULL);
-  GSocketAddress *address = g_inet_socket_address_new_from_string ("127.0.0.1", PORT);
-
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-  soup_server_listen (server, address, 0, NULL);
-
-  g_main_loop_run (loop);
-  return NULL;
-}
-
 static void
 test_custom_serialize ()
 {
+  TestServer *server = test_server_create (server_callback);
   RestProxy *proxy;
   RestProxyCall *call;
-  char *url;
   GError *error = NULL;
 
-  url = g_strdup_printf ("http://127.0.0.1:%d/", PORT);
+  test_server_run (server);
 
-  g_thread_new ("Server Thread", server_func, NULL);
-
-  proxy = rest_proxy_new (url, FALSE);
+  proxy = rest_proxy_new (server->url, FALSE);
   call = g_object_new (REST_TYPE_CUSTOM_PROXY_CALL, "proxy", proxy, NULL);
 
   rest_proxy_call_set_function (call, "wrong-function");
@@ -143,9 +126,9 @@ test_custom_serialize ()
 
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
 
+  test_server_stop (server);
   g_object_unref (call);
   g_object_unref (proxy);
-  g_free (url);
 }
 
 int
