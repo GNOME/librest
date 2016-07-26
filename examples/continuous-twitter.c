@@ -28,10 +28,26 @@ _call_continous_cb (RestProxyCall *call,
                     const gchar   *buf,
                     gsize          len,
                     const GError  *error,
-                    GObject       *weak_object,
                     gpointer       userdata)
 {
   g_message ("%s", buf);
+}
+
+static void
+continuous_done_cb (GObject      *source_object,
+                    GAsyncResult *result,
+                    gpointer      user_data)
+{
+  GError *error = NULL;
+
+  rest_proxy_call_continuous_finish (REST_PROXY_CALL (source_object),
+                                     result,
+                                     &error);
+
+  if (error != NULL)
+    {
+      g_critical ("%s", error->message);
+    }
 }
 
 int
@@ -78,7 +94,7 @@ main (int argc, char **argv)
   rest_proxy_call_continuous (call,
                               _call_continous_cb,
                               NULL,
-                              NULL,
+                              continuous_done_cb,
                               NULL);
 
   g_main_loop_run (loop);
