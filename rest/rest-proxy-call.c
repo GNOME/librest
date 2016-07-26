@@ -28,6 +28,9 @@
 #include "rest-private.h"
 #include "rest-proxy-call-private.h"
 
+typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
+                                           const GError  *error,
+                                           gpointer       userdata);
 
 struct _RestProxyCallAsyncClosure {
   RestProxyCall *call;
@@ -53,8 +56,6 @@ struct _RestProxyCallUploadClosure {
   goffset uploaded;
 };
 typedef struct _RestProxyCallUploadClosure RestProxyCallUploadClosure;
-
-
 
 #define GET_PRIVATE(o) ((RestProxyCallPrivate*)(rest_proxy_call_get_instance_private (REST_PROXY_CALL(o))))
 

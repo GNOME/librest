@@ -148,10 +148,6 @@ void rest_proxy_call_remove_param (RestProxyCall *call,
 
 RestParams *rest_proxy_call_get_params (RestProxyCall *call);
 
-typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
-                                           const GError  *error,
-                                           gpointer       userdata);
-
 void rest_proxy_call_invoke_async (RestProxyCall       *call,
                                    GCancellable        *cancellable,
                                    GAsyncReadyCallback  callback,
