@@ -33,12 +33,16 @@
 #define SIZE_CHUNK 4
 static guint8 server_count = 0;
 static guint8 client_count = 0;
-static TestServer *test_server;
+
+typedef struct {
+  TestServer  *test_server;
+  SoupMessage *msg;
+} ServerData;
 
 static gboolean
 send_chunks (gpointer user_data)
 {
-  SoupMessage *msg = SOUP_MESSAGE (user_data);
+  ServerData *server_data = user_data;
   guint i;
   guint8 data[SIZE_CHUNK];
 
@@ -48,11 +52,11 @@ send_chunks (gpointer user_data)
     server_count++;
   }
 
-  soup_message_body_append (msg->response_body, SOUP_MEMORY_COPY, data, SIZE_CHUNK);
-  soup_server_unpause_message (test_server->server, msg);
+  soup_message_body_append (server_data->msg->response_body, SOUP_MEMORY_COPY, data, SIZE_CHUNK);
+  soup_server_unpause_message (server_data->test_server->server, server_data->msg);
 
   if (server_count == NUM_CHUNKS * SIZE_CHUNK) {
-    soup_message_body_complete (msg->response_body);
+    soup_message_body_complete (server_data->msg->response_body);
     return G_SOURCE_REMOVE;
   } else {
     return G_SOURCE_CONTINUE;
@@ -64,20 +68,39 @@ server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
 {
+  TestServer *test_server = user_data;
   GSource *source;
+  ServerData *server_data;
 
-  g_assert_cmpstr (path, ==, "/stream");
-  soup_message_set_status (msg, SOUP_STATUS_OK);
-  soup_message_headers_set_encoding (msg->response_headers,
-                                     SOUP_ENCODING_CHUNKED);
-  soup_server_pause_message (server, msg);
+  g_message ("Path: %s", path);
 
-  /* The server is running in its own thread with its own GMainContext,
-   * so schedule the sending there */
-  source = g_idle_source_new ();
-  g_source_set_callback (source, send_chunks, msg, NULL);
-  g_source_attach (source, g_main_loop_get_context (test_server->main_loop));
-  g_source_unref (source);
+  if (strcmp (path, "/stream") == 0)
+    {
+      g_assert_cmpstr (path, ==, "/stream");
+      soup_message_set_status (msg, SOUP_STATUS_OK);
+      soup_message_headers_set_encoding (msg->response_headers,
+                                         SOUP_ENCODING_CHUNKED);
+      soup_server_pause_message (server, msg);
+
+      server_data = g_malloc (sizeof (ServerData));
+      server_data->test_server = test_server;
+      server_data->msg = msg;
+      /* The server is running in its own thread with its own GMainContext,
+       * so schedule the sending there */
+      source = g_idle_source_new ();
+      g_source_set_callback (source, send_chunks, server_data, g_free);
+      g_source_attach (source, g_main_loop_get_context (test_server->main_loop));
+      g_source_unref (source);
+    }
+  else if (strcmp (path, "/upload") == 0)
+    {
+      soup_message_set_status (msg, SOUP_STATUS_OK);
+    }
+  else
+    {
+      soup_message_set_status (msg, SOUP_STATUS_MALFORMED);
+    }
+
 }
 
 static void
@@ -113,13 +136,15 @@ call_done_cb (GObject      *source_object,
   rest_proxy_call_continuous_finish (call, result, &error);
   g_assert_no_error (error);
 
+  g_assert (client_count == NUM_CHUNKS * SIZE_CHUNK);
+
   g_main_loop_quit (loop);
 }
 
 static void
 continuous ()
 {
-  test_server = test_server_create (server_callback);
+  TestServer *test_server = test_server_create (server_callback);
   RestProxy *proxy;
   RestProxyCall *call;
   GMainLoop *loop;
@@ -144,11 +169,66 @@ continuous ()
   g_object_unref (proxy);
 }
 
+static void
+upload_callback (RestProxyCall *call,
+                 gsize          total,
+                 gsize          uploaded,
+                 const GError  *error,
+                 gpointer       user_data)
+{
+  g_assert (REST_IS_PROXY_CALL (call));
+}
+
+static void
+upload_done_cb (GObject      *source_object,
+                GAsyncResult *result,
+                gpointer      user_data)
+{
+  RestProxyCall *call = REST_PROXY_CALL (source_object);
+  GMainLoop *loop = user_data;
+  GError *error = NULL;
+
+  rest_proxy_call_upload_finish (call, result, &error);
+  g_assert_no_error (error);
+
+  g_main_loop_quit (loop);
+}
+
+static void
+upload ()
+{
+  TestServer *test_server = test_server_create (server_callback);
+  RestProxy *proxy;
+  RestProxyCall *call;
+  GMainLoop *loop;
+
+  test_server_run (test_server);
+
+  loop = g_main_loop_new (NULL, FALSE);
+
+  proxy = rest_proxy_new (test_server->url, FALSE);
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "upload");
+  rest_proxy_call_upload (call,
+                          upload_callback,
+                          NULL,
+                          upload_done_cb,
+                          loop);
+
+  g_main_loop_run (loop);
+
+  test_server_stop (test_server);
+  g_main_loop_unref (loop);
+  g_object_unref (call);
+  g_object_unref (proxy);
+}
+
 int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
   g_test_add_func ("/proxy/continuous", continuous);
+  g_test_add_func ("/proxy/upload", upload);
 
   return g_test_run ();
 }
