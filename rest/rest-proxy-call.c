@@ -641,10 +641,10 @@ _continuous_call_message_completed_cb (SoupSession *session,
                                        gpointer     user_data)
 {
   GTask *task = user_data;
-  RestProxyCallContinuousClosure *closure;
   RestProxyCall *call;
   RestProxyCallPrivate *priv;
   GError *error = NULL;
+  RestProxyCallContinuousClosure *closure;
 
   closure = (RestProxyCallContinuousClosure *)g_task_get_task_data (task);
   call = closure->call;
@@ -1127,8 +1127,8 @@ rest_proxy_call_upload (RestProxyCall                *call,
                         gpointer                      user_data)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  GError *error = NULL;
   GTask *task;
+  GError *error = NULL;
   SoupMessage *message;
   RestProxyCallUploadClosure *closure;
 
@@ -1177,7 +1177,7 @@ rest_proxy_call_upload (RestProxyCall                *call,
   _rest_proxy_queue_message (priv->proxy,
                              message,
                              _upload_call_message_completed_cb,
-                             closure);
+                             task);
 }
 
 gboolean
