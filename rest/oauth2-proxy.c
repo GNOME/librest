@@ -339,7 +339,7 @@ oauth2_proxy_build_login_url (OAuth2Proxy *proxy,
  *
  * Get the current request or access token.
  *
- * Returns: the token, or %NULL if there is no token yet.  This string is owned
+ * Returns: (nullable): the token, or %NULL if there is no token yet.  This string is owned
  * by #OAuth2Proxy and should not be freed.
  */
 const char *
