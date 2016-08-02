@@ -88,18 +88,15 @@ oauth2_proxy_set_property (GObject *object, guint property_id,
 
   switch (property_id) {
   case PROP_CLIENT_ID:
-    if (priv->client_id)
-      g_free (priv->client_id);
+    g_free (priv->client_id);
     priv->client_id = g_value_dup_string (value);
     break;
   case PROP_AUTH_ENDPOINT:
-    if (priv->auth_endpoint)
-      g_free (priv->auth_endpoint);
+    g_free (priv->auth_endpoint);
     priv->auth_endpoint = g_value_dup_string (value);
     break;
   case PROP_ACCESS_TOKEN:
-    if (priv->access_token)
-      g_free (priv->access_token);
+    g_free (priv->access_token);
     priv->access_token = g_value_dup_string (value);
     break;
   default:
@@ -363,9 +360,7 @@ oauth2_proxy_set_access_token (OAuth2Proxy *proxy, const char *access_token)
 {
   g_return_if_fail (OAUTH2_IS_PROXY (proxy));
 
-  if (proxy->priv->access_token)
-    g_free (proxy->priv->access_token);
-
+  g_free (proxy->priv->access_token);
   proxy->priv->access_token = g_strdup (access_token);
 }
 
