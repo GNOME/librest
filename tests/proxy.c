@@ -325,6 +325,62 @@ cancel ()
   test_server_stop (server);
 }
 
+static void
+param_full_cb (GObject      *source_object,
+               GAsyncResult *result,
+               gpointer      user_data)
+{
+  RestProxyCall *call = REST_PROXY_CALL (source_object);
+  GMainLoop *main_loop = user_data;
+  GError *error = NULL;
+  gboolean success;
+
+  success= rest_proxy_call_invoke_finish (call, result, &error);
+  g_assert (success);
+  g_assert_no_error (error);
+
+  g_main_loop_quit (main_loop);
+}
+
+static void
+param_full ()
+{
+  TestServer *server = test_server_create (server_callback);
+  RestProxy *proxy = rest_proxy_new (server->url, FALSE);
+  RestProxyCall *call;
+  RestParam *param;
+  GMainLoop *main_loop;
+  guchar data[] = {1,2,3,4,5,6,7,8,9,10};
+
+  test_server_run (server);
+
+  main_loop = g_main_loop_new (NULL, FALSE);
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "useragent/none");
+
+  param = rest_param_new_full ("some-param-name",
+                               REST_MEMORY_COPY,
+                               data,
+                               sizeof (data),
+                               "multipart/form-data",
+                               "some-filename.png");
+  rest_proxy_call_add_param_full (call, param);
+
+  rest_proxy_call_invoke_async (call,
+                                NULL,
+                                param_full_cb,
+                                main_loop);
+
+  g_main_loop_run (main_loop);
+
+
+
+  g_main_loop_unref (main_loop);
+  g_object_unref (proxy);
+  g_object_unref (call);
+  test_server_stop (server);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -336,6 +392,7 @@ main (int argc, char **argv)
   g_test_add_func ("/proxy/fail", fail);
   g_test_add_func ("/proxy/useragent", useragent);
   g_test_add_func ("/proxy/cancel", cancel);
+  g_test_add_func ("/proxy/param-full", param_full);
 
   return g_test_run ();
 }
