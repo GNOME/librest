@@ -248,7 +248,7 @@ rest_param_get_content_type (RestParam *param)
  *
  * Get the original file name of the parameter, if one is available.
  *
- * Returns: the filename if          set, or %NULL.
+ * Returns: (nullable): the filename if set, or %NULL.
  **/
 const char *
 rest_param_get_file_name (RestParam *param)
