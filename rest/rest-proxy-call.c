@@ -231,6 +231,9 @@ rest_proxy_call_set_method (RestProxyCall *call,
  * @call: The #RestProxyCall
  *
  * Get the HTTP method to use when making the call, for example GET or POST.
+ *
+ * Returns: The method of @call.
+ *   This value is owned by @call and may not be modified or freed.
  */
 const char *
 rest_proxy_call_get_method (RestProxyCall *call)
@@ -243,7 +246,7 @@ rest_proxy_call_get_method (RestProxyCall *call)
 /**
  * rest_proxy_call_set_function:
  * @call: The #RestProxyCall
- * @function: The function to call
+ * @function: (nullable): The function to call or %NULL
  *
  * Set the REST "function" to call on the proxy.  This is appended to the URL,
  * so that for example a proxy with the URL
@@ -269,9 +272,10 @@ rest_proxy_call_set_function (RestProxyCall *call,
  *
  * Get the REST function that is going to be called on the proxy.
  *
- * Returns: The REST "function" for the current call, see also
- * rest_proxy_call_set_function(). This string is owned by the #RestProxyCall
- * and should not be freed.
+ * Returns: (nullable): The REST "function" for the current call, see also
+ *   rest_proxy_call_set_function() or %NULL if no function has been set yet.
+ *   This string is owned by the #RestProxyCall and should not be freed.
+ *
  * Since: 0.7.92
  */
 const char *
@@ -300,6 +304,8 @@ rest_proxy_call_add_header (RestProxyCall *call,
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
 
   g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (header != NULL);
+  g_return_if_fail (value != NULL);
 
   g_hash_table_insert (priv->headers,
                        g_strdup (header),
@@ -359,14 +365,16 @@ rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
  *
  * Get the value of the header called @header.
  *
- * Returns: The header value, or %NULL if it does not exist. This string is
- * owned by the #RestProxyCall and should not be freed.
+ * Returns: (nullable): The header value, or %NULL
+ *   if it does not exist. This string is
+ *   owned by the #RestProxyCall and should not be freed.
  */
 const gchar *
 rest_proxy_call_lookup_header (RestProxyCall *call,
                                const gchar   *header)
 {
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+  g_return_val_if_fail (header != NULL, NULL);
 
   return g_hash_table_lookup (GET_PRIVATE (call)->headers, header);
 }
@@ -383,6 +391,7 @@ rest_proxy_call_remove_header (RestProxyCall *call,
                                const gchar   *header)
 {
   g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (header != NULL);
 
   g_hash_table_remove (GET_PRIVATE (call)->headers, header);
 }
@@ -406,6 +415,8 @@ rest_proxy_call_add_param (RestProxyCall *call,
   RestParam *param;
 
   g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (name != NULL);
+  g_return_if_fail (value != NULL);
 
   param = rest_param_new_string (name, REST_MEMORY_COPY, value);
   rest_params_add (priv->params, param);
@@ -472,14 +483,16 @@ rest_proxy_call_add_params_from_valist (RestProxyCall *call,
  *
  * Get the value of the parameter called @name.
  *
- * Returns: The parameter value, or %NULL if it does not exist. This string is
- * owned by the #RestProxyCall and should not be freed.
+ * Returns: (transfer none) (nullable): The parameter value,
+ *   or %NULL if it does not exist. This memory is
+ *   owned by the #RestProxyCall and should not be freed.
  */
 RestParam *
 rest_proxy_call_lookup_param (RestProxyCall *call,
                               const gchar   *name)
 {
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
+  g_return_val_if_fail (name != NULL, NULL);
 
   return rest_params_get (GET_PRIVATE (call)->params, name);
 }
@@ -496,6 +509,7 @@ rest_proxy_call_remove_param (RestProxyCall *call,
                               const gchar   *name)
 {
   g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (name != NULL);
 
   rest_params_remove (GET_PRIVATE (call)->params, name);
 }
@@ -914,6 +928,9 @@ _call_message_call_completed_cb (SoupSession *session,
  *   cancel the call, or %NULL
  * @callback: (scope async): callback to call when the async call is finished
  * @user_data: (closure): user data for the callback
+ *
+ * When the operation is finished, @callback will be called.
+ * You can then call rest_proxy_call_invoke_finish() and get the result of the operation.
  */
 void
 rest_proxy_call_invoke_async (RestProxyCall      *call,
@@ -1256,7 +1273,7 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
 
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), NULL);
-  g_return_val_if_fail (header != NULL);
+  g_return_val_if_fail (header != NULL, NULL);
 
   if (!priv->response_headers)
   {
@@ -1270,8 +1287,9 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
  * rest_proxy_call_get_response_headers:
  * @call: The #RestProxyCall
  *
- * Returns: (transfer container): pointer to a hash table of
- * headers. This hash table must not be changed. You should call
+ * Returns: (transfer container) (nullable): pointer to a hash table of
+ * headers or %NULL if no response headers are present.
+ * This hash table must not be changed. You should call
  * g_hash_table_unref() when you have finished with it.
  */
 GHashTable *
@@ -1311,8 +1329,9 @@ rest_proxy_call_get_payload_length (RestProxyCall *call)
  *
  * Get the return payload.
  *
- * Returns: A pointer to the payload. This is owned by #RestProxyCall and should
- * not be freed.
+ * Returns: (nullable): A pointer to the payload or %NULL if @call has
+ * not or unsuccessfully been invoked. This is owned by #RestProxyCall
+ * and should not be freed.
  */
 const gchar *
 rest_proxy_call_get_payload (RestProxyCall *call)
@@ -1364,7 +1383,7 @@ rest_proxy_call_get_status_message (RestProxyCall *call)
  * Invoker for a virtual method to serialize the parameters for this
  * #RestProxyCall.
  *
- * Returns: TRUE if the serialization was successful, FALSE otherwise.
+ * Returns: %TRUE if the serialization was successful, %FALSE otherwise.
  */
 gboolean
 rest_proxy_call_serialize_params (RestProxyCall *call,
