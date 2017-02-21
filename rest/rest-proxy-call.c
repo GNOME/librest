@@ -420,6 +420,13 @@ rest_proxy_call_add_param (RestProxyCall *call,
   rest_params_add (priv->params, param);
 }
 
+/**
+ * rest_proxy_call_add_param_full:
+ * @call: The #RestProxyCall
+ * @param: (transfer full): The parameter to add
+ *
+ * Add a query parameter @param to this call.
+ */
 void
 rest_proxy_call_add_param_full (RestProxyCall *call, RestParam *param)
 {
