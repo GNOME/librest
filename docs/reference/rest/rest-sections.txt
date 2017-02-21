@@ -43,10 +43,12 @@ rest_proxy_call_add_params_from_valist
 rest_proxy_call_lookup_param
 rest_proxy_call_remove_param
 rest_proxy_call_get_params
-rest_proxy_call_run
-RestProxyCallAsyncCallback
-rest_proxy_call_async
-rest_proxy_call_cancel
+rest_proxy_call_invoke_async
+rest_proxy_call_invoke_finish
+rest_proxy_call_upload
+rest_proxy_call_upload_finish
+rest_proxy_call_continuous
+rest_proxy_call_continuous_finish
 rest_proxy_call_sync
 rest_proxy_call_lookup_response_header
 rest_proxy_call_get_response_headers
@@ -155,9 +157,6 @@ OAuthSignatureMethod
 oauth_proxy_new
 oauth_proxy_new_echo_proxy
 oauth_proxy_new_with_token
-OAuthProxyAuthCallback
-oauth_proxy_auth_step
-oauth_proxy_auth_step_async
 oauth_proxy_request_token
 oauth_proxy_request_token_async
 oauth_proxy_is_oauth10a
@@ -169,6 +168,8 @@ oauth_proxy_get_token_secret
 oauth_proxy_set_token_secret
 oauth_proxy_get_signature_host
 oauth_proxy_set_signature_host
+oauth_proxy_access_token_finish
+oauth_proxy_request_token_finish
 <SUBSECTION Standard>
 OAuthProxyPrivate
 OAuthProxyClass
