@@ -330,7 +330,9 @@ char *
 oauth2_proxy_build_login_url (OAuth2Proxy *proxy,
                               const char* redirect_uri)
 {
-    return oauth2_proxy_build_login_url_full (proxy, redirect_uri, NULL);
+  g_return_val_if_fail (OAUTH2_IS_PROXY (proxy), NULL);
+
+  return oauth2_proxy_build_login_url_full (proxy, redirect_uri, NULL);
 }
 
 /**
@@ -339,12 +341,15 @@ oauth2_proxy_build_login_url (OAuth2Proxy *proxy,
  *
  * Get the current request or access token.
  *
- * Returns: (nullable): the token, or %NULL if there is no token yet.  This string is owned
- * by #OAuth2Proxy and should not be freed.
+ * Returns: (nullable): the token, or
+ *   %NULL if there is no token yet.  This string is owned
+ *   by #OAuth2Proxy and should not be freed.
  */
 const char *
 oauth2_proxy_get_access_token (OAuth2Proxy *proxy)
 {
+  g_return_val_if_fail (OAUTH2_IS_PROXY (proxy), NULL);
+
   return proxy->priv->access_token;
 }
 
@@ -359,6 +364,7 @@ void
 oauth2_proxy_set_access_token (OAuth2Proxy *proxy, const char *access_token)
 {
   g_return_if_fail (OAUTH2_IS_PROXY (proxy));
+  g_return_if_fail (access_token != NULL);
 
   g_free (proxy->priv->access_token);
   proxy->priv->access_token = g_strdup (access_token);
