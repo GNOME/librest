@@ -34,7 +34,7 @@ test_server_create (SoupServerCallback server_cb)
   context = g_main_context_new ();
   g_main_context_push_thread_default (context);
   main_loop = g_main_loop_new (context, FALSE);
-  server = soup_server_new (NULL);
+  server = soup_server_new (NULL, NULL);
 
   soup_server_listen_local (server, 0, 0, &error);
   g_assert_no_error (error);

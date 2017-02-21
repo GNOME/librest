@@ -1,0 +1,2 @@
+option('extras', type: 'boolean', value: 'false')
+option('gtk-doc', type: 'boolean', value: 'true')
