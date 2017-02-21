@@ -220,13 +220,10 @@ rest_proxy_call_set_method (RestProxyCall *call,
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
 
   g_return_if_fail (REST_IS_PROXY_CALL (call));
+  g_return_if_fail (method != NULL);
 
   g_free (priv->method);
-
-  if (method)
-    priv->method = g_strdup (method);
-  else
-    priv->method = g_strdup ("GET");
+  priv->method = g_strdup (method);
 }
 
 /**
