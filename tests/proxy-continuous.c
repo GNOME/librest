@@ -31,6 +31,8 @@
 
 #define NUM_CHUNKS 20
 #define SIZE_CHUNK 4
+#define UPLOAD_SUCCESSFUL "Upload successful"
+
 static guint8 server_count = 0;
 static guint8 client_count = 0;
 
@@ -95,6 +97,8 @@ server_callback (SoupServer *server, SoupMessage *msg,
   else if (strcmp (path, "/upload") == 0)
     {
       soup_message_set_status (msg, SOUP_STATUS_OK);
+      soup_message_set_response (msg, "text/plain", SOUP_MEMORY_COPY,
+                                 UPLOAD_SUCCESSFUL, strlen (UPLOAD_SUCCESSFUL));
     }
   else
     {
@@ -177,6 +181,8 @@ upload_callback (RestProxyCall *call,
                  gpointer       user_data)
 {
   g_assert (REST_IS_PROXY_CALL (call));
+  g_assert (total < uploaded);
+  g_assert_no_error (error);
 }
 
 static void
@@ -190,6 +196,9 @@ upload_done_cb (GObject      *source_object,
 
   rest_proxy_call_upload_finish (call, result, &error);
   g_assert_no_error (error);
+
+  g_assert_nonnull (rest_proxy_call_get_payload (call));
+  g_assert_cmpint (rest_proxy_call_get_payload_length (call), ==, strlen (UPLOAD_SUCCESSFUL));
 
   g_main_loop_quit (loop);
 }
