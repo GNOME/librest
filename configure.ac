@@ -1,6 +1,6 @@
 m4_define([rest_major], [0])
 m4_define([rest_minor], [8])
-m4_define([rest_micro], [0])
+m4_define([rest_micro], [1])
 
 m4_define([rest_version], [rest_major.rest_minor.rest_micro])
 
