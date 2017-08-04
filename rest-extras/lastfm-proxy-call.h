@@ -28,39 +28,20 @@
 G_BEGIN_DECLS
 
 #define LASTFM_TYPE_PROXY_CALL lastfm_proxy_call_get_type()
-
-#define LASTFM_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), LASTFM_TYPE_PROXY_CALL, LastfmProxyCall))
-
-#define LASTFM_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), LASTFM_TYPE_PROXY_CALL, LastfmProxyCallClass))
-
-#define LASTFM_IS_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LASTFM_TYPE_PROXY_CALL))
-
-#define LASTFM_IS_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), LASTFM_TYPE_PROXY_CALL))
-
-#define LASTFM_PROXY_CALL_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), LASTFM_TYPE_PROXY_CALL, LastfmProxyCallClass))
+G_DECLARE_DERIVABLE_TYPE (LastfmProxyCall, lastfm_proxy_call, LASTFM, PROXY_CALL, RestProxyCall)
 
 /**
  * LastfmProxyCall:
  *
  * #LastfmProxyCall has no publicly available members.
  */
-typedef struct {
-  RestProxyCall parent;
-} LastfmProxyCall;
 
-typedef struct {
+struct _LastfmProxyCallClass {
   RestProxyCallClass parent_class;
   /*< private >*/
   /* padding for future expansion */
   gpointer _padding_dummy[8];
-} LastfmProxyCallClass;
-
-GType lastfm_proxy_call_get_type (void);
+};
 
 G_END_DECLS
 
