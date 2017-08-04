@@ -29,39 +29,20 @@
 G_BEGIN_DECLS
 
 #define OAUTH2_TYPE_PROXY_CALL oauth2_proxy_call_get_type()
-
-#define OAUTH2_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), OAUTH2_TYPE_PROXY_CALL, OAuth2ProxyCall))
-
-#define OAUTH2_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), OAUTH2_TYPE_PROXY_CALL, OAuth2ProxyCallClass))
-
-#define OAUTH2_IS_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), OAUTH2_TYPE_PROXY_CALL))
-
-#define OAUTH2_IS_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), OAUTH2_TYPE_PROXY_CALL))
-
-#define OAUTH2_PROXY_CALL_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), OAUTH2_TYPE_PROXY_CALL, OAuth2ProxyCallClass))
+G_DECLARE_DERIVABLE_TYPE (OAuth2ProxyCall, oauth2_proxy_call, OAUTH2, PROXY_CALL, RestProxyCall)
 
 /**
  * OAuth2ProxyCall:
  *
  * #OAuth2ProxyCall has no publicly available members.
  */
-typedef struct {
-  RestProxyCall parent;
-} OAuth2ProxyCall;
 
-typedef struct {
+struct _OAuth2ProxyCallClass {
   RestProxyCallClass parent_class;
   /*< private >*/
   /* padding for future expansion */
   gpointer _padding_dummy[8];
-} OAuth2ProxyCallClass;
-
-GType oauth2_proxy_call_get_type (void);
+};
 
 G_END_DECLS
 
