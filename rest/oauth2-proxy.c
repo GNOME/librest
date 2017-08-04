@@ -27,10 +27,9 @@
 #include "oauth2-proxy-private.h"
 #include "oauth2-proxy-call.h"
 
-G_DEFINE_TYPE (OAuth2Proxy, oauth2_proxy, REST_TYPE_PROXY)
+#define GET_PRIVATE(o) oauth2_proxy_get_instance_private(OAUTH2_PROXY(o))
 
-#define OAUTH2_PROXY_GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), OAUTH2_TYPE_PROXY, OAuth2ProxyPrivate))
+G_DEFINE_TYPE_WITH_PRIVATE (OAuth2Proxy, oauth2_proxy, REST_TYPE_PROXY)
 
 GQuark
 oauth2_proxy_error_quark (void)
@@ -126,8 +125,6 @@ oauth2_proxy_class_init (OAuth2ProxyClass *klass)
   RestProxyClass *proxy_class = REST_PROXY_CLASS (klass);
   GParamSpec *pspec;
 
-  g_type_class_add_private (klass, sizeof (OAuth2ProxyPrivate));
-
   object_class->get_property = oauth2_proxy_get_property;
   object_class->set_property = oauth2_proxy_set_property;
   object_class->finalize = oauth2_proxy_finalize;
@@ -159,7 +156,7 @@ oauth2_proxy_class_init (OAuth2ProxyClass *klass)
 static void
 oauth2_proxy_init (OAuth2Proxy *proxy)
 {
-  proxy->priv = OAUTH2_PROXY_GET_PRIVATE (proxy);
+  proxy->priv = GET_PRIVATE (proxy);
 }
 
 /**
