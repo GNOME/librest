@@ -31,33 +31,13 @@
 G_BEGIN_DECLS
 
 #define REST_TYPE_PROXY rest_proxy_get_type()
-
-#define REST_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), REST_TYPE_PROXY, RestProxy))
-
-#define REST_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), REST_TYPE_PROXY, RestProxyClass))
-
-#define REST_IS_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), REST_TYPE_PROXY))
-
-#define REST_IS_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), REST_TYPE_PROXY))
-
-#define REST_PROXY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), REST_TYPE_PROXY, RestProxyClass))
-
-typedef struct _RestProxy RestProxy;
-typedef struct _RestProxyClass RestProxyClass;
+G_DECLARE_DERIVABLE_TYPE (RestProxy, rest_proxy, REST, PROXY, GObject)
 
 /**
  * RestProxy:
  *
  * #RestProxy has no publicly available members.
  */
-struct _RestProxy {
-  GObject parent;
-};
 
 /**
  * RestProxyClass:
@@ -179,8 +159,6 @@ typedef enum {
 } RestProxyError;
 
 GQuark rest_proxy_error_quark (void);
-
-GType rest_proxy_get_type (void);
 
 RestProxy *rest_proxy_new (const gchar *url_format, 
                            gboolean     binding_required);
