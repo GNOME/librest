@@ -24,10 +24,7 @@
 #include <rest/rest-proxy-auth-private.h>
 #include "rest-private.h"
 
-G_DEFINE_TYPE (RestProxyAuth, rest_proxy_auth, G_TYPE_OBJECT)
-
-#define REST_PROXY_AUTH_GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), REST_TYPE_PROXY_AUTH, RestProxyAuthPrivate))
+#define GET_PRIVATE(o) rest_proxy_auth_get_instance_private(REST_PROXY_AUTH(o))
 
 struct _RestProxyAuthPrivate {
   /* used to hold state during async authentication */
@@ -37,6 +34,8 @@ struct _RestProxyAuthPrivate {
   SoupAuth *auth;
   gboolean paused;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (RestProxyAuth, rest_proxy_auth, G_TYPE_OBJECT)
 
 static void
 rest_proxy_auth_dispose (GObject *object)
@@ -56,15 +55,13 @@ rest_proxy_auth_class_init (RestProxyAuthClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (RestProxyAuthPrivate));
-
   object_class->dispose = rest_proxy_auth_dispose;
 }
 
 static void
 rest_proxy_auth_init (RestProxyAuth *proxy)
 {
-  proxy->priv = REST_PROXY_AUTH_GET_PRIVATE (proxy);
+  proxy->priv = GET_PRIVATE (proxy);
 }
 
 G_GNUC_INTERNAL RestProxyAuth*
