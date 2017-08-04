@@ -28,39 +28,20 @@
 G_BEGIN_DECLS
 
 #define OAUTH_TYPE_PROXY_CALL oauth_proxy_call_get_type()
-
-#define OAUTH_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), OAUTH_TYPE_PROXY_CALL, OAuthProxyCall))
-
-#define OAUTH_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), OAUTH_TYPE_PROXY_CALL, OAuthProxyCallClass))
-
-#define OAUTH_IS_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), OAUTH_TYPE_PROXY_CALL))
-
-#define OAUTH_IS_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), OAUTH_TYPE_PROXY_CALL))
-
-#define OAUTH_PROXY_CALL_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), OAUTH_TYPE_PROXY_CALL, OAuthProxyCallClass))
+G_DECLARE_DERIVABLE_TYPE (OAuthProxyCall, oauth_proxy_call, OAUTH, PROXY_CALL, RestProxyCall)
 
 /**
  * OAuthProxyCall:
  *
  * #OAuthProxyCall has no publicly available members.
  */
-typedef struct {
-  RestProxyCall parent;
-} OAuthProxyCall;
 
-typedef struct {
+struct _OAuthProxyCallClass {
   RestProxyCallClass parent_class;
   /*< private >*/
   /* padding for future expansion */
   gpointer _padding_dummy[8];
-} OAuthProxyCallClass;
-
-GType oauth_proxy_call_get_type (void);
+};
 
 void oauth_proxy_call_parse_token_response (OAuthProxyCall *call);
 
