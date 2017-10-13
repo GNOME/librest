@@ -334,7 +334,6 @@ rest_xml_node_add_child (RestXmlNode *parent, const char *tag)
   RestXmlNode *node;
   char        *escaped;
 
-  g_return_val_if_fail (parent, NULL);
   g_return_val_if_fail (tag && *tag, NULL);
 
   escaped = g_markup_escape_text (tag, -1);
