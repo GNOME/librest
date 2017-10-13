@@ -280,6 +280,9 @@ rest_xml_node_print (RestXmlNode *node)
 {
   GHashTableIter iter;
   gpointer       key, value;
+  GList          *attrs = NULL;
+  GList          *children = NULL;
+  GList          *l;
   GString        *xml = g_string_new (NULL);
   RestXmlNode   *n;
 
@@ -288,13 +291,29 @@ rest_xml_node_print (RestXmlNode *node)
 
   g_hash_table_iter_init (&iter, node->attrs);
   while (g_hash_table_iter_next (&iter, &key, &value))
-    g_string_append_printf (xml, " %s=\'%s\'", (char *)key, (char *)value);
+    {
+      char *attr = g_strdup_printf ("%s=\'%s\'", (char *)key, (char *)value);
+      attrs = g_list_prepend (attrs, attr);
+    }
+
+  attrs = g_list_sort (attrs, (GCompareFunc) g_strcmp0);
+  for (l = attrs; l; l = l->next)
+    {
+      const char *attr = (const char *) l->data;
+      g_string_append_printf (xml, " %s", attr);
+    }
 
   g_string_append (xml, ">");
 
   g_hash_table_iter_init (&iter, node->children);
   while (g_hash_table_iter_next (&iter, &key, &value))
+    children = g_list_prepend (children, key);
+
+  children = g_list_sort (children, (GCompareFunc) g_strcmp0);
+  for (l = children; l; l = l->next)
     {
+      const char *name = (const char *) l->data;
+      RestXmlNode *value = (RestXmlNode *) g_hash_table_lookup (node->children, name);
       char *child = rest_xml_node_print ((RestXmlNode *) value);
 
       g_string_append (xml, child);
@@ -314,6 +333,8 @@ rest_xml_node_print (RestXmlNode *node)
       g_free (sibling);
     }
 
+  g_list_free_full (attrs, g_free);
+  g_list_free (children);
   return g_string_free (xml, FALSE);
 }
 
