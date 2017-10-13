@@ -288,7 +288,7 @@ rest_xml_node_print (RestXmlNode *node)
 
   g_hash_table_iter_init (&iter, node->attrs);
   while (g_hash_table_iter_next (&iter, &key, &value))
-    g_string_append_printf (xml, " %s =\'%s\'", (char *)key, (char *)value);
+    g_string_append_printf (xml, " %s=\'%s\'", (char *)key, (char *)value);
 
   g_string_append (xml, ">");
 
