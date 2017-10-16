@@ -103,6 +103,9 @@ rest_xml_parser_parse_from_data (RestXmlParser *parser,
                                NULL, /* URL? */
                                NULL, /* encoding */
                                XML_PARSE_RECOVER | XML_PARSE_NOCDATA);
+  if (reader == NULL) {
+      return NULL;
+  }
   xmlTextReaderSetErrorHandler(reader, rest_xml_parser_xml_reader_error, NULL);
 
   while (xmlTextReaderRead (reader) == 1)

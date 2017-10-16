@@ -34,6 +34,12 @@ main (int argc, char **argv)
 
   parser = rest_xml_parser_new ();
 
+  root = rest_xml_parser_parse_from_data (parser, "", -1);
+  g_assert (root == NULL);
+
+  root = rest_xml_parser_parse_from_data (parser, "<invalid", -1);
+  g_assert (root == NULL);
+
   root = rest_xml_parser_parse_from_data (parser, TEST_XML, strlen (TEST_XML));
   g_assert (root);
 
