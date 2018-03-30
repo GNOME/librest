@@ -38,7 +38,8 @@ lib_headers = \
 	oauth2-proxy.h		\
 	oauth2-proxy-call.h	\
 	rest-xml-node.h		\
-	rest-xml-parser.h
+	rest-xml-parser.h	\
+	rest.h
 
 EXTRA_DIST = \
 	rest-marshal.txt
@@ -120,7 +121,7 @@ Rest_@API_VERSION_AM@_gir_INCLUDES = GObject-2.0 Gio-2.0 Soup-2.4
 Rest_@API_VERSION_AM@_gir_PACKAGES = gobject-2.0 libsoup-2.4 libxml-2.0 gio-2.0
 Rest_@API_VERSION_AM@_gir_SCANNERFLAGS = --accept-unprefixed --warn-all
 Rest_@API_VERSION_AM@_gir_EXPORT_PACKAGES = rest-@API_VERSION@
-REST_CINCLUDES=$(patsubst %,--c-include='rest/%',$(shell echo $(lib_headers)))
+REST_CINCLUDES=--c-include='rest/rest.h'
 INTROSPECTION_SCANNER_ARGS = $(REST_CINCLUDES)
 
 girdir = $(datadir)/gir-1.0
