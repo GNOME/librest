@@ -260,8 +260,9 @@ append_query_param (gpointer key, gpointer value, gpointer user_data)
  * oauth2_proxy_build_login_url_full:
  * @proxy: a OAuth2Proxy object
  * @redirect_uri: the uri to redirect to after the user authenticates
- * @extra_params: any extra parameters to add to the login url (e.g. facebook
- * uses 'scope=foo,bar' to request extended permissions).
+ * @extra_params: (element-type utf8 utf8): any extra parameters to add to the
+ * login url (e.g. facebook uses 'scope=foo,bar' to request extended
+ * permissions).
  *
  * Builds a url at which the user can log in to the specified OAuth2-based web
  * service.  In general, this url should be displayed in an embedded browser

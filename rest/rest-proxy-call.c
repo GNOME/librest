@@ -28,12 +28,39 @@
 #include "rest-private.h"
 #include "rest-proxy-call-private.h"
 
+/**
+ * RestProxyCallAsyncCallback:
+ * @call: The #RestProxyCall
+ * @error: (nullable): a #GError, %NULL when no error occured
+ * @weak_object: (nullable):
+ * @user_data:
+ **/
+
+/**
+ * RestProxyCallContinuousCallback:
+ * @call: The #RestProxyCall
+ * @buf: (array length=len) (element-type gchar): A buffer
+ * @len: The length of the buffer @buf
+ * @error: (nullable): a #GError, %NULL when no error occured
+ * @weak_object: (nullable):
+ * @user_data:
+ **/
+
+/**
+ * RestProxyCallUploadCallback:
+ * @call: The #RestProxyCall
+ * @total: the total number of bytes
+ * @uploaded: the uploaded number of bytes
+ * @error: (nullable): a #GError, %NULL when no error occured
+ * @weak_object: (nullable):
+ * @user_data:
+ **/
 
 struct _RestProxyCallAsyncClosure {
   RestProxyCall *call;
   RestProxyCallAsyncCallback callback;
   GObject *weak_object;
-  gpointer userdata;
+  gpointer user_data;
   SoupMessage *message;
 };
 typedef struct _RestProxyCallAsyncClosure RestProxyCallAsyncClosure;
@@ -42,7 +69,7 @@ struct _RestProxyCallContinuousClosure {
   RestProxyCall *call;
   RestProxyCallContinuousCallback callback;
   GObject *weak_object;
-  gpointer userdata;
+  gpointer user_data;
   SoupMessage *message;
 };
 typedef struct _RestProxyCallContinuousClosure RestProxyCallContinuousClosure;
@@ -51,7 +78,7 @@ struct _RestProxyCallUploadClosure {
   RestProxyCall *call;
   RestProxyCallUploadCallback callback;
   GObject *weak_object;
-  gpointer userdata;
+  gpointer user_data;
   SoupMessage *message;
   gsize uploaded;
 };
@@ -414,6 +441,15 @@ rest_proxy_call_add_param (RestProxyCall *call,
   rest_params_add (priv->params, param);
 }
 
+/**
+ * rest_proxy_call_add_param_full:
+ * @call: The #RestProxyCall
+ * @param: (transfer full): The #RestParam to add
+ *
+ * Add a query parameter called @param with the string value @value to the call.
+ * If a parameter with this name already exists, the new value will replace the
+ * old.
+ */
 void
 rest_proxy_call_add_param_full (RestProxyCall *call, RestParam *param)
 {
@@ -529,9 +565,9 @@ static void _call_async_weak_notify_cb (gpointer *data,
 static void
 _populate_headers_hash_table (const gchar *name,
                               const gchar *value,
-                              gpointer     userdata)
+                              gpointer     user_data)
 {
-  GHashTable *headers = (GHashTable *)userdata;
+  GHashTable *headers = (GHashTable *)user_data;
 
   g_hash_table_insert (headers, g_strdup (name), g_strdup (value));
 }
@@ -612,14 +648,14 @@ finish_call (RestProxyCall *call, SoupMessage *message, GError **error)
 static void
 _continuous_call_message_completed_cb (SoupSession *session,
                                        SoupMessage *message,
-                                       gpointer     userdata)
+                                       gpointer     user_data)
 {
   RestProxyCallContinuousClosure *closure;
   RestProxyCall *call;
   RestProxyCallPrivate *priv;
   GError *error = NULL;
 
-  closure = (RestProxyCallContinuousClosure *)userdata;
+  closure = (RestProxyCallContinuousClosure *)user_data;
   call = closure->call;
   priv = GET_PRIVATE (call);
 
@@ -633,7 +669,7 @@ _continuous_call_message_completed_cb (SoupSession *session,
                      0,
                      error,
                      closure->weak_object,
-                     closure->userdata);
+                     closure->user_data);
 
   g_clear_error (&error);
 
@@ -961,7 +997,7 @@ _continuous_call_message_got_chunk_cb (SoupMessage                    *msg,
                      chunk->length,
                      NULL,
                      closure->weak_object,
-                     closure->userdata);
+                     closure->user_data);
 }
 
 
@@ -970,7 +1006,7 @@ _continuous_call_message_got_chunk_cb (SoupMessage                    *msg,
  * @call: The #RestProxyCall
  * @callback: a #RestProxyCallContinuousCallback to invoke when data is available
  * @weak_object: The #GObject to weakly reference and tie the lifecycle to
- * @userdata: (closure): data to pass to @callback
+ * @user_data: (closure): data to pass to @callback
  * @error: (out) (allow-none): a #GError, or %NULL
  *
  * Asynchronously invoke @call but expect a continuous stream of content. This
@@ -991,7 +1027,7 @@ gboolean
 rest_proxy_call_continuous (RestProxyCall                    *call,
                             RestProxyCallContinuousCallback   callback,
                             GObject                          *weak_object,
-                            gpointer                          userdata,
+                            gpointer                          user_data,
                             GError                          **error)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
@@ -1019,7 +1055,7 @@ rest_proxy_call_continuous (RestProxyCall                    *call,
   closure->callback = callback;
   closure->weak_object = weak_object;
   closure->message = message;
-  closure->userdata = userdata;
+  closure->user_data = user_data;
 
   priv->cur_call_closure = (RestProxyCallAsyncClosure *)closure;
 
@@ -1064,7 +1100,7 @@ _upload_call_message_completed_cb (SoupSession *session,
                      closure->uploaded,
                      error,
                      closure->weak_object,
-                     closure->userdata);
+                     closure->user_data);
 
   g_clear_error (&error);
 
@@ -1094,7 +1130,7 @@ _upload_call_message_wrote_data_cb (SoupMessage                *msg,
                        closure->uploaded,
                        NULL,
                        closure->weak_object,
-                       closure->userdata);
+                       closure->user_data);
 }
 
 /**
@@ -1103,7 +1139,7 @@ _upload_call_message_wrote_data_cb (SoupMessage                *msg,
  * @callback: (scope async): a #RestProxyCallUploadCallback to invoke when a chunk
  *   of data was uploaded
  * @weak_object: The #GObject to weakly reference and tie the lifecycle to
- * @userdata: data to pass to @callback
+ * @user_data: data to pass to @callback
  * @error: a #GError, or %NULL
  *
  * Asynchronously invoke @call but expect to have the callback invoked every time a
@@ -1123,7 +1159,7 @@ gboolean
 rest_proxy_call_upload (RestProxyCall                *call,
                         RestProxyCallUploadCallback   callback,
                         GObject                      *weak_object,
-                        gpointer                      userdata,
+                        gpointer                      user_data,
                         GError                      **error)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
@@ -1148,7 +1184,7 @@ rest_proxy_call_upload (RestProxyCall                *call,
   closure->callback = callback;
   closure->weak_object = weak_object;
   closure->message = message;
-  closure->userdata = userdata;
+  closure->user_data = user_data;
   closure->uploaded = 0;
 
   priv->cur_call_closure = (RestProxyCallAsyncClosure *)closure;
@@ -1274,8 +1310,8 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
  * rest_proxy_call_get_response_headers:
  * @call: The #RestProxyCall
  *
- * Returns: (transfer container): pointer to a hash table of
- * headers. This hash table must not be changed. You should call
+ * Returns: (transfer container) (element-type utf8 utf8): pointer to a
+ * hash table of headers. This hash table must not be changed. You should call
  * g_hash_table_unref() when you have finished with it.
  */
 GHashTable *
@@ -1361,7 +1397,7 @@ rest_proxy_call_get_status_message (RestProxyCall *call)
  * rest_proxy_call_serialize_params:
  * @call: The #RestProxyCall
  * @content_type: (out): Content type of the payload
- * @content: (out): The payload
+ * @content: (out) (array length=content_len) (element-type gchar): The payload
  * @content_len: (out): Length of the payload data
  * @error: a #GError, or %NULL
  *

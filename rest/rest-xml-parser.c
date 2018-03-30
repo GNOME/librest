@@ -65,7 +65,7 @@ rest_xml_parser_new (void)
 /**
  * rest_xml_parser_parse_from_data:
  * @parser: a #RestXmlParser
- * @data: the XML content to parse
+ * @data: (array length=len) (element-type gchar): the XML content to parse
  * @len: the length of @data, or -1 if @data is a nul-terminated string
  *
  * Parse the XML in @data, and return a new #RestXmlNode.  If @data is invalid

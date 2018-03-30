@@ -131,7 +131,7 @@ RestParams *rest_proxy_call_get_params (RestProxyCall *call);
 typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
                                            const GError  *error,
                                            GObject       *weak_object,
-                                           gpointer       userdata);
+                                           gpointer       user_data);
 
 void rest_proxy_call_invoke_async (RestProxyCall       *call,
                                    GCancellable        *cancellable,
@@ -147,12 +147,12 @@ typedef void (*RestProxyCallContinuousCallback) (RestProxyCall *call,
                                                  gsize          len,
                                                  const GError  *error,
                                                  GObject       *weak_object,
-                                                 gpointer       userdata);
+                                                 gpointer       user_data);
 
 gboolean rest_proxy_call_continuous (RestProxyCall                    *call,
                                      RestProxyCallContinuousCallback   callback,
                                      GObject                          *weak_object,
-                                     gpointer                          userdata,
+                                     gpointer                          user_data,
                                      GError                          **error);
 
 typedef void (*RestProxyCallUploadCallback) (RestProxyCall *call,
@@ -160,12 +160,12 @@ typedef void (*RestProxyCallUploadCallback) (RestProxyCall *call,
                                              gsize          uploaded,
                                              const GError  *error,
                                              GObject       *weak_object,
-                                             gpointer       userdata);
+                                             gpointer       user_data);
 
 gboolean rest_proxy_call_upload (RestProxyCall                *call,
                                  RestProxyCallUploadCallback   callback,
                                  GObject                      *weak_object,
-                                 gpointer                      userdata,
+                                 gpointer                      user_data,
                                  GError                      **error);
 
 gboolean rest_proxy_call_cancel (RestProxyCall *call);

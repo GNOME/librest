@@ -280,7 +280,7 @@ rest_param_is_string (RestParam *param)
  * Get the content of @param.  The content should be treated as read-only and
  * not modified in any way.
  *
- * Returns: (transfer none): the content.
+ * Returns: (transfer none) (array) (element-type guint8):: the content.
  **/
 gconstpointer
 rest_param_get_content (RestParam *param)

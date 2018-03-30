@@ -282,8 +282,8 @@ oauth_proxy_new_with_token (const char *consumer_key,
 /**
  * oauth_proxy_request_token:
  * @proxy: an #OAuthProxy
- * @function: the function name to invoke
- * @callback_uri: the callback URI
+ * @function: (allow-none): the function name to invoke
+ * @callback_uri: (allow-none): the callback URI or %NULL
  * @error: a #GError, or %NULL
  *
  * Perform the Request Token phase of OAuth, invoking @function (defaulting to
@@ -352,7 +352,7 @@ request_token_cb (GObject      *source_object,
  * @proxy: an #OAuthProxy
  * @function: (nullable): the function name to invoke
  * @callback_uri: (nullable): the callback URI
- * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
+ * @callback: (scope async): a #GAsyncReadyCallback to invoke on completion
  * @user_data: user data to pass to @callback
  *
  * Perform the Request Token phase of OAuth, invoking @function (defaulting to
@@ -485,7 +485,7 @@ access_token_cb (GObject      *source_object,
  * @proxy: an #OAuthProxy
  * @function: the function name to invoke
  * @verifier: the verifier
- * @callback: (scope async): a #OAuthProxyAuthCallback to invoke on completion
+ * @callback: (scope async): a #GAsyncReadyCallback to invoke on completion
  * @user_data: user data to pass to @callback
  *
  * Perform the Access Token phase of OAuth, invoking @function (defaulting to

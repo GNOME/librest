@@ -79,7 +79,7 @@ rest_params_free (RestParams *params)
 /**
  * rest_params_add:
  * @params: a valid #RestParams
- * @param: a valid #RestParam
+ * @param: (transfer full): a valid #RestParam
  *
  * Add @param to @params.
  **/
@@ -101,7 +101,8 @@ rest_params_add (RestParams *params, RestParam *param)
  *
  * Return the #RestParam called @name, or %NULL if it doesn't exist.
  *
- * Returns: a #RestParam or %NULL if the name doesn't exist
+ * Returns: (nullable) (transfer none): a #RestParam or %NULL if the name
+ * doesn't exist
  **/
 RestParam *
 rest_params_get (RestParams *params, const char *name)
@@ -170,7 +171,7 @@ rest_params_are_strings (RestParams *params)
  * The values are owned by the #RestParams, so don't destroy the #RestParams
  * before the hash table.
  *
- * Returns: (element-type utf8 Rest.Param) (transfer container): a new #GHashTable.
+ * Returns: (element-type utf8 utf8) (transfer container): a new #GHashTable.
  **/
 GHashTable *
 rest_params_as_string_hash_table (RestParams *params)
