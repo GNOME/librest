@@ -1,1 +1,1 @@
-subdir('reference')
+subdir('reference/rest')

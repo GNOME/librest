@@ -1,0 +1,21 @@
+image: fedora:latest
+
+stages:
+  - build
+
+build-folks:
+  stage: build
+  except:
+    - tags
+  before_script:
+    - dnf update -y --nogpgcheck
+    - dnf -y install --nogpgcheck redhat-rpm-config
+      glib2-devel gobject-introspection-devel libxml2-devel meson ninja-build
+      libsoup-devel vala
+  script:
+    - meson _build
+    - ninja -C _build
+    - meson test -C _build
+  artifacts:
+    paths:
+      - "_build/meson-logs"
