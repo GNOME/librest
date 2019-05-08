@@ -1,0 +1,10 @@
+option('examples',
+  type: 'boolean',
+  value: false,
+  description: 'Build the examples',
+)
+option('gtk_doc',
+  type: 'boolean',
+  value: false,
+  description: 'Build the gtk-doc reference docs',
+)
