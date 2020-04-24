@@ -9,7 +9,7 @@ AC_PREREQ([2.63])
 AC_INIT([rest], [rest_version],
         [],
         [rest],
-        [http://git.gnome.org/browse/librest/])
+        [https://gitlab.gnome.org/GNOME/librest/])
 
 AC_CONFIG_SRCDIR([rest/rest-proxy.h])
 AC_CONFIG_HEADERS([config.h])
