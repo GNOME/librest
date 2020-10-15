@@ -79,7 +79,7 @@ rest_params_free (RestParams *params)
 /**
  * rest_params_add:
  * @params: a valid #RestParams
- * @param: a valid #RestParam
+ * @param: (transfer full): a valid #RestParam
  *
  * Add @param to @params.
  **/
@@ -101,7 +101,8 @@ rest_params_add (RestParams *params, RestParam *param)
  *
  * Return the #RestParam called @name, or %NULL if it doesn't exist.
  *
- * Returns: a #RestParam or %NULL if the name doesn't exist
+ * Returns: (transfer none) (nullable): a #RestParam or %NULL if the name
+ * doesn't exist
  **/
 RestParam *
 rest_params_get (RestParams *params, const char *name)
@@ -224,8 +225,8 @@ rest_params_iter_init (RestParamsIter *iter, RestParams *params)
 /**
  * rest_params_iter_next:
  * @iter: an initialized #RestParamsIter
- * @name: a location to store the name, or %NULL
- * @param: a location to store the #RestParam, or %NULL
+ * @name: (out) (optional): a location to store the name, or %NULL
+ * @param: (out) (optional): a location to store the #RestParam, or %NULL
  *
  * Advances @iter and retrieves the name and/or parameter that are now pointed
  * at as a result of this advancement.  If FALSE is returned, @name and @param
