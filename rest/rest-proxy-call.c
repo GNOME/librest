@@ -414,6 +414,15 @@ rest_proxy_call_add_param (RestProxyCall *call,
   rest_params_add (priv->params, param);
 }
 
+/**
+ * rest_proxy_call_add_param_full:
+ * @call: The #RestProxyCall
+ * @param: (transfer full): A #RestParam
+ *
+ * Add a query parameter @param to the call.
+ * If a parameter with this name already exists, the new value will replace the
+ * old.
+ */
 void
 rest_proxy_call_add_param_full (RestProxyCall *call, RestParam *param)
 {
@@ -475,8 +484,9 @@ rest_proxy_call_add_params_from_valist (RestProxyCall *call,
  *
  * Get the value of the parameter called @name.
  *
- * Returns: The parameter value, or %NULL if it does not exist. This string is
- * owned by the #RestProxyCall and should not be freed.
+ * Returns: (transfer none) (nullable): The parameter value, or %NULL if it does
+ * not exist. This string is owned by the #RestProxyCall and should not be
+ * freed.
  */
 RestParam *
 rest_proxy_call_lookup_param (RestProxyCall *call,
@@ -1274,8 +1284,8 @@ rest_proxy_call_lookup_response_header (RestProxyCall *call,
  * rest_proxy_call_get_response_headers:
  * @call: The #RestProxyCall
  *
- * Returns: (transfer container): pointer to a hash table of
- * headers. This hash table must not be changed. You should call
+ * Returns: (transfer container) (element-type utf8 utf8): pointer to a hash
+ * table of headers. This hash table must not be changed. You should call
  * g_hash_table_unref() when you have finished with it.
  */
 GHashTable *
