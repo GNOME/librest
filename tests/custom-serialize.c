@@ -27,7 +27,7 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
-#define PORT 8080
+#define PORT 8081
 
 #define REST_TYPE_CUSTOM_PROXY_CALL custom_proxy_call_get_type()
 
