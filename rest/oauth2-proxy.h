@@ -90,6 +90,8 @@ void oauth2_proxy_set_access_token (OAuth2Proxy *proxy, const char *access_token
 
 char * oauth2_proxy_extract_access_token (const char *url);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (OAuth2Proxy, g_object_unref)
+
 G_END_DECLS
 
 #endif /* _OAUTH2_PROXY */
