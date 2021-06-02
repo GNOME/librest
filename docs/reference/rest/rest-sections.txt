@@ -198,6 +198,8 @@ rest_params_are_strings
 rest_params_as_string_hash_table
 rest_params_iter_init
 rest_params_iter_next
+rest_params_ref
+rest_params_unref
 </SECTION>
 
 <SECTION>

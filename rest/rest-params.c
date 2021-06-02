@@ -241,3 +241,44 @@ rest_params_iter_next (RestParamsIter *iter, const char **name, RestParam **para
 
   return g_hash_table_iter_next ((GHashTableIter *)iter, (gpointer)name, (gpointer)param);
 }
+
+/**
+ * rest_params_ref:
+ * @params: a valid #RestParams
+ *
+ * Increase the reference count on @params.
+ *
+ * Returns: the #RestParams
+ *
+ * Since: 0.9.0
+ **/
+RestParams *
+rest_params_ref (RestParams *params)
+{
+  GHashTable *hash = (GHashTable *)params;
+
+  g_return_val_if_fail (params != NULL, NULL);
+
+  g_hash_table_ref (hash);
+
+  return params;
+}
+
+/**
+ * rest_params_unref:
+ * @params: a valid #RestParams
+ *
+ * Decrease the reference count on @params, destroying it if the
+ * reference count reaches 0.
+ *
+ * Since: 0.9.0
+ **/
+void
+rest_params_unref (RestParams *params)
+{
+  GHashTable *hash = (GHashTable *)params;
+
+  g_return_if_fail (params != NULL);
+
+  g_hash_table_unref (hash);
+}

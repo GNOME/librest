@@ -48,6 +48,9 @@ GHashTable * rest_params_as_string_hash_table (RestParams *params);
 void rest_params_iter_init (RestParamsIter *iter, RestParams *params);
 gboolean rest_params_iter_next (RestParamsIter *iter, const char **name, RestParam **param);
 
+RestParams *rest_params_ref (RestParams *params);
+void rest_params_unref (RestParams *params);
+
 G_END_DECLS
 
 #endif /* _REST_PARAMS */
