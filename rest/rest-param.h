@@ -82,6 +82,8 @@ gsize rest_param_get_content_length (RestParam *param);
 RestParam *rest_param_ref (RestParam *param);
 void rest_param_unref (RestParam *param);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(RestParam, rest_param_unref)
+
 G_END_DECLS
 
 #endif /* _REST_PARAM */
