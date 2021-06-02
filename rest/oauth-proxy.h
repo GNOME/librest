@@ -28,37 +28,20 @@
 G_BEGIN_DECLS
 
 #define OAUTH_TYPE_PROXY oauth_proxy_get_type()
-
-#define OAUTH_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), OAUTH_TYPE_PROXY, OAuthProxy))
-
-#define OAUTH_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), OAUTH_TYPE_PROXY, OAuthProxyClass))
-
-#define OAUTH_IS_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), OAUTH_TYPE_PROXY))
-
-#define OAUTH_IS_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), OAUTH_TYPE_PROXY))
-
-#define OAUTH_PROXY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), OAUTH_TYPE_PROXY, OAuthProxyClass))
+G_DECLARE_DERIVABLE_TYPE (OAuthProxy, oauth_proxy, OAUTH, PROXY, RestProxy)
 
 /**
  * OAuthProxy:
  *
  * #OAuthProxy has no publicly available members.
  */
-typedef struct {
-  RestProxy parent;
-} OAuthProxy;
 
-typedef struct {
+struct _OAuthProxyClass {
   RestProxyClass parent_class;
   /*< private >*/
   /* padding for future expansion */
   gpointer _padding_dummy[8];
-} OAuthProxyClass;
+};
 
 GType oauth_signature_method_get_type (void) G_GNUC_CONST;
 #define OAUTH_TYPE_SIGNATURE_METHOD (oauth_signature_method_get_type())
@@ -76,8 +59,6 @@ typedef enum {
   PLAINTEXT,
   HMAC_SHA1
 } OAuthSignatureMethod;
-
-GType oauth_proxy_get_type (void);
 
 RestProxy* oauth_proxy_new (const char *consumer_key,
                             const char *consumer_secret,
