@@ -68,6 +68,8 @@ void rest_proxy_auth_pause (RestProxyAuth *auth);
 void rest_proxy_auth_unpause (RestProxyAuth *auth);
 void rest_proxy_auth_cancel (RestProxyAuth *auth);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (RestProxyAuth, g_object_unref)
+
 G_END_DECLS
 
 #endif /* _REST_PROXY_AUTH */
