@@ -51,6 +51,8 @@ gboolean rest_params_iter_next (RestParamsIter *iter, const char **name, RestPar
 RestParams *rest_params_ref (RestParams *params);
 void rest_params_unref (RestParams *params);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(RestParams, rest_params_unref)
+
 G_END_DECLS
 
 #endif /* _REST_PARAMS */
