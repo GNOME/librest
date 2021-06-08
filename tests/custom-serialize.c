@@ -88,22 +88,40 @@ custom_proxy_call_init (CustomProxyCall *self)
 }
 
 static void
+#ifdef WITH_SOUP_2
 server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
+#else
+server_callback (SoupServer *server, SoupServerMessage *msg,
+                 const char *path, GHashTable *query, gpointer user_data)
+#endif
 {
   if (g_str_equal (path, "/ping")) {
     const char *content_type = NULL;
+#ifdef WITH_SOUP_2
     SoupMessageHeaders *headers = msg->request_headers;
     SoupMessageBody *body = msg->request_body;
+#else
+    SoupMessageHeaders *headers = soup_server_message_get_request_headers (msg);
+    SoupMessageBody *body = soup_server_message_get_request_body (msg);
+#endif
     content_type = soup_message_headers_get_content_type (headers, NULL);
     g_assert_cmpstr (content_type, ==, "application/json");
 
     g_assert_cmpstr (body->data, ==, "{}");
 
+#ifdef WITH_SOUP_2
     soup_message_set_status (msg, SOUP_STATUS_OK);
+#else
+    soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
   } else {
+#ifdef WITH_SOUP_2
     soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+#else
+    soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL);
+#endif
   }
 }
 

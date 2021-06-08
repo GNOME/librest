@@ -9,4 +9,4 @@ Description: RESTful web api query library
 Version: @VERSION@
 Libs: -L${libdir} -lrest-${apiversion}
 Cflags: -I${includedir}/rest-${apiversion}
-Requires: glib-2.0 libsoup-2.4 libxml-2.0
+Requires: glib-2.0 libsoup-@SOUP_API_VERSION@ libxml-2.0

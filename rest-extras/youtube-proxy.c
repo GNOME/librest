@@ -246,6 +246,9 @@ typedef struct {
   GObject *weak_object;
   gpointer user_data;
   gsize uploaded;
+#ifndef WITH_SOUP_2
+  GCancellable *cancellable;
+#endif
 } YoutubeProxyUploadClosure;
 
 static void
@@ -255,7 +258,11 @@ _upload_async_weak_notify_cb (gpointer *data,
   YoutubeProxyUploadClosure *closure =
     (YoutubeProxyUploadClosure *) data;
 
+#ifdef WITH_SOUP_2
   _rest_proxy_cancel_message (REST_PROXY (closure->proxy), closure->message);
+#else
+  g_cancellable_cancel (closure->cancellable);
+#endif
 }
 
 static void
@@ -267,6 +274,9 @@ _upload_async_closure_free (YoutubeProxyUploadClosure *closure)
                          closure);
 
   g_object_unref (closure->proxy);
+#ifndef WITH_SOUP_2
+  g_object_unref (closure->cancellable);
+#endif
 
   g_slice_free (YoutubeProxyUploadClosure, closure);
 }
@@ -286,6 +296,9 @@ _upload_async_closure_new (YoutubeProxy *self,
   closure->message = message;
   closure->weak_object = weak_object;
   closure->user_data = user_data;
+#ifndef WITH_SOUP_2
+  closure->cancellable = g_cancellable_new ();
+#endif
 
   if (weak_object != NULL)
     g_object_weak_ref (weak_object,
@@ -295,41 +308,67 @@ _upload_async_closure_new (YoutubeProxy *self,
 }
 
 static void
-_upload_completed_cb (SoupSession *session,
-                      SoupMessage *message,
+_upload_completed_cb (SoupMessage *message,
+                      GBytes      *payload,
+                      GError      *error,
                       gpointer     user_data)
 {
   YoutubeProxyUploadClosure *closure =
     (YoutubeProxyUploadClosure *) user_data;
-  GError *error = NULL;
+  gsize length;
+  gconstpointer data;
+  guint status_code;
+  const char *reason_phrase;
 
   if (closure->callback == NULL)
     return;
 
-  if (message->status_code < 200 || message->status_code >= 300)
-    error = g_error_new_literal (REST_PROXY_ERROR,
-                                 message->status_code,
-                                 message->reason_phrase);
+#ifdef WITH_SOUP_2
+  status_code = message->status_code;
+  reason_phrase = message->reason_phrase;
+#else
+  status_code = soup_message_get_status (message);
+  reason_phrase = soup_message_get_reason_phrase (message);
+#endif
 
-  closure->callback (closure->proxy, message->response_body->data,
-                     message->request_body->length,
-                     message->request_body->length,
+  if (status_code < 200 || status_code >= 300)
+    {
+      g_clear_error (&error);
+      error = g_error_new_literal (REST_PROXY_ERROR,
+                                   status_code,
+                                   reason_phrase);
+    }
+
+  data = g_bytes_get_data (payload, &length);
+  closure->callback (closure->proxy, data, length, length,
                      error, closure->weak_object, closure->user_data);
+  g_bytes_unref (payload);
 
   _upload_async_closure_free (closure);
 }
 
 static void
 _message_wrote_data_cb (SoupMessage               *msg,
+#ifdef WITH_SOUP_2
                         SoupBuffer                *chunk,
+#else
+                        gsize                      chunk_size,
+#endif
                         YoutubeProxyUploadClosure *closure)
 {
-  closure->uploaded = closure->uploaded + chunk->length;
+#ifdef WITH_SOUP_2
+  gsize chunk_size = chunk->length;
+  goffset content_length = msg->request_body->length;
+#else
+  goffset content_length = soup_message_headers_get_content_length (soup_message_get_request_headers (msg));
+#endif
 
-  if (closure->uploaded < msg->request_body->length)
+  closure->uploaded = closure->uploaded + chunk_size;
+
+  if (closure->uploaded < content_length)
     closure->callback (closure->proxy,
                        NULL,
-                       msg->request_body->length,
+                       content_length,
                        closure->uploaded,
                        NULL,
                        closure->weak_object,
@@ -364,7 +403,12 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
   SoupMultipart *mp;
   SoupMessage *message;
   SoupMessageHeaders *part_headers;
+  SoupMessageHeaders *request_headers;
+#ifdef WITH_SOUP_2
   SoupBuffer *sb;
+#else
+  GBytes *sb;
+#endif
   gchar *content_type;
   gchar *atom_xml;
   GMappedFile *map;
@@ -380,10 +424,17 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
 
   atom_xml = _construct_upload_atom_xml (fields, incomplete);
 
+#ifdef WITH_SOUP_2
   sb = soup_buffer_new_with_owner (atom_xml,
                                    strlen(atom_xml),
                                    atom_xml,
                                    (GDestroyNotify) g_free);
+#else
+  sb = g_bytes_new_with_free_func (atom_xml,
+                                   strlen (atom_xml),
+                                   (GDestroyNotify) g_free,
+                                   atom_xml);
+#endif
 
   part_headers = soup_message_headers_new (SOUP_MESSAGE_HEADERS_MULTIPART);
 
@@ -393,7 +444,11 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
 
   soup_multipart_append_part (mp, part_headers, sb);
 
+#ifdef WITH_SOUP_2
   soup_buffer_free (sb);
+#else
+  g_bytes_unref (sb);
+#endif
 
   content_type = g_content_type_guess (
       filename,
@@ -401,24 +456,37 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
       g_mapped_file_get_length (map),
       NULL);
 
+#ifdef WITH_SOUP_2
   sb = soup_buffer_new_with_owner (g_mapped_file_get_contents (map),
                                    g_mapped_file_get_length (map),
                                    map,
                                    (GDestroyNotify) g_mapped_file_unref);
+#else
+  sb = g_bytes_new_with_free_func (g_mapped_file_get_contents (map),
+                                   g_mapped_file_get_length (map),
+                                   (GDestroyNotify) g_mapped_file_unref,
+                                   map);
+#endif
 
   soup_message_headers_replace (part_headers, "Content-Type", content_type);
 
   soup_multipart_append_part (mp, part_headers, sb);
 
+#ifdef WITH_SOUP_2
   soup_buffer_free (sb);
-
   soup_message_headers_free (part_headers);
-
   message = soup_form_request_new_from_multipart (UPLOAD_URL, mp);
+  request_headers = message->request_headers;
+#else
+  g_bytes_unref (sb);
+  soup_message_headers_unref (part_headers);
+  message = soup_message_new_from_multipart (UPLOAD_URL, mp);
+  request_headers = soup_message_get_request_headers (message);
+#endif
 
   soup_multipart_free (mp);
 
-  _set_upload_headers (self, message->request_headers, filename);
+  _set_upload_headers (self, request_headers, filename);
 
   closure = _upload_async_closure_new (self, callback, message, weak_object,
                                        user_data);
@@ -429,7 +497,13 @@ youtube_proxy_upload_async (YoutubeProxy              *self,
                     closure);
 
 
-  _rest_proxy_queue_message (REST_PROXY (self), message, _upload_completed_cb,
+  _rest_proxy_queue_message (REST_PROXY (self), message,
+#ifdef WITH_SOUP_2
+                             NULL,
+#else
+                             closure->cancellable,
+#endif
+                             _upload_completed_cb,
                              closure);
 
   return TRUE;

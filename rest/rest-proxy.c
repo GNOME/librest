@@ -45,6 +45,9 @@ struct _RestProxyPrivate {
   SoupSession *session;
   gboolean disable_cookies;
   char *ssl_ca_file;
+#ifndef WITH_SOUP_2
+  gboolean ssl_strict;
+#endif
 };
 
 
@@ -116,11 +119,15 @@ rest_proxy_get_property (GObject   *object,
       g_value_set_string (value, priv->password);
       break;
     case PROP_SSL_STRICT: {
+#ifdef WITH_SOUP_2
       gboolean ssl_strict;
       g_object_get (G_OBJECT(priv->session),
                     "ssl-strict", &ssl_strict,
                     NULL);
       g_value_set_boolean (value, ssl_strict);
+#else
+      g_value_set_boolean (value, priv->ssl_strict);
+#endif
       break;
     }
     case PROP_SSL_CA_FILE:
@@ -172,9 +179,13 @@ rest_proxy_set_property (GObject      *object,
       priv->password = g_value_dup_string (value);
       break;
     case PROP_SSL_STRICT:
+#ifdef WITH_SOUP_2
       g_object_set (G_OBJECT(priv->session),
                     "ssl-strict", g_value_get_boolean (value),
                     NULL);
+#else
+      priv->ssl_strict = g_value_get_boolean (value);
+#endif
       break;
     case PROP_SSL_CA_FILE:
       g_free(priv->ssl_ca_file);
@@ -207,6 +218,7 @@ default_authenticate_cb (RestProxy *self,
   return !retrying;
 }
 
+#ifdef WITH_SOUP_2
 static void
 authenticate (RestProxy   *self,
               SoupMessage *msg,
@@ -224,6 +236,7 @@ authenticate (RestProxy   *self,
     soup_auth_authenticate (soup_auth, priv->username, priv->password);
   g_object_unref (G_OBJECT (rest_auth));
 }
+#endif
 
 static void
 rest_proxy_constructed (GObject *object)
@@ -238,14 +251,20 @@ rest_proxy_constructed (GObject *object)
   }
 
   if (REST_DEBUG_ENABLED(PROXY)) {
+#ifdef WITH_SOUP_2
     SoupSessionFeature *logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_BODY, 0);
+#else
+    SoupSessionFeature *logger = (SoupSessionFeature*)soup_logger_new (SOUP_LOGGER_LOG_HEADERS);
+#endif
     soup_session_add_feature (priv->session, logger);
     g_object_unref (logger);
   }
 
+#ifdef WITH_SOUP_2
   /* session lifetime is same as self, no need to keep signalid */
   g_signal_connect_swapped (priv->session, "authenticate",
                             G_CALLBACK(authenticate), object);
+#endif
 }
 
 static void
@@ -391,23 +410,62 @@ rest_proxy_class_init (RestProxyClass *klass)
   proxy_class->authenticate = default_authenticate_cb;
 }
 
+static gboolean
+transform_ssl_ca_file_to_tls_database (GBinding     *binding,
+                                       const GValue *from_value,
+                                       GValue       *to_value,
+                                       gpointer      user_data)
+{
+  g_value_take_object (to_value,
+                       g_tls_file_database_new (g_value_get_string (from_value), NULL));
+  return TRUE;
+}
+
+static gboolean
+transform_tls_database_to_ssl_ca_file (GBinding     *binding,
+                                       const GValue *from_value,
+                                       GValue       *to_value,
+                                       gpointer      user_data)
+{
+  GTlsDatabase *tls_database;
+  char *path = NULL;
+
+  tls_database = g_value_get_object (from_value);
+  if (tls_database)
+    g_object_get (tls_database, "anchors", &path, NULL);
+  g_value_take_string (to_value, path);
+  return TRUE;
+}
+
 static void
 rest_proxy_init (RestProxy *self)
 {
   RestProxyPrivate *priv = GET_PRIVATE (self);
+  GTlsDatabase *tls_database;
+
+#ifndef WITH_SOUP_2
+  priv->ssl_strict = TRUE;
+#endif
 
   priv->session = soup_session_new ();
 
 #ifdef REST_SYSTEM_CA_FILE
   /* with ssl-strict (defaults TRUE) setting ssl-ca-file forces all
    * certificates to be trusted */
-  g_object_set (priv->session,
-                "ssl-ca-file", REST_SYSTEM_CA_FILE,
-                NULL);
+  tls_database = g_tls_file_database_new (REST_SYSTEM_CA_FILE, NULL);
+  if (tls_database) {
+          g_object_set (priv->session,
+                        "tls-database", tls_database,
+                        NULL);
+          g_object_unref (tls_database);
+  }
 #endif
-  g_object_bind_property (self, "ssl-ca-file",
-                          priv->session, "ssl-ca-file",
-                          G_BINDING_BIDIRECTIONAL);
+  g_object_bind_property_full (self, "ssl-ca-file",
+                               priv->session, "tls-database",
+                               G_BINDING_BIDIRECTIONAL,
+                               transform_ssl_ca_file_to_tls_database,
+                               transform_tls_database_to_ssl_ca_file,
+                               NULL, NULL);
 }
 
 /**
@@ -689,27 +747,127 @@ rest_proxy_simple_run (RestProxy *proxy,
   return ret;
 }
 
+typedef struct {
+  RestMessageFinishedCallback callback;
+  gpointer user_data;
+} RestMessageQueueData;
+
+#ifdef WITH_SOUP_2
+static void
+message_finished_cb (SoupSession *session,
+                     SoupMessage *message,
+                     gpointer     user_data)
+{
+  RestMessageQueueData *data = user_data;
+  GBytes *body;
+  GError *error = NULL;
+
+  body = g_bytes_new (message->response_body->data,
+                      message->response_body->length + 1);
+  data->callback (message, body, error, data->user_data);
+  g_free (data);
+}
+#else
+static void
+message_send_and_read_ready_cb (GObject      *source,
+                                GAsyncResult *result,
+                                gpointer      user_data)
+{
+  SoupSession *session = SOUP_SESSION (source);
+  RestMessageQueueData *data = user_data;
+  GBytes *body;
+  GError *error = NULL;
+
+  body = soup_session_send_and_read_finish (session, result, &error);
+  data->callback (soup_session_get_async_result_message (session, result), body, error, data->user_data);
+  g_free (data);
+}
+#endif
+
 void
-_rest_proxy_queue_message (RestProxy   *proxy,
-                           SoupMessage *message,
-                           SoupSessionCallback callback,
-                           gpointer user_data)
+_rest_proxy_queue_message (RestProxy                  *proxy,
+                           SoupMessage                *message,
+                           GCancellable               *cancellable,
+                           RestMessageFinishedCallback callback,
+                           gpointer                    user_data)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestMessageQueueData *data;
 
   g_return_if_fail (REST_IS_PROXY (proxy));
   g_return_if_fail (SOUP_IS_MESSAGE (message));
 
+  data = g_new0 (RestMessageQueueData, 1);
+  data->callback = callback;
+  data->user_data = user_data;
+
+#ifdef WITH_SOUP_2
   soup_session_queue_message (priv->session,
                               message,
-                              callback,
-                              user_data);
+                              message_finished_cb,
+                              data);
+#else
+  soup_session_send_and_read_async (priv->session,
+                                    message,
+                                    G_PRIORITY_DEFAULT,
+                                    cancellable,
+                                    message_send_and_read_ready_cb,
+                                    data);
+#endif
+}
+
+static void
+message_send_ready_cb (GObject      *source,
+                       GAsyncResult *result,
+                       gpointer      user_data)
+{
+  SoupSession *session = SOUP_SESSION (source);
+  GTask *task = user_data;
+  GInputStream *stream;
+  GError *error = NULL;
+
+  stream = soup_session_send_finish (session, result, &error);
+  if (stream)
+    g_task_return_pointer (task, stream, g_object_unref);
+  else
+    g_task_return_error (task, error);
+  g_object_unref (task);
+}
+
+void
+_rest_proxy_send_message_async (RestProxy          *proxy,
+                                SoupMessage        *message,
+                                GCancellable       *cancellable,
+                                GAsyncReadyCallback callback,
+                                gpointer            user_data)
+{
+  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  GTask *task;
+
+  task = g_task_new (proxy, cancellable, callback, user_data);
+  soup_session_send_async (priv->session,
+                           message,
+#ifndef WITH_SOUP_2
+                           G_PRIORITY_DEFAULT,
+#endif
+                           cancellable,
+                           message_send_ready_cb,
+                           task);
+}
+
+GInputStream *
+_rest_proxy_send_message_finish (RestProxy    *proxy,
+                                 GAsyncResult *result,
+                                 GError      **error)
+{
+  return g_task_propagate_pointer (G_TASK (result), error);
 }
 
 void
 _rest_proxy_cancel_message (RestProxy   *proxy,
                             SoupMessage *message)
 {
+#ifdef WITH_SOUP_2
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
 
   g_return_if_fail (REST_IS_PROXY (proxy));
@@ -718,16 +876,31 @@ _rest_proxy_cancel_message (RestProxy   *proxy,
   soup_session_cancel_message (priv->session,
                                message,
                                SOUP_STATUS_CANCELLED);
+#endif
 }
 
-guint
-_rest_proxy_send_message (RestProxy   *proxy,
-                          SoupMessage *message)
+GBytes *
+_rest_proxy_send_message (RestProxy    *proxy,
+                          SoupMessage  *message,
+                          GCancellable *cancellable,
+                          GError      **error)
 {
   RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  GBytes *body;
 
-  g_return_val_if_fail (REST_IS_PROXY (proxy), 0);
-  g_return_val_if_fail (SOUP_IS_MESSAGE (message), 0);
+  g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
+  g_return_val_if_fail (SOUP_IS_MESSAGE (message), NULL);
 
-  return soup_session_send_message (priv->session, message);
+#ifdef WITH_SOUP_2
+  soup_session_send_message (priv->session, message);
+  body = g_bytes_new (message->response_body->data,
+                      message->response_body->length + 1);
+#else
+  body = soup_session_send_and_read (priv->session,
+                                     message,
+                                     cancellable,
+                                     error);
+#endif
+
+  return body;
 }
