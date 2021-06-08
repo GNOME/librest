@@ -39,9 +39,15 @@ static SoupServer *server;
 static gboolean
 send_chunks (gpointer user_data)
 {
-  SoupMessage *msg = SOUP_MESSAGE (user_data);
   guint i;
   guint8 data[SIZE_CHUNK];
+#ifdef WITH_SOUP_2
+  SoupMessage *msg = SOUP_MESSAGE (user_data);
+  SoupMessageBody *response_body = msg->response_body;
+#else
+  SoupServerMessage *msg = SOUP_SERVER_MESSAGE (user_data);
+  SoupMessageBody *response_body = soup_server_message_get_response_body (msg);
+#endif
 
   for (i = 0; i < SIZE_CHUNK; i++)
   {
@@ -49,12 +55,12 @@ send_chunks (gpointer user_data)
     server_count++;
   }
 
-  soup_message_body_append (msg->response_body, SOUP_MEMORY_COPY, data, SIZE_CHUNK);
+  soup_message_body_append (response_body, SOUP_MEMORY_COPY, data, SIZE_CHUNK);
   soup_server_unpause_message (server, msg);
 
   if (server_count == NUM_CHUNKS * SIZE_CHUNK)
   {
-    soup_message_body_complete (msg->response_body);
+    soup_message_body_complete (response_body);
     return FALSE;
   } else {
     return TRUE;
@@ -62,13 +68,28 @@ send_chunks (gpointer user_data)
 }
 
 static void
+#ifdef WITH_SOUP_2
 server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
+#else
+server_callback (SoupServer *server, SoupServerMessage *msg,
+                 const char *path, GHashTable *query, gpointer user_data)
+#endif
 {
+#ifdef WITH_SOUP_2
+  SoupMessageHeaders *response_headers = msg->response_headers;
+#else
+  SoupMessageHeaders *response_headers = soup_server_message_get_response_headers (msg);
+#endif
+
   g_assert_cmpstr (path, ==, "/stream");
+#ifdef WITH_SOUP_2
   soup_message_set_status (msg, SOUP_STATUS_OK);
-  soup_message_headers_set_encoding (msg->response_headers,
+#else
+  soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
+  soup_message_headers_set_encoding (response_headers,
                                      SOUP_ENCODING_CHUNKED);
   soup_server_pause_message (server, msg);
 
@@ -142,13 +163,21 @@ continuous ()
   uris = soup_server_get_uris (server);
   g_assert (g_slist_length (uris) > 0);
 
+#ifdef WITH_SOUP_2
   url = soup_uri_to_string (uris->data, FALSE);
+#else
+  url = g_uri_to_string (uris->data);
+#endif
 
   loop = g_main_loop_new (NULL, FALSE);
 
   proxy = rest_proxy_new (url, FALSE);
   stream_test (proxy);
+#ifdef WITH_SOUP_2
   g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
+#else
+  g_slist_free_full (uris, (GDestroyNotify)g_uri_unref);
+#endif
 
   g_main_loop_run (loop);
   g_free (url);
