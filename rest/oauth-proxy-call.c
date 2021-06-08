@@ -30,7 +30,7 @@
 
 G_DEFINE_TYPE (OAuthProxyCall, oauth_proxy_call, REST_TYPE_PROXY_CALL)
 
-#define OAUTH_ENCODE_STRING(x_) (x_ ? soup_uri_encode( (x_), "!$&'()*+,;=@") : g_strdup (""))
+#define OAUTH_ENCODE_STRING(x_) (x_ ? g_uri_escape_string( (x_), NULL, TRUE) : g_strdup (""))
 
 static char *
 sign_plaintext (OAuthProxyPrivate *priv)
@@ -136,15 +136,24 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   if (priv->oauth_echo) {
     g_string_append_uri_escaped (text, priv->service_url, NULL, FALSE);
   } else if (priv->signature_host != NULL) {
-    SoupURI *url = soup_uri_new (url_str);
+    GUri *url = g_uri_parse (url_str, G_URI_FLAGS_ENCODED, NULL);
+    GUri *new_url;
     gchar *signing_url;
 
-    soup_uri_set_host (url, priv->signature_host);
-    signing_url = soup_uri_to_string (url, FALSE);
+    new_url = g_uri_build (g_uri_get_flags (url),
+                           g_uri_get_scheme (url),
+                           g_uri_get_userinfo (url),
+                           priv->signature_host,
+                           g_uri_get_port (url),
+                           g_uri_get_path (url),
+                           g_uri_get_query (url),
+                           g_uri_get_fragment (url));
+    signing_url = g_uri_to_string (new_url);
 
     g_string_append_uri_escaped (text, signing_url, NULL, FALSE);
 
-    soup_uri_free (url);
+    g_uri_unref (new_url);
+    g_uri_unref (url);
     g_free (signing_url);
   } else {
     g_string_append_uri_escaped (text, url_str, NULL, FALSE);

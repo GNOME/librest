@@ -37,8 +37,6 @@ oauth2_proxy_error_quark (void)
     return g_quark_from_static_string ("rest-oauth2-proxy");
 }
 
-#define EXTRA_CHARS_ENCODE "!$&'()*+,;=@"
-
 enum {
   PROP_0,
   PROP_CLIENT_ID,
@@ -242,8 +240,8 @@ append_query_param (gpointer key, gpointer value, gpointer user_data)
     char *encoded_val, *encoded_key;
     char *param;
 
-    encoded_val = soup_uri_encode (value, EXTRA_CHARS_ENCODE);
-    encoded_key = soup_uri_encode (key, EXTRA_CHARS_ENCODE);
+    encoded_val = g_uri_escape_string (value, NULL, TRUE);
+    encoded_key = g_uri_escape_string (key, NULL, TRUE);
 
     param = g_strdup_printf ("%s=%s", encoded_key, encoded_val);
     g_free (encoded_key);
@@ -295,8 +293,8 @@ oauth2_proxy_build_login_url_full (OAuth2Proxy *proxy,
         g_hash_table_foreach (extra_params, append_query_param, params);
     }
 
-    encoded_uri = soup_uri_encode (redirect_uri, EXTRA_CHARS_ENCODE);
-    encoded_id = soup_uri_encode (proxy->priv->client_id, EXTRA_CHARS_ENCODE);
+    encoded_uri = g_uri_escape_string (redirect_uri, NULL, TRUE);
+    encoded_id = g_uri_escape_string (proxy->priv->client_id, NULL, TRUE);
 
     url = g_strdup_printf ("%s?client_id=%s&redirect_uri=%s&type=user_agent",
                            proxy->priv->auth_endpoint, encoded_id,
@@ -378,20 +376,22 @@ oauth2_proxy_extract_access_token (const char *url)
 {
   GHashTable *params;
   char *token = NULL;
-  SoupURI *soupuri = soup_uri_new (url);
+  const char *fragment;
+  GUri *uri = g_uri_parse (url, G_URI_FLAGS_ENCODED, NULL);
 
-  if (soupuri->fragment != NULL) {
-    params = soup_form_decode (soupuri->fragment);
+  fragment = g_uri_get_fragment (uri);
+  if (fragment != NULL) {
+    params = soup_form_decode (fragment);
 
     if (params) {
       char *encoded = g_hash_table_lookup (params, "access_token");
       if (encoded)
-        token = soup_uri_decode (encoded);
+        token = g_uri_unescape_string (encoded, NULL);
 
       g_hash_table_destroy (params);
     }
   }
-  soup_uri_free (soupuri);
+  g_uri_unref (uri);
 
   return token;
 }
