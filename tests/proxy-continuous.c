@@ -88,7 +88,7 @@ _call_continuous_cb (RestProxyCall *call,
   g_assert_no_error (error);
   g_assert (REST_IS_PROXY (weak_object));
 
-  if (buf == NULL && len == 0)
+  if (buf == NULL || len == 0)
     g_assert (client_count == NUM_CHUNKS * SIZE_CHUNK);
 
   for (i = 0; i < len; i++)
