@@ -3,8 +3,6 @@ test_suites = {
     'proxy',
     'proxy-continuous',
     'threaded',
-    'oauth',
-    'oauth-async',
     'oauth2',
     'xml',
     'custom-serialize',
