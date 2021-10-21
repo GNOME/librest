@@ -1,0 +1,25 @@
+option('ca_certificates',
+  type: 'boolean',
+  value: false,
+  description: 'Whether to use a pre-specified Certificate Authority list (see the ca_certificates_path option)',
+)
+option('ca_certificates_path',
+  type: 'string',
+  value: '',
+  description: 'List of paths to the system Certificate Authority list. If empty, a default set of paths will be tried.',
+)
+option('introspection',
+  type: 'boolean',
+  value: true,
+  description: 'Generate GObject Introspection (.gir) files',
+)
+option('examples',
+  type: 'boolean',
+  value: true,
+  description: 'Build the examples',
+)
+option('gtk_doc',
+  type: 'boolean',
+  value: false,
+  description: 'Build the gtk-doc reference docs',
+)
