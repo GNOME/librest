@@ -14,6 +14,9 @@ librest_pkg_string = 'rest-@0@'.format(librest_api_version)
 gnome = import('gnome')
 pkgconfig = import('pkgconfig')
 
+# Paths
+rest_datadir = join_paths(get_option('prefix'), get_option('datadir'))
+
 # CA certificates
 if get_option('ca_certificates')
   ca_certificates_path = get_option('ca_certificates_path')
