@@ -80,7 +80,7 @@ if get_option('introspection')
     sources: [ librest_headers, librest_enums[1] ],
     namespace: 'Rest',
     nsversion: librest_api_version,
-    includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-2.4' ],
+    includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version) ],
     extra_args: librest_gir_extra_args,
     install: true,
   )

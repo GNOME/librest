@@ -365,12 +365,11 @@ test_status_ok (RestProxy *proxy, const char *function)
 static void *
 server_thread_func (gpointer data)
 {
-  GSocketAddress *address = g_inet_socket_address_new_from_string ("127.0.0.1", 8080);
   server_loop = g_main_loop_new (NULL, TRUE);
   /*SoupServer *server = soup_server_new (NULL);*/
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
 
-  soup_server_listen (server, address, 0, NULL);
+  soup_server_listen_local (server, PORT, 0, NULL);
   g_main_loop_run (server_loop);
 
   return NULL;
