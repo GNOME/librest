@@ -20,12 +20,6 @@ AM_INIT_AUTOMAKE([1.11 foreign -Wno-portability no-define dist-xz])
 
 AM_SILENT_RULES([yes])
 
-API_MAJOR=1
-API_MINOR=0
-AC_SUBST([API_VERSION],[$API_MAJOR.$API_MINOR])
-AC_SUBST([API_VERSION_AM],[$API_MAJOR\_$API_MINOR])
-AC_DEFINE_UNQUOTED(API_VERSION, [$API_VERSION], [API version])
-
 AC_CANONICAL_HOST
 
 AC_PROG_CC
@@ -40,8 +34,7 @@ AM_PROG_CC_C_O
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
-PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.44)
-PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= 2.42)
+PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.67.4)
 PKG_CHECK_MODULES(XML, libxml-2.0)
 PKG_CHECK_MODULES(GTHREAD, gthread-2.0)
 
@@ -57,6 +50,37 @@ AC_PATH_PROG([GLIB_MKENUMS],[glib-mkenums])
 
 localedir=${datadir}/locale
 AC_SUBST(localedir)
+
+AC_MSG_CHECKING([for libsoup version to use])
+AC_ARG_WITH(soup,
+            [AC_HELP_STRING([--soup=2|3],
+                            [version of libsoup library to use (default: 2)])],
+            [case "$withval" in
+                2|3) ;;
+                *) AC_MSG_ERROR([invalid argument "$withval" for --with-soup]) ;;
+             esac],
+            [with_soup=2])
+AC_MSG_RESULT([$with_soup])
+
+API_MAJOR=1
+
+if test "$with_soup" = "2"; then
+    PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= 2.42)
+    SOUP_API_VERSION=2.4
+    API_MINOR=0
+    AC_DEFINE([WITH_SOUP_2],[1],[Define if libsoup version used is 2])
+else
+    PKG_CHECK_MODULES(SOUP, libsoup-3.0 >= 2.99.8)
+    SOUP_API_VERSION=3.0
+    API_MINOR=1
+fi
+
+AM_CONDITIONAL([WITH_SOUP_2],[test "$with_soup" = "2"])
+AC_SUBST(SOUP_API_VERSION)
+
+AC_SUBST([API_VERSION],[$API_MAJOR.$API_MINOR])
+AC_SUBST([API_VERSION_AM],[$API_MAJOR\_$API_MINOR])
+AC_DEFINE_UNQUOTED(API_VERSION, [$API_VERSION], [API version])
 
 dnl === Coverage report =======================================================
 AC_PATH_PROG([GCOV], [lcov], [enable_gcov=no])
@@ -130,6 +154,7 @@ echo "                 LibRest $VERSION"
 echo "                 ================"
 echo ""
 echo "                   prefix:   ${prefix}"
+echo "          libsoup version:   ${with_soup}"
 echo ""
 echo "            Documentation:   ${enable_gtk_doc}"
 echo "       Introspection data:   ${enable_introspection}"

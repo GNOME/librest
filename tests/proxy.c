@@ -49,20 +49,35 @@ SoupServer *server;
 GMainLoop *server_loop;
 
 static void
+#ifdef WITH_SOUP_2
 server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
+#else
+server_callback (SoupServer *server, SoupServerMessage *msg,
+                 const char *path, GHashTable *query, gpointer user_data)
+#endif
 {
   if (g_str_equal (path, "/ping")) {
+#ifdef WITH_SOUP_2
     soup_message_set_status (msg, SOUP_STATUS_OK);
+#else
+    soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
   }
   else if (g_str_equal (path, "/echo")) {
     const char *value;
 
     value = g_hash_table_lookup (query, "value");
+#ifdef WITH_SOUP_2
     soup_message_set_response (msg, "text/plain", SOUP_MEMORY_COPY,
                                value, strlen (value));
     soup_message_set_status (msg, SOUP_STATUS_OK);
+#else
+    soup_server_message_set_response (msg, "text/plain", SOUP_MEMORY_COPY,
+                                      value, strlen (value));
+    soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
   }
   else if (g_str_equal (path, "/reverse")) {
     char *value;
@@ -70,9 +85,15 @@ server_callback (SoupServer *server, SoupMessage *msg,
     value = g_strdup (g_hash_table_lookup (query, "value"));
     g_strreverse (value);
 
+#ifdef WITH_SOUP_2
     soup_message_set_response (msg, "text/plain", SOUP_MEMORY_TAKE,
                                value, strlen (value));
     soup_message_set_status (msg, SOUP_STATUS_OK);
+#else
+    soup_server_message_set_response (msg, "text/plain", SOUP_MEMORY_TAKE,
+                                       value, strlen (value));
+    soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
   }
   else if (g_str_equal (path, "/status")) {
     const char *value;
@@ -81,25 +102,61 @@ server_callback (SoupServer *server, SoupMessage *msg,
     value = g_hash_table_lookup (query, "status");
     if (value) {
       status = atoi (value);
+#ifdef WITH_SOUP_2
       soup_message_set_status (msg, status ?: SOUP_STATUS_INTERNAL_SERVER_ERROR);
+#else
+      soup_server_message_set_status (msg, status ?: SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL);
+#endif
     } else {
+#ifdef WITH_SOUP_2
       soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+#else
+      soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL);
+#endif
     }
   }
   else if (g_str_equal (path, "/useragent/none")) {
-    if (soup_message_headers_get (msg->request_headers, "User-Agent") == NULL) {
+#ifdef WITH_SOUP_2
+    SoupMessageHeaders *request_headers = msg->request_headers;
+#else
+    SoupMessageHeaders *request_headers = soup_server_message_get_request_headers (msg);
+#endif
+
+    if (soup_message_headers_get (request_headers, "User-Agent") == NULL) {
+#ifdef WITH_SOUP_2
       soup_message_set_status (msg, SOUP_STATUS_OK);
+#else
+      soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
     } else {
+#ifdef WITH_SOUP_2
       soup_message_set_status (msg, SOUP_STATUS_EXPECTATION_FAILED);
+#else
+      soup_server_message_set_status (msg, SOUP_STATUS_EXPECTATION_FAILED, NULL);
+#endif
     }
   }
   else if (g_str_equal (path, "/useragent/testsuite")) {
+#ifdef WITH_SOUP_2
+    SoupMessageHeaders *request_headers = msg->request_headers;
+#else
+    SoupMessageHeaders *request_headers = soup_server_message_get_request_headers (msg);
+#endif
     const char *value;
-    value = soup_message_headers_get (msg->request_headers, "User-Agent");
+    value = soup_message_headers_get (request_headers, "User-Agent");
     if (g_strcmp0 (value, "TestSuite-1.0") == 0) {
+#ifdef WITH_SOUP_2
       soup_message_set_status (msg, SOUP_STATUS_OK);
+#else
+      soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
     } else {
+#ifdef WITH_SOUP_2
       soup_message_set_status (msg, SOUP_STATUS_EXPECTATION_FAILED);
+#else
+      soup_server_message_set_status (msg, SOUP_STATUS_EXPECTATION_FAILED, NULL);
+#endif
+
     }
   }
 }
@@ -308,12 +365,11 @@ test_status_ok (RestProxy *proxy, const char *function)
 static void *
 server_thread_func (gpointer data)
 {
-  GSocketAddress *address = g_inet_socket_address_new_from_string ("127.0.0.1", 8080);
   server_loop = g_main_loop_new (NULL, TRUE);
   /*SoupServer *server = soup_server_new (NULL);*/
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
 
-  soup_server_listen (server, address, 0, NULL);
+  soup_server_listen_local (server, PORT, 0, NULL);
   g_main_loop_run (server_loop);
 
   return NULL;
@@ -325,7 +381,7 @@ main (int argc, char **argv)
   char *url;
   RestProxy *proxy;
 
-  server = soup_server_new ("", NULL);
+  server = soup_server_new (NULL);
   g_thread_new ("Server Thread", server_thread_func, NULL);
 
   url = g_strdup_printf ("http://127.0.0.1:%d/", PORT);

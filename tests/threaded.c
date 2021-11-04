@@ -36,13 +36,22 @@ GMainLoop *main_loop;
 SoupServer *server;
 
 static void
+#ifdef WITH_SOUP_2
 server_callback (SoupServer *server, SoupMessage *msg,
                  const char *path, GHashTable *query,
                  SoupClientContext *client, gpointer user_data)
+#else
+server_callback (SoupServer *server, SoupServerMessage *msg,
+                 const char *path, GHashTable *query, gpointer user_data)
+#endif
 {
   g_assert_cmpstr (path, ==, "/ping");
 
+#ifdef WITH_SOUP_2
   soup_message_set_status (msg, SOUP_STATUS_OK);
+#else
+  soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+#endif
   g_atomic_int_add (&threads_done, 1);
 
   if (threads_done == N_THREADS) {
@@ -96,7 +105,11 @@ static void ping ()
   uris = soup_server_get_uris (server);
   g_assert (g_slist_length (uris) > 0);
 
+#ifdef WITH_SOUP_2
   url = soup_uri_to_string (uris->data, FALSE);
+#else
+  url = g_uri_to_string (uris->data);
+#endif
 
   main_loop = g_main_loop_new (NULL, TRUE);
 
@@ -109,7 +122,11 @@ static void ping ()
   g_main_loop_run (main_loop);
 
   g_free (url);
+#ifdef WITH_SOUP_2
   g_slist_free_full (uris, (GDestroyNotify)soup_uri_free);
+#else
+  g_slist_free_full (uris, (GDestroyNotify)g_uri_unref);
+#endif
   g_object_unref (server);
   g_main_loop_unref (main_loop);
 }
