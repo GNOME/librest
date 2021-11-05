@@ -1491,11 +1491,7 @@ rest_proxy_call_get_payload_length (RestProxyCall *call)
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), 0);
 
   payload = GET_PRIVATE (call)->payload;
-#ifdef WITH_SOUP_2
-  return payload ? g_bytes_get_size (payload) - 1 : 0;
-#else
   return payload ? g_bytes_get_size (payload) : 0;
-#endif
 }
 
 /**

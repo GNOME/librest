@@ -45,7 +45,7 @@ librest_extras_dep = declare_dependency(
   link_with: librest_extras_lib,
 )
 
-if get_option('introspection')
+if get_option('introspection').enabled()
   librest_extras_gir = gnome.generate_gir(librest_extras_lib,
     sources: librest_extras_sources + librest_extras_headers,
     namespace: 'RestExtras',

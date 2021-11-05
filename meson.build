@@ -1,7 +1,7 @@
 project('rest', 'c',
   version: '0.9.0',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.49',
+  meson_version: '>= 0.53',
 )
 
 # Versioning
@@ -73,11 +73,13 @@ config_h_inc = include_directories('.')
 # Subdirectories
 subdir('rest')
 subdir('rest-extras')
-subdir('tests')
+if get_option('tests')
+  subdir('tests')
+endif
 if get_option('examples')
   subdir('examples')
 endif
-if get_option('gtk_doc')
+if get_option('gtk_doc').enabled()
   subdir('docs')
 endif
 
@@ -102,4 +104,21 @@ pkgconfig.generate(librest_extras_lib,
   variables: [
     'apiversion=@0@'.format(librest_api_version),
   ],
+)
+
+summary({
+    'prefix': get_option('prefix'),
+    'libdir': get_option('prefix') / get_option('libdir'),
+  },
+  section: 'Directories',
+)
+
+summary({
+    'Introspection': get_option('introspection').enabled() or get_option('introspection').auto(),
+    'Documentation': get_option('gtk_doc').enabled() or get_option('gtk_doc').auto(),
+    'Tests': get_option('tests'),
+    'Soup 2': get_option('soup2'),
+  },
+  section: 'Build',
+  bool_yn: true,
 )

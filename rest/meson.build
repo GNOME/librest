@@ -65,8 +65,10 @@ install_headers(librest_headers,
   subdir: librest_pkg_string / 'rest',
 )
 
+rest_dep_sources = []
+
 # GObject Introspection
-if get_option('introspection')
+if get_option('introspection').enabled()
   librest_gir_extra_args = [
     '--accept-unprefixed',
     '--c-include=rest/rest-enum-types.h',
@@ -84,10 +86,15 @@ if get_option('introspection')
     extra_args: librest_gir_extra_args,
     install: true,
   )
+
+  rest_dep_sources += librest_gir
 endif
 
 librest_dep = declare_dependency(
+  sources: rest_dep_sources,
   link_with: librest_lib,
+  include_directories: include_directories('..'),
+  dependencies: librest_deps,
 )
 
 # Test suite

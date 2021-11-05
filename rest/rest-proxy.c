@@ -763,7 +763,7 @@ message_finished_cb (SoupSession *session,
   GError *error = NULL;
 
   body = g_bytes_new (message->response_body->data,
-                      message->response_body->length + 1);
+                      message->response_body->length);
   data->callback (message, body, error, data->user_data);
   g_free (data);
 }
@@ -894,7 +894,7 @@ _rest_proxy_send_message (RestProxy    *proxy,
 #ifdef WITH_SOUP_2
   soup_session_send_message (priv->session, message);
   body = g_bytes_new (message->response_body->data,
-                      message->response_body->length + 1);
+                      message->response_body->length);
 #else
   body = soup_session_send_and_read (priv->session,
                                      message,
