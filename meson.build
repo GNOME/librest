@@ -57,6 +57,7 @@ endif
 glib_dep = dependency('glib-2.0', version: '>= 2.44')
 gobject_dep = dependency('gobject-2.0', version: '>= 2.44')
 libsoup_dep = dependency(libsoup_name, version: libsoup_req_version)
+libjson_glib_dep = dependency('json-glib-1.0')
 libxml_dep = dependency('libxml-2.0')
 
 # config.h

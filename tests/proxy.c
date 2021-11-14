@@ -50,15 +50,18 @@ GMainLoop *server_loop;
 
 #ifdef WITH_SOUP_2
 static void
-server_callback_soup (SoupServer        *server,
-                      SoupMessage       *msg,
-                      const gchar       *path,
-                      GHashTable        *query,
-                      SoupClientContext *client,
-                      gpointer           user_data)
+server_callback (SoupServer        *server,
+                 SoupMessage       *msg,
+                 const gchar       *path,
+                 GHashTable        *query,
+                 SoupClientContext *client,
+                 gpointer           user_data)
 {
-  if (g_str_equal (path, "/ping") && g_strcmp0 ("GET", soup_server_message_get_method (msg)) == 0) {
+  if (g_str_equal (path, "/ping") && g_strcmp0 ("GET", msg->method) == 0) {
     soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+  else if (g_str_equal (path, "/ping") && g_strcmp0 ("POST", msg->method) == 0) {
+    soup_message_set_status (msg, SOUP_STATUS_NOT_FOUND);
   }
   else if (g_str_equal (path, "/echo")) {
     const char *value;
@@ -119,6 +122,9 @@ server_callback (SoupServer        *server,
 {
   if (g_str_equal (path, "/ping") && g_strcmp0 ("GET", soup_server_message_get_method (msg)) == 0) {
     soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
+  }
+  else if (g_str_equal (path, "/ping") && g_strcmp0 ("POST", soup_server_message_get_method (msg)) == 0) {
+    soup_server_message_set_status (msg, SOUP_STATUS_NOT_FOUND, NULL);
   }
   else if (g_str_equal (path, "/echo")) {
     const char *value;
@@ -200,6 +206,21 @@ ping_test (RestProxy *proxy)
 
   if (rest_proxy_call_get_payload_length (call) != 0) {
     g_printerr ("wrong length returned\n");
+    errors++;
+    return;
+  }
+
+  g_object_unref (call);
+
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_function (call, "ping");
+  rest_proxy_call_set_method (call, "POST");
+
+  rest_proxy_call_sync (call, &error);
+  /* g_assert_nonnull(error); */
+
+  if (rest_proxy_call_get_status_code (call) != SOUP_STATUS_NOT_FOUND) {
+    g_printerr ("wrong response code\n");
     errors++;
     return;
   }
@@ -379,11 +400,7 @@ static void *
 server_thread_func (gpointer data)
 {
   server_loop = g_main_loop_new (NULL, TRUE);
-#ifdef WITH_SOUP_2
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-#else
-  soup_server_add_handler (server, NULL, server_callback, NULL, NULL);
-#endif
 
   soup_server_listen_local (server, PORT, 0, NULL);
   g_main_loop_run (server_loop);

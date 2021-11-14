@@ -19,9 +19,12 @@ librest_sources = [
   'rest-main.c',
   'oauth-proxy.c',
   'oauth-proxy-call.c',
-  'oauth2-proxy.c',
-  'oauth2-proxy-call.c',
   'sha1.c',
+
+  'rest-oauth2-proxy.c',
+  'rest-oauth2-proxy-call.c',
+  'rest-pkce-code-challenge.c',
+  'rest-utils.c',
 
   librest_enums,
   librest_marshal,
@@ -30,8 +33,6 @@ librest_sources = [
 librest_headers = [
   'oauth-proxy-call.h',
   'oauth-proxy.h',
-  'oauth2-proxy-call.h',
-  'oauth2-proxy.h',
   'rest-param.h',
   'rest-params.h',
   'rest-proxy-auth.h',
@@ -39,11 +40,18 @@ librest_headers = [
   'rest-proxy.h',
   'rest-xml-node.h',
   'rest-xml-parser.h',
+
+  'rest-oauth2-proxy.h',
+  'rest-oauth2-proxy-call.h',
+  'rest-pkce-code-challenge.h',
+  'rest-utils.h',
+  'rest.h',
 ]
 
 librest_deps = [
   glib_dep,
   libsoup_dep,
+  libjson_glib_dep,
   libxml_dep,
 ]
 
