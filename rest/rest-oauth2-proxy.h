@@ -39,13 +39,20 @@ struct _RestOAuth2ProxyClass
   gpointer padding[8];
 };
 
+enum {
+  REST_OAUTH2_PROXY_NO_REFRESH_TOKEN,
+};
+
+#define REST_OAUTH2_PROXY_ERROR rest_oauth2_proxy_error_quark ()
+GQuark rest_oauth2_proxy_error_quark ();
+
 RestOAuth2Proxy *rest_oauth2_proxy_new                         (const gchar          *authurl,
                                                                 const gchar          *tokenurl,
                                                                 const gchar          *redirecturl,
                                                                 const gchar          *client_id,
                                                                 const gchar          *client_secret,
                                                                 const gchar          *baseurl);
-const gchar     *rest_oauth2_proxy_build_authorization_url     (RestOAuth2Proxy      *self,
+gchar           *rest_oauth2_proxy_build_authorization_url     (RestOAuth2Proxy      *self,
                                                                 const gchar          *code_challenge,
                                                                 const gchar          *scope,
                                                                 gchar               **state);

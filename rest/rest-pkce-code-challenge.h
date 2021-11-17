@@ -26,6 +26,12 @@ G_BEGIN_DECLS
 
 #define REST_TYPE_PKCE_CODE_CHALLENGE (rest_pkce_code_challenge_get_type ())
 
+/**
+ * RestPkceCodeChallenge:
+ *
+ * In order to play a Pkce Code Verification during a OAuth2 authorization
+ * you need this structure which handles the algorithmic part.
+ */
 typedef struct _RestPkceCodeChallenge RestPkceCodeChallenge;
 
 GType                  rest_pkce_code_challenge_get_type      (void) G_GNUC_CONST;

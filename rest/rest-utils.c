@@ -20,6 +20,14 @@
 
 #include "rest-utils.h"
 
+/**
+ * random_string:
+ * @length: the length of the random string
+ *
+ * Creates a random string from a given alphabeth with length @length
+ *
+ * Returns: (transfer full): a random string
+ */
 gchar *
 random_string (guint length)
 {

@@ -96,12 +96,26 @@ rest_pkce_code_challenge_free (RestPkceCodeChallenge *self)
   g_slice_free (RestPkceCodeChallenge, self);
 }
 
+/**
+ * rest_pkce_code_challenge_get_challenge:
+ *
+ * Returns the Code Challenge for the Pkce verification.
+ *
+ * Returns: the code_challenge
+ */
 const gchar *
 rest_pkce_code_challenge_get_challenge (RestPkceCodeChallenge *self)
 {
   return self->code_challenge;
 }
 
+/**
+ * rest_pkce_code_challenge_get_verifier:
+ *
+ * Returns the Code Verifier for the Pkce verification.
+ *
+ * Returns: the code_verifier
+ */
 const gchar *
 rest_pkce_code_challenge_get_verifier (RestPkceCodeChallenge *self)
 {

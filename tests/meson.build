@@ -5,6 +5,7 @@ test_suites = {
     'threaded',
     'xml',
     'custom-serialize',
+    'oauth2',
   ],
   'rest-extras': [
     'flickr',
@@ -22,7 +23,7 @@ test_deps = [
 foreach suite, test_names : test_suites
   foreach name : test_names
     test_bin = executable(name,
-      '@0@.c'.format(name),
+      ['@0@.c'.format(name), 'helper/test-server.c'],
       dependencies: test_deps,
       include_directories: config_h_inc,
     )

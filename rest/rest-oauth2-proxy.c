@@ -40,6 +40,8 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (RestOAuth2Proxy, rest_oauth2_proxy, REST_TYPE_PROXY)
 
+G_DEFINE_QUARK (rest-oauth2-proxy-error-quark, rest_oauth2_proxy_error)
+
 enum {
   PROP_0,
   PROP_AUTH_URL,
@@ -342,7 +344,7 @@ rest_oauth2_proxy_init (RestOAuth2Proxy *self)
  *
  * Since: 0.8
  */
-const gchar *
+gchar *
 rest_oauth2_proxy_build_authorization_url (RestOAuth2Proxy  *self,
                                            const gchar      *code_challenge,
                                            const gchar      *scope,
@@ -356,13 +358,15 @@ rest_oauth2_proxy_build_authorization_url (RestOAuth2Proxy  *self,
 
   g_return_val_if_fail (REST_IS_OAUTH2_PROXY (self), NULL);
 
-  *state = random_string (10);
+  if (state != NULL)
+    *state = random_string (10);
   params = g_hash_table_new (g_str_hash, g_str_equal);
 
   g_hash_table_insert (params, "response_type", "code");
   g_hash_table_insert (params, "client_id", priv->client_id);
   g_hash_table_insert (params, "redirect_uri", priv->redirect_uri);
-  g_hash_table_insert (params, "state", *state);
+  if (state != NULL)
+    g_hash_table_insert (params, "state", *state);
   g_hash_table_insert (params, "code_challenge", (gchar *)code_challenge);
   g_hash_table_insert (params, "code_challenge_method", "S256");
   if (scope)
@@ -477,6 +481,15 @@ rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
   task = g_task_new (self, cancellable, callback, user_data);
 
   g_return_if_fail (REST_IS_OAUTH2_PROXY (self));
+
+  if (priv->refresh_token == NULL)
+    {
+      g_task_return_new_error (task,
+                               REST_OAUTH2_PROXY_ERROR,
+                               REST_OAUTH2_PROXY_NO_REFRESH_TOKEN,
+                               "No refresh token available");
+      return;
+    }
 
   params = g_hash_table_new (g_str_hash, g_str_equal);
 
