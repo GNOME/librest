@@ -328,7 +328,7 @@ flickr_proxy_build_login_url (FlickrProxy *proxy,
                      NULL,
                      "flickr.com",
                      -1,
-                     "services/auth/",
+                     "/services/auth/",
                      query,
                      NULL);
 
