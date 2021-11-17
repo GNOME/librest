@@ -138,7 +138,7 @@ test_refresh_access_token_finished_error (GObject      *object,
   g_assert (G_IS_ASYNC_RESULT (result));
 
   rest_oauth2_proxy_refresh_access_token_finish (REST_OAUTH2_PROXY (object), result, &error);
-  g_assert_error (error, REST_OAUTH2_PROXY_ERROR, REST_OAUTH2_PROXY_NO_REFRESH_TOKEN);
+  g_assert_error (error, REST_OAUTH2_ERROR, REST_OAUTH2_ERROR_NO_REFRESH_TOKEN);
 
   *finished = TRUE;
 }

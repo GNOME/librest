@@ -40,11 +40,12 @@ struct _RestOAuth2ProxyClass
 };
 
 enum {
-  REST_OAUTH2_PROXY_NO_REFRESH_TOKEN,
+  REST_OAUTH2_ERROR_NO_REFRESH_TOKEN,
+  REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED,
 };
 
-#define REST_OAUTH2_PROXY_ERROR rest_oauth2_proxy_error_quark ()
-GQuark rest_oauth2_proxy_error_quark ();
+#define REST_OAUTH2_ERROR rest_oauth2_error_quark ()
+GQuark rest_oauth2_error_quark ();
 
 RestOAuth2Proxy *rest_oauth2_proxy_new                         (const gchar          *authurl,
                                                                 const gchar          *tokenurl,

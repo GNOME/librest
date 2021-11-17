@@ -22,8 +22,6 @@
 
 G_DEFINE_TYPE (RestOAuth2ProxyCall, rest_oauth2_proxy_call, REST_TYPE_PROXY_CALL)
 
-G_DEFINE_QUARK (rest-oauth2-error-quark, rest_oauth2_error)
-
 static gboolean
 rest_oauth2_proxy_call_prepare (RestProxyCall  *call,
                                 GError        **error)
@@ -45,7 +43,7 @@ rest_oauth2_proxy_call_prepare (RestProxyCall  *call,
     {
       g_set_error (error,
                    REST_OAUTH2_ERROR,
-                   REST_OAUTH2_PROXY_ERROR_ACCESS_TOKEN_EXPIRED,
+                   REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED,
                    "Access token is expired");
       return FALSE;
     }

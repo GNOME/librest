@@ -40,7 +40,7 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (RestOAuth2Proxy, rest_oauth2_proxy, REST_TYPE_PROXY)
 
-G_DEFINE_QUARK (rest-oauth2-proxy-error-quark, rest_oauth2_proxy_error)
+G_DEFINE_QUARK (rest-oauth2-error-quark, rest_oauth2_error)
 
 enum {
   PROP_0,
@@ -485,8 +485,8 @@ rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
   if (priv->refresh_token == NULL)
     {
       g_task_return_new_error (task,
-                               REST_OAUTH2_PROXY_ERROR,
-                               REST_OAUTH2_PROXY_NO_REFRESH_TOKEN,
+                               REST_OAUTH2_ERROR,
+                               REST_OAUTH2_ERROR_NO_REFRESH_TOKEN,
                                "No refresh token available");
       return;
     }

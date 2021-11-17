@@ -32,10 +32,4 @@ struct _RestOAuth2ProxyCallClass {
   RestProxyCallClass parent_class;
 };
 
-enum {
-  REST_OAUTH2_PROXY_ERROR_ACCESS_TOKEN_EXPIRED,
-};
-
-#define REST_OAUTH2_ERROR rest_oauth2_error_quark ()
-
 G_END_DECLS
