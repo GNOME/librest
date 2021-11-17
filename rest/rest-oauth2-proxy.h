@@ -66,6 +66,7 @@ void             rest_oauth2_proxy_fetch_access_token_async    (RestOAuth2Proxy 
 gboolean         rest_oauth2_proxy_fetch_access_token_finish   (RestOAuth2Proxy      *self,
                                                                 GAsyncResult         *result,
                                                                 GError              **error);
+void             rest_oauth2_proxy_refresh_access_token        (RestOAuth2Proxy      *self);
 void             rest_oauth2_proxy_refresh_access_token_async  (RestOAuth2Proxy      *self,
                                                                 GCancellable         *cancellable,
                                                                 GAsyncReadyCallback   callback,

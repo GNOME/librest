@@ -392,10 +392,11 @@ rest_oauth2_proxy_fetch_access_token_cb (SoupMessage *msg,
                                          gpointer     user_data)
 {
   g_autoptr(GTask) task = user_data;
-  RestOAuth2Proxy *self = g_task_get_source_object (task);
+  RestOAuth2Proxy *self;
 
-  g_return_if_fail (G_IS_TASK (task));
-  g_return_if_fail (REST_IS_OAUTH2_PROXY (self));
+  g_assert (G_IS_TASK (task));
+
+  self = g_task_get_source_object (task);
 
   if (error)
     {
@@ -467,6 +468,70 @@ rest_oauth2_proxy_fetch_access_token_finish (RestOAuth2Proxy  *self,
 }
 
 void
+rest_oauth2_proxy_refresh_access_token (RestOAuth2Proxy *self)
+{
+  RestOAuth2ProxyPrivate *priv = rest_oauth2_proxy_get_instance_private (self);
+  g_autoptr(SoupMessage) msg = NULL;
+  g_autoptr(GHashTable) params = NULL;
+  g_autoptr(GTask) task = NULL;
+  g_autoptr(GError) error = NULL;
+  GBytes *payload;
+
+  task = g_task_new (self, NULL, NULL, NULL);
+
+  g_return_if_fail (REST_IS_OAUTH2_PROXY (self));
+
+  if (priv->refresh_token == NULL)
+    {
+      g_task_return_new_error (task,
+                               REST_OAUTH2_ERROR,
+                               REST_OAUTH2_ERROR_NO_REFRESH_TOKEN,
+                               "No refresh token available");
+      return;
+    }
+
+  params = g_hash_table_new (g_str_hash, g_str_equal);
+
+  g_hash_table_insert (params, "client_id", priv->client_id);
+  g_hash_table_insert (params, "refresh_token", priv->refresh_token);
+  g_hash_table_insert (params, "redirect_uri", priv->redirect_uri);
+  g_hash_table_insert (params, "grant_type", "refresh_token");
+
+#if WITH_SOUP_2
+  msg = soup_form_request_new_from_hash (SOUP_METHOD_POST, priv->tokenurl, params);
+#else
+  msg = soup_message_new_from_encoded_form (SOUP_METHOD_POST, priv->tokenurl, soup_form_encode_hash (params));
+#endif
+  payload = _rest_proxy_send_message (REST_PROXY (self), msg, NULL, &error);
+  if (error)
+    g_task_return_error (task, error);
+
+  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, g_steal_pointer (&task));
+}
+
+static void
+rest_oauth2_proxy_refresh_access_token_cb (SoupMessage *msg,
+                                           GBytes      *payload,
+                                           GError      *error,
+                                           gpointer     user_data)
+{
+  g_autoptr(GTask) task = user_data;
+  RestOAuth2Proxy *self;
+
+  g_assert (G_IS_TASK (task));
+
+  self = g_task_get_source_object (task);
+
+  if (error)
+    {
+      g_task_return_error (task, error);
+      return;
+    }
+
+  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, g_steal_pointer (&task));
+}
+
+void
 rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
                                               GCancellable        *cancellable,
                                               GAsyncReadyCallback  callback,
@@ -476,7 +541,6 @@ rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
   g_autoptr(SoupMessage) msg = NULL;
   g_autoptr(GHashTable) params = NULL;
   g_autoptr(GTask) task = NULL;
-  GBytes *payload;
 
   task = g_task_new (self, cancellable, callback, user_data);
 
@@ -503,9 +567,15 @@ rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
 #else
   msg = soup_message_new_from_encoded_form (SOUP_METHOD_POST, priv->tokenurl, soup_form_encode_hash (params));
 #endif
-  payload = _rest_proxy_send_message (REST_PROXY (self), msg, NULL, NULL);
-
-  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, g_steal_pointer (&task));
+  _rest_proxy_queue_message (REST_PROXY (self),
+#if WITH_SOUP_2
+                             g_steal_pointer (&msg),
+#else
+                             msg,
+#endif
+                             cancellable,
+                             rest_oauth2_proxy_refresh_access_token_cb,
+                             g_steal_pointer (&task));
 }
 
 /**

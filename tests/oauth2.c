@@ -164,7 +164,6 @@ static void
 test_refresh_access_token (gconstpointer url)
 {
   GMainContext *async_context = g_main_context_ref_thread_default ();
-  g_autoptr(GError) error = NULL;
 
   g_autofree gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
   g_autofree gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
@@ -185,12 +184,39 @@ test_refresh_access_token (gconstpointer url)
   rest_oauth2_proxy_set_refresh_token (REST_OAUTH2_PROXY (proxy), "refresh_token");
   rest_oauth2_proxy_refresh_access_token_async (REST_OAUTH2_PROXY (proxy), NULL, test_refresh_access_token_finished, &finished);
 
+  finished = FALSE;
+
   while (!finished) {
     g_main_context_iteration (async_context, TRUE);
   }
 
   g_assert_cmpstr ("2YotnFZFEjr1zCsicMWpAA", ==, rest_oauth2_proxy_get_access_token (REST_OAUTH2_PROXY (proxy)));
   g_assert_cmpstr ("tGzv3JOkF0XG5Qx2TlKWIA", ==, rest_oauth2_proxy_get_refresh_token (REST_OAUTH2_PROXY (proxy)));
+
+  g_main_context_unref (async_context);
+}
+
+static void
+test_access_token_expired (gconstpointer url)
+{
+  g_autofree gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
+  g_autofree gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
+  g_autoptr(GError) error = NULL;
+
+  g_autoptr(RestProxy) proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
+                                                                  tokenurl,
+                                                                  "http://www.example.com",
+                                                                  "client-id",
+                                                                  "client-secret",
+                                                                  baseurl));
+  GDateTime *now = g_date_time_new_now_local ();
+  rest_oauth2_proxy_set_expiration_date (REST_OAUTH2_PROXY (proxy), now);
+
+  g_autoptr(RestProxyCall) call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_method (call, "GET");
+  rest_proxy_call_set_function (call, "/expired");
+  rest_proxy_call_sync (call, &error);
+  g_assert_error (error, REST_OAUTH2_ERROR, REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED);
 }
 
 gint
@@ -210,6 +236,7 @@ main (gint   argc,
   g_test_add_data_func ("/oauth2/authorization_url", url, test_authorization_url);
   g_test_add_data_func ("/oauth2/fetch_access_token", url, test_fetch_access_token);
   g_test_add_data_func ("/oauth2/refresh_access_token", url, test_refresh_access_token);
+  g_test_add_data_func ("/oauth2/access_token_expired", url, test_access_token_expired);
 
   return g_test_run ();
 }
