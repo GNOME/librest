@@ -2,20 +2,18 @@
  *
  * Copyright 2021 Günther Wagner <info@gunibert.de>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 /**
@@ -128,7 +126,7 @@ main (gint   argc,
 #endif
 
   RestOAuth2Proxy *oauth2_proxy = rest_oauth2_proxy_new (authurl, tokenurl, redirecturl, clientid, clientsecret, baseurl);
-  rest_proxy_add_soup_feature (oauth2_proxy, logger);
+  rest_proxy_add_soup_feature (REST_PROXY (oauth2_proxy), SOUP_SESSION_FEATURE (logger));
   const gchar *authorize_url = rest_oauth2_proxy_build_authorization_url (oauth2_proxy, rest_pkce_code_challenge_get_challenge (pkce), NULL, &state);
 
   g_print ("URL to authorize: %s\n", authorize_url);

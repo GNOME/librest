@@ -2,20 +2,18 @@
  *
  * Copyright 2021 Günther Wagner <info@gunibert.de>
  *
- * This file is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
  *
- * This file is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * SPDX-License-Identifier: LGPL-3.0-or-later
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "rest-oauth2-proxy.h"
@@ -467,27 +465,26 @@ rest_oauth2_proxy_fetch_access_token_finish (RestOAuth2Proxy  *self,
   return g_task_propagate_boolean (G_TASK (result), error);
 }
 
-void
-rest_oauth2_proxy_refresh_access_token (RestOAuth2Proxy *self)
+gboolean
+rest_oauth2_proxy_refresh_access_token (RestOAuth2Proxy *self,
+                                        GError         **error)
 {
   RestOAuth2ProxyPrivate *priv = rest_oauth2_proxy_get_instance_private (self);
   g_autoptr(SoupMessage) msg = NULL;
   g_autoptr(GHashTable) params = NULL;
   g_autoptr(GTask) task = NULL;
-  g_autoptr(GError) error = NULL;
   GBytes *payload;
 
   task = g_task_new (self, NULL, NULL, NULL);
 
-  g_return_if_fail (REST_IS_OAUTH2_PROXY (self));
+  g_return_val_if_fail (REST_IS_OAUTH2_PROXY (self), FALSE);
 
   if (priv->refresh_token == NULL)
     {
-      g_task_return_new_error (task,
-                               REST_OAUTH2_ERROR,
-                               REST_OAUTH2_ERROR_NO_REFRESH_TOKEN,
-                               "No refresh token available");
-      return;
+      *error = g_error_new (REST_OAUTH2_ERROR,
+                            REST_OAUTH2_ERROR_NO_REFRESH_TOKEN,
+                            "No refresh token available");
+      return FALSE;
     }
 
   params = g_hash_table_new (g_str_hash, g_str_equal);
@@ -502,11 +499,14 @@ rest_oauth2_proxy_refresh_access_token (RestOAuth2Proxy *self)
 #else
   msg = soup_message_new_from_encoded_form (SOUP_METHOD_POST, priv->tokenurl, soup_form_encode_hash (params));
 #endif
-  payload = _rest_proxy_send_message (REST_PROXY (self), msg, NULL, &error);
-  if (error)
-    g_task_return_error (task, error);
+  payload = _rest_proxy_send_message (REST_PROXY (self), msg, NULL, error);
+  if (error && *error)
+    {
+      return FALSE;
+    }
 
   REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, g_steal_pointer (&task));
+  return TRUE;
 }
 
 static void

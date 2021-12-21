@@ -1,4 +1,5 @@
 Overview of changes for 0.9
 ===========================
+* new oauth2 proxy to accomplish pkce workflow with api endpoints
 * introduced meson as buildsystem
 * introduced the possibility to build librest with soup-2.4 or soup-3.0
