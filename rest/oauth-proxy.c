@@ -23,10 +23,32 @@
 #include <rest/rest-proxy.h>
 #include <libsoup/soup.h>
 #include "oauth-proxy.h"
-#include "oauth-proxy-private.h"
 #include "oauth-proxy-call.h"
 
-G_DEFINE_TYPE (OAuthProxy, oauth_proxy, REST_TYPE_PROXY)
+typedef struct {
+  /* Application "consumer" keys */
+  char *consumer_key;
+  char *consumer_secret;
+  /* Authorisation "user" tokens */
+  char *token;
+  char *token_secret;
+  /* How we're signing */
+  OAuthSignatureMethod method;
+  /* OAuth 1.0a */
+  gboolean oauth_10a;
+  char *verifier;
+  /* OAuth Echo */
+  gboolean oauth_echo;
+  char *service_url;
+  /* URL to use for signatures */
+  char *signature_host;
+} OAuthProxyPrivate;
+
+struct _OAuthProxy {
+  RestProxy parent_instance;
+};
+
+G_DEFINE_TYPE_WITH_PRIVATE (OAuthProxy, oauth_proxy, REST_TYPE_PROXY)
 
 enum {
   PROP_0,
@@ -54,7 +76,8 @@ static void
 oauth_proxy_get_property (GObject *object, guint property_id,
                               GValue *value, GParamSpec *pspec)
 {
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  OAuthProxy *self = OAUTH_PROXY (object);
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
 
   switch (property_id) {
   case PROP_CONSUMER_KEY:
@@ -84,7 +107,8 @@ static void
 oauth_proxy_set_property (GObject *object, guint property_id,
                               const GValue *value, GParamSpec *pspec)
 {
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  OAuthProxy *self = OAUTH_PROXY (object);
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
 
   switch (property_id) {
   case PROP_CONSUMER_KEY:
@@ -123,7 +147,8 @@ oauth_proxy_set_property (GObject *object, guint property_id,
 static void
 oauth_proxy_finalize (GObject *object)
 {
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (object);
+  OAuthProxy *self = OAUTH_PROXY (object);
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
 
   g_free (priv->consumer_key);
   g_free (priv->consumer_secret);
@@ -145,8 +170,6 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   RestProxyClass *proxy_class = REST_PROXY_CLASS (klass);
   GParamSpec *pspec;
-
-  g_type_class_add_private (klass, sizeof (OAuthProxyPrivate));
 
   object_class->get_property = oauth_proxy_get_property;
   object_class->set_property = oauth_proxy_set_property;
@@ -201,7 +224,8 @@ oauth_proxy_class_init (OAuthProxyClass *klass)
 static void
 oauth_proxy_init (OAuthProxy *self)
 {
-  PROXY_GET_PRIVATE (self)->method = HMAC_SHA1;
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
+  priv->method = HMAC_SHA1;
 }
 
 /**
@@ -534,6 +558,22 @@ oauth_proxy_access_token_finish (OAuthProxy *proxy,
   return g_task_propagate_boolean (G_TASK (result), error);
 }
 
+const char *
+oauth_proxy_get_consumer_key (OAuthProxy *self)
+{
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
+
+  return priv->consumer_key;
+}
+
+const char *
+oauth_proxy_get_consumer_secret (OAuthProxy *self)
+{
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
+
+  return priv->consumer_secret;
+}
+
 /**
  * oauth_proxy_get_token:
  * @proxy: an #OAuthProxy
@@ -546,7 +586,8 @@ oauth_proxy_access_token_finish (OAuthProxy *proxy,
 const char *
 oauth_proxy_get_token (OAuthProxy *proxy)
 {
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
+
   return priv->token;
 }
 
@@ -560,10 +601,9 @@ oauth_proxy_get_token (OAuthProxy *proxy)
 void
 oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
 {
-  OAuthProxyPrivate *priv;
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
 
   g_return_if_fail (OAUTH_IS_PROXY (proxy));
-  priv = PROXY_GET_PRIVATE (proxy);
 
   g_free (priv->token);
   priv->token = g_strdup (token);
@@ -581,7 +621,8 @@ oauth_proxy_set_token (OAuthProxy *proxy, const char *token)
 const char *
 oauth_proxy_get_token_secret (OAuthProxy *proxy)
 {
-  OAuthProxyPrivate *priv = PROXY_GET_PRIVATE (proxy);
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
+
   return priv->token_secret;
 }
 
@@ -595,10 +636,9 @@ oauth_proxy_get_token_secret (OAuthProxy *proxy)
 void
 oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
 {
-  OAuthProxyPrivate *priv;
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
 
   g_return_if_fail (OAUTH_IS_PROXY (proxy));
-  priv = PROXY_GET_PRIVATE (proxy);
 
   if (priv->token_secret)
     g_free (priv->token_secret);
@@ -619,9 +659,22 @@ oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret)
 gboolean
 oauth_proxy_is_oauth10a (OAuthProxy *proxy)
 {
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
+
   g_return_val_if_fail (OAUTH_IS_PROXY (proxy), FALSE);
 
-  return PROXY_GET_PRIVATE (proxy)->oauth_10a;
+  return priv->oauth_10a;
+}
+
+void
+oauth_proxy_set_oauth10a (OAuthProxy *self,
+                          gboolean    oauth10a)
+{
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
+
+  g_return_if_fail (OAUTH_IS_PROXY (self));
+
+  priv->oauth_10a = oauth10a;
 }
 
 /**
@@ -636,10 +689,9 @@ oauth_proxy_is_oauth10a (OAuthProxy *proxy)
 const char *
 oauth_proxy_get_signature_host (OAuthProxy *proxy)
 {
-  OAuthProxyPrivate *priv;
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
 
   g_return_val_if_fail (OAUTH_IS_PROXY (proxy), NULL);
-  priv = PROXY_GET_PRIVATE (proxy);
 
   return priv->signature_host;
 }
@@ -655,10 +707,9 @@ void
 oauth_proxy_set_signature_host (OAuthProxy *proxy,
                                 const char *signature_host)
 {
-  OAuthProxyPrivate *priv;
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
 
   g_return_if_fail (OAUTH_IS_PROXY (proxy));
-  priv = PROXY_GET_PRIVATE (proxy);
 
   g_free (priv->signature_host);
 
@@ -686,13 +737,12 @@ oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
                             gboolean     binding_required)
 {
   OAuthProxy *echo_proxy;
-  OAuthProxyPrivate *priv, *echo_priv;
+  OAuthProxyPrivate *echo_priv;
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (proxy);
 
   g_return_val_if_fail (OAUTH_IS_PROXY (proxy), NULL);
   g_return_val_if_fail (service_url, NULL);
   g_return_val_if_fail (url_format, NULL);
-
-  priv = PROXY_GET_PRIVATE (proxy);
 
   echo_proxy = g_object_new (OAUTH_TYPE_PROXY,
                              "url-format", url_format,
@@ -703,7 +753,7 @@ oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
                              "token", priv->token,
                              "token-secret", priv->token_secret,
                              NULL);
-  echo_priv = PROXY_GET_PRIVATE (echo_proxy);
+  echo_priv = oauth_proxy_get_instance_private (echo_proxy);
 
   echo_priv->oauth_echo = TRUE;
   echo_priv->service_url = g_strdup (service_url);
@@ -728,3 +778,26 @@ oauth_signature_method_get_type (void)
   return enum_type_id;
 }
 
+gboolean
+oauth_proxy_is_echo (OAuthProxy *self)
+{
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
+
+  return priv->oauth_echo;
+}
+
+const char *
+oauth_proxy_get_service_url (OAuthProxy *self)
+{
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
+
+  return priv->service_url;
+}
+
+OAuthSignatureMethod
+oauth_proxy_get_sign_method (OAuthProxy *self)
+{
+  OAuthProxyPrivate *priv = oauth_proxy_get_instance_private (self);
+
+  return priv->method;
+}
