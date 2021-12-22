@@ -24,7 +24,7 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy-call.h>
 #include "oauth-proxy-call.h"
-#include "oauth-proxy-private.h"
+#include "oauth-proxy.h"
 #include "rest-proxy-call-private.h"
 #include "sha1.h"
 
@@ -33,14 +33,14 @@ G_DEFINE_TYPE (OAuthProxyCall, oauth_proxy_call, REST_TYPE_PROXY_CALL)
 #define OAUTH_ENCODE_STRING(x_) (x_ ? g_uri_escape_string( (x_), NULL, TRUE) : g_strdup (""))
 
 static char *
-sign_plaintext (OAuthProxyPrivate *priv)
+sign_plaintext (OAuthProxy *proxy)
 {
   char *cs;
   char *ts;
   char *rv;
 
-  cs = OAUTH_ENCODE_STRING (priv->consumer_secret);
-  ts = OAUTH_ENCODE_STRING (priv->token_secret);
+  cs = OAUTH_ENCODE_STRING (oauth_proxy_get_consumer_secret (proxy));
+  ts = OAUTH_ENCODE_STRING (oauth_proxy_get_token_secret (proxy));
   rv = g_strconcat (cs, "&", ts, NULL);
 
   g_free (cs);
@@ -117,7 +117,6 @@ merge_params (GHashTable *hash, RestParams *params)
 static char *
 sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
 {
-  OAuthProxyPrivate *priv;
   const char *url_str;
   char *key, *signature, *ep, *eep;
   const char *content_type;
@@ -127,15 +126,14 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   RestParam *param;
   gboolean encode_query_params = TRUE;
 
-  priv = PROXY_GET_PRIVATE (proxy);
   url_str = rest_proxy_call_get_url (call);
 
   text = g_string_new (NULL);
   g_string_append (text, rest_proxy_call_get_method (call));
   g_string_append_c (text, '&');
-  if (priv->oauth_echo) {
-    g_string_append_uri_escaped (text, priv->service_url, NULL, FALSE);
-  } else if (priv->signature_host != NULL) {
+  if (oauth_proxy_is_echo (proxy))
+    g_string_append_uri_escaped (text, oauth_proxy_get_service_url (proxy), NULL, FALSE);
+  else if (oauth_proxy_get_signature_host (proxy) != NULL) {
     GUri *url = g_uri_parse (url_str, G_URI_FLAGS_ENCODED, NULL);
     GUri *new_url;
     gchar *signing_url;
@@ -143,7 +141,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
     new_url = g_uri_build (g_uri_get_flags (url),
                            g_uri_get_scheme (url),
                            g_uri_get_userinfo (url),
-                           priv->signature_host,
+                           oauth_proxy_get_signature_host (proxy),
                            g_uri_get_port (url),
                            g_uri_get_path (url),
                            g_uri_get_query (url),
@@ -178,7 +176,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   /* Merge the OAuth parameters with the query parameters */
   all_params = g_hash_table_new (g_str_hash, g_str_equal);
   merge_hashes (all_params, oauth_params);
-  if (encode_query_params && !priv->oauth_echo) {
+  if (encode_query_params && !oauth_proxy_is_echo (proxy)) {
       merge_params (all_params, rest_proxy_call_get_params (call));
   }
 
@@ -191,7 +189,7 @@ sign_hmac (OAuthProxy *proxy, RestProxyCall *call, GHashTable *oauth_params)
   g_hash_table_destroy (all_params);
 
   /* PLAINTEXT signature value is the HMAC-SHA1 key value */
-  key = sign_plaintext (priv);
+  key = sign_plaintext (proxy);
 
   signature = hmac_sha1 (key, text->str);
 
@@ -263,12 +261,10 @@ static gboolean
 _prepare (RestProxyCall *call, GError **error)
 {
   OAuthProxy *proxy = NULL;
-  OAuthProxyPrivate *priv;
   char *s;
   GHashTable *oauth_params;
 
   g_object_get (call, "proxy", &proxy, NULL);
-  priv = PROXY_GET_PRIVATE (proxy);
 
   /* We have to make this hash free the strings and thus duplicate when we put
    * them in since when we call call steal_oauth_params that has to duplicate
@@ -288,15 +284,15 @@ _prepare (RestProxyCall *call, GError **error)
   g_hash_table_insert (oauth_params, g_strdup ("oauth_nonce"), s);
 
   g_hash_table_insert (oauth_params, g_strdup ("oauth_consumer_key"),
-                       g_strdup (priv->consumer_key));
+                       g_strdup (oauth_proxy_get_consumer_key (proxy)));
 
-  if (priv->token)
-    g_hash_table_insert (oauth_params, g_strdup ("oauth_token"), g_strdup (priv->token));
+  if (oauth_proxy_get_token (proxy))
+    g_hash_table_insert (oauth_params, g_strdup ("oauth_token"), g_strdup (oauth_proxy_get_token (proxy)));
 
-  switch (priv->method) {
+  switch (oauth_proxy_get_sign_method (proxy)) {
   case PLAINTEXT:
     g_hash_table_insert (oauth_params, g_strdup ("oauth_signature_method"), g_strdup ("PLAINTEXT"));
-    s = sign_plaintext (priv);
+    s = sign_plaintext (proxy);
     break;
   case HMAC_SHA1:
     g_hash_table_insert (oauth_params, g_strdup ("oauth_signature_method"), g_strdup ("HMAC-SHA1"));
@@ -306,9 +302,9 @@ _prepare (RestProxyCall *call, GError **error)
   g_hash_table_insert (oauth_params, g_strdup ("oauth_signature"), s);
 
   s = make_authorized_header (oauth_params);
-  if (priv->oauth_echo) {
+  if (oauth_proxy_is_echo (proxy)) {
     rest_proxy_call_add_header (call, "X-Verify-Credentials-Authorization", s);
-    rest_proxy_call_add_param (call, "X-Auth-Service-Provider", priv->service_url);
+    rest_proxy_call_add_param (call, "X-Auth-Service-Provider", oauth_proxy_get_service_url (proxy));
   } else {
     rest_proxy_call_add_header (call, "Authorization", s);
   }
@@ -336,7 +332,6 @@ oauth_proxy_call_init (OAuthProxyCall *self)
 void
 oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
 {
-  OAuthProxyPrivate *priv;
   GHashTable *form;
   OAuthProxy *proxy;
   g_autofree gchar *formstr = NULL;
@@ -346,19 +341,15 @@ oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
   g_return_if_fail (OAUTH_IS_PROXY_CALL (call));
 
   g_object_get (call, "proxy", &proxy, NULL);
-  priv = PROXY_GET_PRIVATE (proxy);
   g_object_unref (proxy);
-  g_assert (priv);
 
   formstr = g_strndup (rest_proxy_call_get_payload (REST_PROXY_CALL (call)), rest_proxy_call_get_payload_length (REST_PROXY_CALL (call)));
   form = soup_form_decode (formstr);
 
-  g_free (priv->token);
-  g_free (priv->token_secret);
-  priv->token = g_strdup (g_hash_table_lookup (form, "oauth_token"));
-  priv->token_secret = g_strdup (g_hash_table_lookup (form, "oauth_token_secret"));
+  oauth_proxy_set_token (proxy, g_hash_table_lookup (form, "oauth_token"));
+  oauth_proxy_set_token_secret (proxy, g_hash_table_lookup (form, "oauth_token_secret"));
   /* This header should only exist for request_token replies, but its easier just to always check it */
-  priv->oauth_10a = g_hash_table_lookup (form, "oauth_callback_confirmed") != NULL;
+  oauth_proxy_set_oauth10a (proxy, g_hash_table_lookup (form, "oauth_callback_confirmed") != NULL);
 
   g_hash_table_destroy (form);
 }
