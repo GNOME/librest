@@ -20,8 +20,7 @@
  *
  */
 
-#ifndef _REST_XML_PARSER
-#define _REST_XML_PARSER
+#pragma once
 
 #include <glib-object.h>
 #include <rest/rest-xml-node.h>
@@ -31,15 +30,19 @@ G_BEGIN_DECLS
 #define REST_TYPE_XML_PARSER rest_xml_parser_get_type()
 G_DECLARE_DERIVABLE_TYPE (RestXmlParser, rest_xml_parser, REST, XML_PARSER, GObject)
 
+/**
+ * RestXmlParser:
+ *
+ * A Xml Parser for Rest Responses
+ */
+
 struct _RestXmlParserClass {
   GObjectClass parent_class;
 };
 
-RestXmlParser *rest_xml_parser_new (void);
-RestXmlNode *rest_xml_parser_parse_from_data (RestXmlParser *parser,
-                                              const gchar   *data,
-                                              goffset        len);
+RestXmlParser *rest_xml_parser_new             (void);
+RestXmlNode   *rest_xml_parser_parse_from_data (RestXmlParser *parser,
+                                                const gchar   *data,
+                                                goffset        len);
 
 G_END_DECLS
-
-#endif /* _REST_XML_PARSER */
