@@ -20,8 +20,7 @@
  *
  */
 
-#ifndef _LASTFM_PROXY_CALL
-#define _LASTFM_PROXY_CALL
+#pragma once
 
 #include <rest/rest-proxy-call.h>
 
@@ -44,6 +43,3 @@ struct _LastfmProxyCallClass {
 };
 
 G_END_DECLS
-
-#endif /* _LASTFM_PROXY_CALL */
-
