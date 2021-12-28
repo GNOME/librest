@@ -148,7 +148,7 @@ rest_proxy_call_dispose (GObject *object)
       g_clear_object (&priv->cancellable);
     }
 
-  g_clear_pointer (&priv->params, rest_params_free);
+  g_clear_pointer (&priv->params, rest_params_unref);
   g_clear_pointer (&priv->headers, g_hash_table_unref);
   g_clear_pointer (&priv->response_headers, g_hash_table_unref);
   g_clear_object (&priv->proxy);

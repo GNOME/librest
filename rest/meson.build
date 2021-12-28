@@ -87,12 +87,11 @@ if get_option('introspection')
   endforeach
 
   librest_gir = gnome.generate_gir(librest_lib,
-    sources: [ librest_headers, librest_sources, librest_enums[1] ],
-    dependencies: librest_deps,
-    namespace: 'Rest',
-    identifier_prefix: 'Rest',
-    symbol_prefix: 'rest',
+    sources: librest_sources + librest_headers + librest_enums,
     nsversion: librest_api_version,
+    namespace: 'Rest',
+    symbol_prefix: 'rest',
+    identifier_prefix: 'Rest',
     includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version) ],
     extra_args: librest_gir_extra_args,
     install: true,
