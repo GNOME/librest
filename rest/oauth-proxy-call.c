@@ -339,6 +339,7 @@ oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
   OAuthProxyPrivate *priv;
   GHashTable *form;
   OAuthProxy *proxy;
+  g_autofree gchar *formstr = NULL;
 
   /* TODO: sanity checks, error handling, probably return gboolean */
 
@@ -349,7 +350,8 @@ oauth_proxy_call_parse_token_response (OAuthProxyCall *call)
   g_object_unref (proxy);
   g_assert (priv);
 
-  form = soup_form_decode (rest_proxy_call_get_payload (REST_PROXY_CALL (call)));
+  formstr = g_strndup (rest_proxy_call_get_payload (REST_PROXY_CALL (call)), rest_proxy_call_get_payload_length (REST_PROXY_CALL (call)));
+  form = soup_form_decode (formstr);
 
   g_free (priv->token);
   g_free (priv->token_secret);
