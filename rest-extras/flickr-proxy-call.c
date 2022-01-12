@@ -4,6 +4,7 @@
  *
  * Authors: Rob Bradford <rob@linux.intel.com>
  *          Ross Burton <ross@linux.intel.com>
+ *          Günther Wagner <info@gunibert.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -24,22 +25,22 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy-call.h>
 #include "flickr-proxy-call.h"
-#include "flickr-proxy-private.h"
+#include "flickr-proxy.h"
 #include "rest/sha1.h"
-
-G_DEFINE_TYPE (FlickrProxyCall, flickr_proxy_call, REST_TYPE_PROXY_CALL)
-
-#define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), FLICKR_TYPE_PROXY_CALL, FlickrProxyCallPrivate))
 
 typedef struct {
   gboolean upload;
 } FlickrProxyCallPrivate;
 
+G_DEFINE_TYPE_WITH_PRIVATE (FlickrProxyCall, flickr_proxy_call, REST_TYPE_PROXY_CALL)
+
 enum {
   PROP_0,
-  PROP_UPLOAD
+  PROP_UPLOAD,
+  N_PROPS
 };
+
+static GParamSpec *properties [N_PROPS];
 
 static void
 flickr_proxy_call_set_property (GObject      *object,
@@ -47,27 +48,34 @@ flickr_proxy_call_set_property (GObject      *object,
                                 const GValue *value,
                                 GParamSpec   *pspec)
 {
-   switch (property_id) {
-   case PROP_UPLOAD:
-     GET_PRIVATE (object)->upload = g_value_get_boolean (value);
-     break;
+  FlickrProxyCall *self = FLICKR_PROXY_CALL (object);
+  FlickrProxyCallPrivate *priv = flickr_proxy_call_get_instance_private (self);
+
+  switch (property_id)
+    {
+    case PROP_UPLOAD:
+      priv->upload = g_value_get_boolean (value);
+      break;
    default:
      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-   }
+    }
 }
 
 static gboolean
-_prepare (RestProxyCall *call, GError **error)
+_prepare (RestProxyCall  *call,
+          GError        **error)
 {
+  FlickrProxyCall *self = (FlickrProxyCall *)call;
+  FlickrProxyCallPrivate *priv = flickr_proxy_call_get_instance_private (self);
+
   FlickrProxy *proxy = NULL;
-  FlickrProxyPrivate *priv;
+  const gchar *token = NULL;
   GHashTable *params;
   char *s;
 
-  g_object_get (call, "proxy", &proxy, NULL);
-  priv = FLICKR_PROXY_GET_PRIVATE (proxy);
+  g_object_get (self, "proxy", &proxy, NULL);
 
-  if (GET_PRIVATE (call)->upload) {
+  if (priv->upload) {
     rest_proxy_bind (REST_PROXY(proxy), "up", "upload");
     rest_proxy_call_set_function (call, NULL);
   } else {
@@ -79,10 +87,11 @@ _prepare (RestProxyCall *call, GError **error)
     rest_proxy_call_set_function (call, NULL);
   }
 
-  rest_proxy_call_add_param (call, "api_key", priv->api_key);
+  rest_proxy_call_add_param (call, "api_key", flickr_proxy_get_api_key (proxy));
+  token = flickr_proxy_get_token (proxy);
 
-  if (priv->token)
-    rest_proxy_call_add_param (call, "auth_token", priv->token);
+  if (token)
+    rest_proxy_call_add_param (call, "auth_token", token);
 
   /* Get the string params as a hash for signing */
   params = rest_params_as_string_hash_table (rest_proxy_call_get_params (call));
@@ -100,14 +109,11 @@ _prepare (RestProxyCall *call, GError **error)
 static void
 flickr_proxy_call_class_init (FlickrProxyCallClass *klass)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   RestProxyCallClass *call_class = REST_PROXY_CALL_CLASS (klass);
-  GObjectClass *obj_class = G_OBJECT_CLASS (klass);
-  GParamSpec *pspec;
-
-  g_type_class_add_private (klass, sizeof (FlickrProxyCallPrivate));
 
   call_class->prepare = _prepare;
-  obj_class->set_property = flickr_proxy_call_set_property;
+  object_class->set_property = flickr_proxy_call_set_property;
 
   /**
    * FlickrProxyCall:upload:
@@ -115,16 +121,19 @@ flickr_proxy_call_class_init (FlickrProxyCallClass *klass)
    * Set if the call should be sent to the photo upload endpoint and not the
    * general-purpose endpoint.
    */
-  pspec = g_param_spec_boolean ("upload", "upload", "upload",
-                                FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (obj_class, PROP_UPLOAD, pspec);
+  properties [PROP_UPLOAD] =
+    g_param_spec_boolean ("upload",
+                          "upload",
+                          "upload",
+                          FALSE,
+                          (G_PARAM_WRITABLE |
+                           G_PARAM_CONSTRUCT_ONLY |
+                           G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_properties (object_class, N_PROPS, properties);
 }
 
 static void
 flickr_proxy_call_init (FlickrProxyCall *self)
 {
 }
-
-#if BUILD_TESTS
-#warning TODO flickr signature test cases
-#endif

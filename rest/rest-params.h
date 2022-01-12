@@ -20,34 +20,52 @@
  *
  */
 
-#ifndef _REST_PARAMS
-#define _REST_PARAMS
+#pragma once
 
 #include <glib-object.h>
 #include "rest-param.h"
 
 G_BEGIN_DECLS
 
+#define REST_TYPE_PARAMS (rest_params_get_type ())
+
 typedef struct _RestParams RestParams;
-typedef struct _GHashTableIter RestParamsIter;
+typedef struct _RestParamsIter RestParamsIter;
 
-RestParams * rest_params_new (void);
+struct _RestParams
+{
+  /*< private >*/
+  guint ref_count;
 
-void rest_params_free (RestParams *params);
+  GList *params;
+};
 
-void rest_params_add (RestParams *params, RestParam *param);
+struct _RestParamsIter
+{
+  /*< private >*/
+  RestParams *params;
+  gint position;
+};
 
-RestParam *rest_params_get (RestParams *params, const char *name);
+GType           rest_params_get_type (void) G_GNUC_CONST;
+RestParams *rest_params_new                  (void);
+RestParams *rest_params_copy                 (RestParams      *self);
+RestParams *rest_params_ref                  (RestParams      *self);
+void        rest_params_unref                (RestParams      *self);
+void        rest_params_add                  (RestParams      *params,
+                                              RestParam       *param);
+RestParam  *rest_params_get                  (RestParams      *params,
+                                              const char      *name);
+void        rest_params_remove               (RestParams      *params,
+                                              const char      *name);
+gboolean    rest_params_are_strings          (RestParams      *params);
+GHashTable *rest_params_as_string_hash_table (RestParams      *params);
+void        rest_params_iter_init            (RestParamsIter  *iter,
+                                              RestParams      *params);
+gboolean    rest_params_iter_next            (RestParamsIter  *iter,
+                                              const char     **name,
+                                              RestParam      **param);
 
-void rest_params_remove (RestParams *params, const char *name);
-
-gboolean rest_params_are_strings (RestParams *params);
-
-GHashTable * rest_params_as_string_hash_table (RestParams *params);
-
-void rest_params_iter_init (RestParamsIter *iter, RestParams *params);
-gboolean rest_params_iter_next (RestParamsIter *iter, const char **name, RestParam **param);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (RestParams, rest_params_unref)
 
 G_END_DECLS
-
-#endif /* _REST_PARAMS */

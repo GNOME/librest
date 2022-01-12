@@ -21,8 +21,7 @@
  *
  */
 
-#ifndef _REST_XML_NODE
-#define _REST_XML_NODE
+#pragma once
 
 #include <glib-object.h>
 
@@ -39,6 +38,8 @@ G_BEGIN_DECLS
  * @attrs: a #GHashTable of string name to string values for the attributes of
  * the element.
  * @next: the sibling #RestXmlNode with the same name
+ *
+ * The #RestXmlNode contains a parsed XmlNode for easy consumption
  */
 typedef struct _RestXmlNode RestXmlNode;
 struct _RestXmlNode {
@@ -54,20 +55,21 @@ struct _RestXmlNode {
 
 GType rest_xml_node_get_type (void);
 
-RestXmlNode *rest_xml_node_ref (RestXmlNode *node);
-void         rest_xml_node_unref (RestXmlNode *node);
-const gchar *rest_xml_node_get_attr (RestXmlNode *node,
-                                     const gchar *attr_name);
-RestXmlNode *rest_xml_node_find (RestXmlNode *start,
-                                 const gchar *tag);
+RestXmlNode *rest_xml_node_ref         (RestXmlNode *node);
+void         rest_xml_node_unref       (RestXmlNode *node);
+const gchar *rest_xml_node_get_attr    (RestXmlNode *node,
+                                        const gchar *attr_name);
+RestXmlNode *rest_xml_node_find        (RestXmlNode *start,
+                                        const gchar *tag);
+RestXmlNode *rest_xml_node_add_child   (RestXmlNode *parent,
+                                        const char  *tag);
+char        *rest_xml_node_print       (RestXmlNode *node);
+void         rest_xml_node_add_attr    (RestXmlNode *node,
+                                        const char  *attribute,
+                                        const char  *value);
+void         rest_xml_node_set_content (RestXmlNode *node,
+                                        const char  *value);
 
-RestXmlNode *rest_xml_node_add_child (RestXmlNode *parent, const char *tag);
-char        *rest_xml_node_print (RestXmlNode *node);
-void         rest_xml_node_add_attr (RestXmlNode *node,
-                                     const char  *attribute,
-                                     const char  *value);
-void         rest_xml_node_set_content (RestXmlNode *node, const char *value);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (RestXmlNode, rest_xml_node_unref)
 
 G_END_DECLS
-
-#endif /* _REST_XML_NODE */

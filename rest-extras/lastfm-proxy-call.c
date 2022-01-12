@@ -25,7 +25,7 @@
 #include <rest/rest-private.h>
 #include <rest/rest-proxy-call.h>
 #include "lastfm-proxy-call.h"
-#include "lastfm-proxy-private.h"
+#include "lastfm-proxy.h"
 #include "rest/sha1.h"
 
 G_DEFINE_TYPE (LastfmProxyCall, lastfm_proxy_call, REST_TYPE_PROXY_CALL)
@@ -34,23 +34,23 @@ static gboolean
 _prepare (RestProxyCall *call, GError **error)
 {
   LastfmProxy *proxy = NULL;
-  LastfmProxyPrivate *priv;
   GHashTable *params;
+  const gchar *session_key;
   char *s;
 
   g_object_get (call, "proxy", &proxy, NULL);
-  priv = LASTFM_PROXY_GET_PRIVATE (proxy);
 
   rest_proxy_call_add_params (call,
                               "method", rest_proxy_call_get_function (call),
-                              "api_key", priv->api_key,
+                              "api_key", lastfm_proxy_get_api_key (proxy),
                               NULL);
 
   /* Reset function because Lastfm puts the function in the parameters */
   rest_proxy_call_set_function (call, NULL);
 
-  if (priv->session_key)
-    rest_proxy_call_add_param (call, "sk", priv->session_key);
+  session_key = lastfm_proxy_get_session_key (proxy);
+  if (session_key)
+    rest_proxy_call_add_param (call, "sk", session_key);
 
   params = rest_params_as_string_hash_table (rest_proxy_call_get_params (call));
   s = lastfm_proxy_sign (proxy, params);
@@ -75,7 +75,3 @@ static void
 lastfm_proxy_call_init (LastfmProxyCall *self)
 {
 }
-
-#if BUILD_TESTS
-#warning TODO lastfm signature test cases
-#endif

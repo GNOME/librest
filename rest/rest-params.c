@@ -30,18 +30,7 @@
  * @see_also: #RestParam, #RestProxyCall.
  */
 
-/*
- * RestParams is an alias for GHashTable achieved by opaque types in the public
- * headers and casting internally. This has several limitations, mainly
- * supporting multiple parameters with the same name and preserving the ordering
- * of parameters.
- *
- * These are not requirements for the bulk of the web services, but this
- * limitation does mean librest can't be used for a few web services.
- *
- * TODO: this should be a list to support multiple parameters with the same
- * name.
- */
+G_DEFINE_BOXED_TYPE (RestParams, rest_params, rest_params_ref, rest_params_unref)
 
 /**
  * rest_params_new:
@@ -53,11 +42,13 @@
 RestParams *
 rest_params_new (void)
 {
-  /* The key is a string that is owned by the RestParam, so we don't need to
-     explicitly free it on removal. */
-  return (RestParams *)
-    g_hash_table_new_full (g_str_hash, g_str_equal,
-                           NULL, (GDestroyNotify)rest_param_unref);
+  RestParams *self;
+
+  self = g_slice_new0 (RestParams);
+  self->ref_count = 1;
+  self->params = NULL;
+
+  return self;
 }
 
 /**
@@ -67,13 +58,73 @@ rest_params_new (void)
  * Destroy the #RestParams and the #RestParam objects that it contains.
  **/
 void
-rest_params_free (RestParams *params)
+rest_params_free (RestParams *self)
 {
-  GHashTable *hash = (GHashTable *)params;
+  g_assert (self);
+  g_assert_cmpint (self->ref_count, ==, 0);
 
-  g_return_if_fail (params);
+  g_list_free_full (g_steal_pointer (&self->params), (GDestroyNotify) rest_param_unref);
 
-  g_hash_table_destroy (hash);
+  g_slice_free (RestParams, self);
+}
+
+/**
+ * rest_params_copy:
+ * @self: a #RestParams
+ *
+ * Makes a deep copy of a #RestParams.
+ *
+ * Returns: (transfer full): A newly created #RestParams with the same
+ *   contents as @self
+ */
+RestParams *
+rest_params_copy (RestParams *self)
+{
+  RestParams *copy;
+
+  g_return_val_if_fail (self, NULL);
+  g_return_val_if_fail (self->ref_count, NULL);
+
+  copy = rest_params_new ();
+  copy->params = g_list_copy_deep (self->params, (GCopyFunc) rest_param_ref, NULL);
+
+  return copy;
+}
+
+/**
+ * rest_params_ref:
+ * @self: A #RestParams
+ *
+ * Increments the reference count of @self by one.
+ *
+ * Returns: (transfer full): @self
+ */
+RestParams *
+rest_params_ref (RestParams *self)
+{
+  g_return_val_if_fail (self, NULL);
+  g_return_val_if_fail (self->ref_count, NULL);
+
+  g_atomic_int_inc (&self->ref_count);
+
+  return self;
+}
+
+/**
+ * rest_params_unref:
+ * @self: A #RestParams
+ *
+ * Decrements the reference count of @self by one, freeing the structure when
+ * the reference count reaches zero.
+ */
+void
+rest_params_unref (RestParams *self)
+{
+  g_return_if_fail (self);
+  g_return_if_fail (self->ref_count);
+
+  if (g_atomic_int_dec_and_test (&self->ref_count))
+    rest_params_free (self);
 }
 
 /**
@@ -84,14 +135,25 @@ rest_params_free (RestParams *params)
  * Add @param to @params.
  **/
 void
-rest_params_add (RestParams *params, RestParam *param)
+rest_params_add (RestParams *self,
+                 RestParam  *param)
 {
-  GHashTable *hash = (GHashTable *)params;
-
-  g_return_if_fail (params);
+  g_return_if_fail (self);
   g_return_if_fail (param);
 
-  g_hash_table_replace (hash, (gpointer)rest_param_get_name (param), param);
+  self->params = g_list_append (self->params, param);
+}
+
+static gint
+rest_params_find (gconstpointer self,
+                  gconstpointer name)
+{
+  const RestParam *e = self;
+  const char *n = name;
+  const char *n2 = rest_param_get_name ((RestParam *)e);
+
+  if (g_strcmp0 (n2, n) == 0) return 0;
+  return -1;
 }
 
 /**
@@ -105,14 +167,13 @@ rest_params_add (RestParams *params, RestParam *param)
  * doesn't exist
  **/
 RestParam *
-rest_params_get (RestParams *params, const char *name)
+rest_params_get (RestParams *self,
+                 const char *name)
 {
-  GHashTable *hash = (GHashTable *)params;
-
-  g_return_val_if_fail (params, NULL);
+  g_return_val_if_fail (self, NULL);
   g_return_val_if_fail (name, NULL);
 
-  return g_hash_table_lookup (hash, name);
+  return g_list_find_custom (self->params, name, rest_params_find)->data;
 }
 
 /**
@@ -123,14 +184,16 @@ rest_params_get (RestParams *params, const char *name)
  * Remove the #RestParam called @name.
  **/
 void
-rest_params_remove (RestParams *params, const char *name)
+rest_params_remove (RestParams *self,
+                    const char *name)
 {
-  GHashTable *hash = (GHashTable *)params;
+  GList *elem = NULL;
 
-  g_return_if_fail (params);
+  g_return_if_fail (self);
   g_return_if_fail (name);
 
-  g_hash_table_remove (hash, name);
+  elem = g_list_find_custom (self->params, name, rest_params_find);
+  self->params = g_list_remove (self->params, elem->data);
 }
 
 /**
@@ -143,27 +206,22 @@ rest_params_remove (RestParams *params, const char *name)
  * Returns: %TRUE if all of the parameters are simple strings, %FALSE otherwise.
  **/
 gboolean
-rest_params_are_strings (RestParams *params)
+rest_params_are_strings (RestParams *self)
 {
-  GHashTable *hash = (GHashTable *)params;
-  GHashTableIter iter;
-  RestParam *param;
+  g_return_val_if_fail (self, FALSE);
 
-  g_return_val_if_fail (params, FALSE);
-
-  g_hash_table_iter_init (&iter, hash);
-  while (g_hash_table_iter_next (&iter, NULL, (gpointer)&param)) {
-    if (!rest_param_is_string (param))
-      return FALSE;
-  }
+  for (GList *cur = self->params; cur; cur = g_list_next (cur))
+    {
+      if (!rest_param_is_string (cur->data))
+        return FALSE;
+    }
 
   return TRUE;
-
 }
 
 /**
  * rest_params_as_string_hash_table:
- * @params: a valid #RestParams
+ * @self: a valid #RestParams
  *
  * Create a new #GHashTable which contains the name and value of all string
  * (content type of text/plain) parameters.
@@ -174,23 +232,19 @@ rest_params_are_strings (RestParams *params)
  * Returns: (element-type utf8 Rest.Param) (transfer container): a new #GHashTable.
  **/
 GHashTable *
-rest_params_as_string_hash_table (RestParams *params)
+rest_params_as_string_hash_table (RestParams *self)
 {
-  GHashTable *hash, *strings;
-  GHashTableIter iter;
-  const char *name = NULL;
-  RestParam *param = NULL;
+  GHashTable *strings;
 
-  g_return_val_if_fail (params, NULL);
+  g_return_val_if_fail (self, NULL);
 
-  hash = (GHashTable *)params;
   strings = g_hash_table_new (g_str_hash, g_str_equal);
 
-  g_hash_table_iter_init (&iter, hash);
-  while (g_hash_table_iter_next (&iter, (gpointer)&name, (gpointer)&param)) {
-    if (rest_param_is_string (param))
-      g_hash_table_insert (strings, (gpointer)name, (gpointer)rest_param_get_content (param));
-  }
+  for (GList *cur = self->params; cur; cur = g_list_next (cur))
+    {
+      if (rest_param_is_string (cur->data))
+        g_hash_table_insert (strings, (gpointer)rest_param_get_name (cur->data), (gpointer)rest_param_get_content (cur->data));
+    }
 
   return strings;
 }
@@ -214,12 +268,14 @@ rest_params_as_string_hash_table (RestParams *params)
  * ]|
  **/
 void
-rest_params_iter_init (RestParamsIter *iter, RestParams *params)
+rest_params_iter_init (RestParamsIter *iter,
+                       RestParams     *params)
 {
   g_return_if_fail (iter);
   g_return_if_fail (params);
 
-  g_hash_table_iter_init ((GHashTableIter *)iter, (GHashTable *)params);
+  iter->params = params;
+  iter->position = -1;
 }
 
 /**
@@ -235,9 +291,21 @@ rest_params_iter_init (RestParamsIter *iter, RestParams *params)
  * Returns: %FALSE if the end of the #RestParams has been reached, %TRUE otherwise.
  **/
 gboolean
-rest_params_iter_next (RestParamsIter *iter, const char **name, RestParam **param)
+rest_params_iter_next (RestParamsIter  *iter,
+                       const char     **name,
+                       RestParam      **param)
 {
+  GList *cur = NULL;
+
   g_return_val_if_fail (iter, FALSE);
 
-  return g_hash_table_iter_next ((GHashTableIter *)iter, (gpointer)name, (gpointer)param);
+  iter->position++;
+  cur = g_list_nth (iter->params->params, iter->position);
+
+  if (cur == NULL) return FALSE;
+
+  *param = cur->data;
+  *name = rest_param_get_name (*param);
+  return TRUE;
 }
+

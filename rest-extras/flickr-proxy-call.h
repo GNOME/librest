@@ -20,49 +20,22 @@
  *
  */
 
-#ifndef _FLICKR_PROXY_CALL
-#define _FLICKR_PROXY_CALL
+#pragma once
 
 #include <rest/rest-proxy-call.h>
 
 G_BEGIN_DECLS
 
-#define FLICKR_TYPE_PROXY_CALL flickr_proxy_call_get_type()
+#define FLICKR_TYPE_PROXY_CALL (flickr_proxy_call_get_type())
 
-#define FLICKR_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), FLICKR_TYPE_PROXY_CALL, FlickrProxyCall))
+G_DECLARE_DERIVABLE_TYPE (FlickrProxyCall, flickr_proxy_call, FLICKR, PROXY_CALL, RestProxyCall)
 
-#define FLICKR_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), FLICKR_TYPE_PROXY_CALL, FlickrProxyCallClass))
-
-#define FLICKR_IS_PROXY_CALL(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), FLICKR_TYPE_PROXY_CALL))
-
-#define FLICKR_IS_PROXY_CALL_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), FLICKR_TYPE_PROXY_CALL))
-
-#define FLICKR_PROXY_CALL_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), FLICKR_TYPE_PROXY_CALL, FlickrProxyCallClass))
-
-/**
- * FlickrProxyCall:
- *
- * #FlickrProxyCall has no publicly available members.
- */
-typedef struct {
-  RestProxyCall parent;
-} FlickrProxyCall;
-
-typedef struct {
+struct _FlickrProxyCallClass {
   RestProxyCallClass parent_class;
+
   /*< private >*/
   /* padding for future expansion */
   gpointer _padding_dummy[8];
-} FlickrProxyCallClass;
-
-GType flickr_proxy_call_get_type (void);
+};
 
 G_END_DECLS
-
-#endif /* _FLICKR_PROXY_CALL */
-

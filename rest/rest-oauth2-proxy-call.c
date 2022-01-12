@@ -1,6 +1,6 @@
 /* rest-oauth2-proxy-call.c
  *
- * Copyright 2021 Günther Wagner <info@gunibert.de>
+ * Copyright 2021-2022 Günther Wagner <info@gunibert.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -24,7 +24,6 @@ static gboolean
 rest_oauth2_proxy_call_prepare (RestProxyCall  *call,
                                 GError        **error)
 {
-  RestOAuth2ProxyCall *self = (RestOAuth2ProxyCall *)call;
   RestOAuth2Proxy *proxy = NULL;
   g_autoptr(GDateTime) now = NULL;
   GDateTime *expiration_date = NULL;

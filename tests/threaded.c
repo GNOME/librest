@@ -95,7 +95,7 @@ static void ping ()
   int i;
   GSList *uris;
 
-  server = soup_server_new (NULL);
+  server = soup_server_new (NULL, NULL);
   soup_server_listen_local (server, 0, 0, &error);
   g_assert_no_error (error);
 

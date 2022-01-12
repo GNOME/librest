@@ -89,7 +89,7 @@ rest_param_new_full (const char    *name,
   param = g_slice_new0 (RestParam);
 
   if (use == REST_MEMORY_COPY) {
-    data = g_memdup (data, length);
+    data = g_memdup2 (data, length);
     use  = REST_MEMORY_TAKE;
   }
 

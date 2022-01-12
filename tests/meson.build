@@ -6,6 +6,7 @@ test_suites = {
     'xml',
     'custom-serialize',
     'oauth2',
+    'params',
   ],
   'rest-extras': [
     'flickr',
@@ -20,6 +21,11 @@ test_deps = [
   librest_extras_dep,
 ]
 
+test_env = [
+  'G_TEST_SRCDIR=@0@'.format(meson.current_source_dir()),
+  'G_TEST_BUILDDIR=@0@'.format(meson.current_build_dir()),
+]
+
 foreach suite, test_names : test_suites
   foreach name : test_names
     test_bin = executable(name,
@@ -30,6 +36,7 @@ foreach suite, test_names : test_suites
 
     test(name, test_bin,
       suite: suite,
+      env: test_env,
     )
   endforeach
 endforeach

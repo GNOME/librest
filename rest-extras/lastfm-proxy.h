@@ -20,8 +20,7 @@
  *
  */
 
-#ifndef _LASTFM_PROXY
-#define _LASTFM_PROXY
+#pragma once
 
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
@@ -30,65 +29,33 @@ G_BEGIN_DECLS
 
 #define LASTFM_TYPE_PROXY lastfm_proxy_get_type()
 
-#define LASTFM_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), LASTFM_TYPE_PROXY, LastfmProxy))
+G_DECLARE_DERIVABLE_TYPE (LastfmProxy, lastfm_proxy, LASTFM, PROXY, RestProxy)
 
-#define LASTFM_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), LASTFM_TYPE_PROXY, LastfmProxyClass))
-
-#define LASTFM_IS_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LASTFM_TYPE_PROXY))
-
-#define LASTFM_IS_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), LASTFM_TYPE_PROXY))
-
-#define LASTFM_PROXY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), LASTFM_TYPE_PROXY, LastfmProxyClass))
-
-typedef struct _LastfmProxyPrivate LastfmProxyPrivate;
-
-/**
- * LastfmProxy:
- *
- * #LastfmProxy has no publicly available members.
- */
-typedef struct {
-  RestProxy parent;
-  LastfmProxyPrivate *priv;
-} LastfmProxy;
-
-typedef struct {
+struct _LastfmProxyClass {
   RestProxyClass parent_class;
+
   /*< private >*/
   /* padding for future expansion */
   gpointer _padding_dummy[8];
-} LastfmProxyClass;
+};
 
 #define LASTFM_PROXY_ERROR lastfm_proxy_error_quark()
 
-GType lastfm_proxy_get_type (void);
-
-RestProxy* lastfm_proxy_new (const char *api_key,
-                             const char *secret);
-
-RestProxy* lastfm_proxy_new_with_session (const char *api_key,
-                                          const char *secret,
-                                          const char *session_key);
-
-const char * lastfm_proxy_get_api_key (LastfmProxy *proxy);
-
-const char * lastfm_proxy_get_secret (LastfmProxy *proxy);
-
-const char * lastfm_proxy_get_session_key (LastfmProxy *proxy);
-
-void lastfm_proxy_set_session_key (LastfmProxy *proxy, const char *session_key);
-
-char * lastfm_proxy_sign (LastfmProxy *proxy, GHashTable *params);
-
-char * lastfm_proxy_build_login_url (LastfmProxy *proxy, const char *token);
-
-gboolean lastfm_proxy_is_successful (RestXmlNode *root, GError **error);
+RestProxy  *lastfm_proxy_new              (const char   *api_key,
+                                           const char   *secret);
+RestProxy  *lastfm_proxy_new_with_session (const char   *api_key,
+                                           const char   *secret,
+                                           const char   *session_key);
+const char *lastfm_proxy_get_api_key      (LastfmProxy  *proxy);
+const char *lastfm_proxy_get_secret       (LastfmProxy  *proxy);
+const char *lastfm_proxy_get_session_key  (LastfmProxy  *proxy);
+void        lastfm_proxy_set_session_key  (LastfmProxy  *proxy,
+                                           const char   *session_key);
+char       *lastfm_proxy_sign             (LastfmProxy  *proxy,
+                                           GHashTable   *params);
+char       *lastfm_proxy_build_login_url  (LastfmProxy  *proxy,
+                                           const char   *token);
+gboolean    lastfm_proxy_is_successful    (RestXmlNode  *root,
+                                           GError      **error);
 
 G_END_DECLS
-
-#endif /* _LASTFM_PROXY */
