@@ -20,11 +20,16 @@ option('examples',
 )
 option('gtk_doc',
   type: 'boolean',
-  value: false,
+  value: true,
   description: 'Build the gtk-doc reference docs',
 )
 option('soup2',
   type: 'boolean',
   value: true,
   description: 'Whether to build with libsoup2',
+)
+option('tests',
+  type: 'boolean',
+  value: true,
+  description: 'Whether to build the tests',
 )

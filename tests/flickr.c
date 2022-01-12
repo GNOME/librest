@@ -108,6 +108,18 @@ test_flickr ()
 
 }
 
+static void
+test_build_login_url (void)
+{
+  RestProxy *p = flickr_proxy_new ("api", "secret");
+  g_autofree gchar *login_url = flickr_proxy_build_login_url (FLICKR_PROXY (p), NULL, "read");
+
+  g_assert_cmpstr (login_url, ==, "http://flickr.com/services/auth/?api_key=api&perms=read&api_sig=55e7647bc1a6e512172b8fda472a64a8");
+
+  login_url = flickr_proxy_build_login_url (FLICKR_PROXY (p), "746563215463214621", "read");
+
+  g_assert_cmpstr (login_url, ==, "http://flickr.com/services/auth/?frob=746563215463214621&api_key=api&perms=read&api_sig=bcabfd22f3beb489aeb3605b8c9e0441");
+}
 
 int
 main (int argc, char **argv)
@@ -115,6 +127,7 @@ main (int argc, char **argv)
   g_test_init (&argc, &argv, NULL);
 
   g_test_add_func ("/flickr/flickr", test_flickr);
+  g_test_add_func ("/flickr/test_build_login_url", test_build_login_url);
 
   return g_test_run ();
 }

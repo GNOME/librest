@@ -1,7 +1,7 @@
 project('rest', 'c',
   version: '0.9.0',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.49',
+  meson_version: '>= 0.53',
 )
 
 # Versioning
@@ -57,6 +57,7 @@ endif
 glib_dep = dependency('glib-2.0', version: '>= 2.44')
 gobject_dep = dependency('gobject-2.0', version: '>= 2.44')
 libsoup_dep = dependency(libsoup_name, version: libsoup_req_version)
+libjson_glib_dep = dependency('json-glib-1.0')
 libxml_dep = dependency('libxml-2.0')
 
 # config.h
@@ -73,7 +74,9 @@ config_h_inc = include_directories('.')
 # Subdirectories
 subdir('rest')
 subdir('rest-extras')
-subdir('tests')
+if get_option('tests')
+  subdir('tests')
+endif
 if get_option('examples')
   subdir('examples')
 endif
@@ -87,7 +90,7 @@ pkgconfig.generate(librest_lib,
   filebase: librest_pkg_string,
   description: 'RESTful web api query library',
   subdirs: librest_pkg_string,
-  requires: [ glib_dep, libsoup_dep, libxml_dep, ],
+  requires: [ glib_dep, libsoup_dep, libxml_dep, libjson_glib_dep ],
   variables: [
     'apiversion=@0@'.format(librest_api_version),
   ],
@@ -98,8 +101,25 @@ pkgconfig.generate(librest_extras_lib,
   filebase: librest_extras_pkg_string,
   description: 'RESTful web api query library',
   subdirs: librest_pkg_string,
-  requires: [ glib_dep, libsoup_dep, libxml_dep, ],
+  requires: [ glib_dep, libsoup_dep, libxml_dep],
   variables: [
     'apiversion=@0@'.format(librest_api_version),
   ],
+)
+
+summary({
+    'prefix': get_option('prefix'),
+    'libdir': get_option('prefix') / get_option('libdir'),
+  },
+  section: 'Directories',
+)
+
+summary({
+    'Introspection': get_option('introspection'),
+    'Documentation': get_option('gtk_doc'),
+    'Tests': get_option('tests'),
+    'Soup 2': get_option('soup2'),
+  },
+  section: 'Build',
+  bool_yn: true,
 )

@@ -238,6 +238,8 @@ rest_proxy_call_set_method (RestProxyCall *call,
  * @call: The #RestProxyCall
  *
  * Get the HTTP method to use when making the call, for example GET or POST.
+ *
+ * Returns: (transfer none): the HTTP method
  */
 const char *
 rest_proxy_call_get_method (RestProxyCall *call)
@@ -1005,10 +1007,16 @@ _call_message_call_completed_cb (SoupMessage *message,
                                  GError      *error,
                                  gpointer     user_data)
 {
-  GTask *task = user_data;
+  g_autoptr(GTask) task = user_data;
   RestProxyCall *call;
 
   call = REST_PROXY_CALL (g_task_get_source_object (task));
+
+  if (error)
+    {
+      g_task_return_error (task, error);
+      return;
+    }
 
   finish_call (call, message, payload, &error);
 
@@ -1016,8 +1024,6 @@ _call_message_call_completed_cb (SoupMessage *message,
     g_task_return_error (task, error);
   else
     g_task_return_boolean (task, TRUE);
-
-  g_object_unref (task);
 }
 
 /**
@@ -1158,6 +1164,8 @@ _continuous_call_message_sent_cb (GObject      *source,
  *
  * You may unref the call after calling this function since there is an
  * internal reference, or you may unref in the callback.
+ *
+ * Returns: %TRUE on success
  */
 gboolean
 rest_proxy_call_continuous (RestProxyCall                    *call,
@@ -1491,11 +1499,7 @@ rest_proxy_call_get_payload_length (RestProxyCall *call)
   g_return_val_if_fail (REST_IS_PROXY_CALL (call), 0);
 
   payload = GET_PRIVATE (call)->payload;
-#ifdef WITH_SOUP_2
-  return payload ? g_bytes_get_size (payload) - 1 : 0;
-#else
   return payload ? g_bytes_get_size (payload) : 0;
-#endif
 }
 
 /**

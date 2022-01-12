@@ -7,6 +7,7 @@ example_names = [
   'get-flickr-favorites',
   'lastfm-shout',
   'continuous-twitter',
+  'gitlab-oauth2-example',
 ]
 
 example_deps = [
