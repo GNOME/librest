@@ -174,8 +174,9 @@ server_callback (SoupServer        *server,
 
 
 static void
-ping_test (RestProxy *proxy)
+ping_test (gconstpointer data)
 {
+  RestProxy *proxy = (RestProxy *)data;
   g_autoptr(RestProxyCall) call;
   GError *error = NULL;
 
@@ -197,8 +198,9 @@ ping_test (RestProxy *proxy)
 }
 
 static void
-echo_test (RestProxy *proxy)
+echo_test (gconstpointer data)
 {
+  RestProxy *proxy = (RestProxy *)data;
   g_autoptr(RestProxyCall) call;
   GError *error = NULL;
 
@@ -213,8 +215,9 @@ echo_test (RestProxy *proxy)
 }
 
 static void
-reverse_test (RestProxy *proxy)
+reverse_test (gconstpointer data)
 {
+  RestProxy *proxy = (RestProxy *)data;
   g_autoptr(RestProxyCall) call;
   GError *error = NULL;
 
@@ -245,8 +248,9 @@ status_ok_test (RestProxy *proxy, guint status)
 }
 
 static void
-status_test (RestProxy *proxy)
+status_test (gconstpointer data)
 {
+  RestProxy *proxy = (RestProxy *)data;
   status_ok_test (proxy, SOUP_STATUS_OK);
   status_ok_test (proxy, SOUP_STATUS_NO_CONTENT);
 }
@@ -268,8 +272,9 @@ status_error_test (RestProxy *proxy, guint status)
 }
 
 static void
-status_test_error (RestProxy *proxy)
+status_test_error (gconstpointer data)
 {
+  RestProxy *proxy = (RestProxy *)data;
   status_error_test (proxy, SOUP_STATUS_BAD_REQUEST);
   status_error_test (proxy, SOUP_STATUS_NOT_IMPLEMENTED);
 }
@@ -288,8 +293,9 @@ test_status_ok (RestProxy *proxy, const char *function)
 }
 
 static void
-test_user_agent (RestProxy *proxy)
+test_user_agent (gconstpointer data)
 {
+  RestProxy *proxy = (RestProxy *)data;
   test_status_ok (proxy, "useragent/none");
   rest_proxy_set_user_agent (proxy, "TestSuite-1.0");
   test_status_ok (proxy, "useragent/testsuite");
