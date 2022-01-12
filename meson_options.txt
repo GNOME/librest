@@ -9,9 +9,8 @@ option('ca_certificates_path',
   description: 'List of paths to the system Certificate Authority list. If empty, a default set of paths will be tried.',
 )
 option('introspection',
-  type: 'feature',
-  value: 'enabled',
-  yield: true,
+  type: 'boolean',
+  value: true,
   description: 'Generate GObject Introspection (.gir) files',
 )
 option('examples',
@@ -20,9 +19,8 @@ option('examples',
   description: 'Build the examples',
 )
 option('gtk_doc',
-  type: 'feature',
-  value: 'auto',
-  yield: true,
+  type: 'boolean',
+  value: true,
   description: 'Build the gtk-doc reference docs',
 )
 option('soup2',

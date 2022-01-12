@@ -80,7 +80,7 @@ endif
 if get_option('examples')
   subdir('examples')
 endif
-if get_option('gtk_doc').enabled()
+if get_option('gtk_doc')
   subdir('docs')
 endif
 
@@ -115,8 +115,8 @@ summary({
 )
 
 summary({
-    'Introspection': get_option('introspection').enabled() or get_option('introspection').auto(),
-    'Documentation': get_option('gtk_doc').enabled() or get_option('gtk_doc').auto(),
+    'Introspection': get_option('introspection'),
+    'Documentation': get_option('gtk_doc'),
     'Tests': get_option('tests'),
     'Soup 2': get_option('soup2'),
   },

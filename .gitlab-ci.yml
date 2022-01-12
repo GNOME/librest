@@ -13,7 +13,7 @@ build-librest:
     - dnf update -y --nogpgcheck
     - dnf -y install --nogpgcheck redhat-rpm-config
       glib2-devel gobject-introspection-devel libxml2-devel meson ninja-build
-      libsoup-devel vala json-glib-devel
+      libsoup-devel vala json-glib-devel git python3-jinja2 python3-toml python3-typogrify python3-pygments
   script:
     - meson _build
     - ninja -C _build
@@ -66,8 +66,8 @@ reference:
       gtk-doc
       json-glib-devel
     MESON_VERSION: "0.55.3"
-    MESON_EXTRA_FLAGS: "-Dintrospection=enabled"
-    DOCS_FLAGS: -Dgtk_doc=enabled
+    MESON_EXTRA_FLAGS: "-Dintrospection=true"
+    DOCS_FLAGS: -Dgtk_doc=true
     DOCS_PATH: docs/librest-1.0
 
 pages:

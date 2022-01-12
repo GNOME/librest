@@ -76,7 +76,7 @@ install_headers(librest_headers,
 rest_dep_sources = []
 
 # GObject Introspection
-if get_option('introspection').enabled()
+if get_option('introspection')
   librest_gir_extra_args = [
     '--accept-unprefixed',
     '--c-include=rest/rest-enum-types.h',
