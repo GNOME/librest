@@ -57,6 +57,14 @@ if get_option('introspection')
     dependencies: librest_extras_deps,
     install: true,
   )
+  
+  if get_option('vapi')
+    librest_extras_vapi = gnome.generate_vapi(librest_extras_pkg_string,
+      sources: librest_extras_gir [0],
+      packages: [ 'glib-2.0', 'libsoup-@0@'.format(libsoup_api_version), librest_vapi ],
+      install: true,
+    )
+  endif
 endif
 
 # Test suite
