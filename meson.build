@@ -116,6 +116,7 @@ summary({
 
 summary({
     'Introspection': get_option('introspection'),
+    'Vapi': get_option('vapi'),
     'Documentation': get_option('gtk_doc'),
     'Tests': get_option('tests'),
     'Soup 2': get_option('soup2'),

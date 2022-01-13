@@ -45,6 +45,10 @@ librest_extras_dep = declare_dependency(
   link_with: librest_extras_lib,
 )
 
+if get_option('vapi') and not get_option('introspection')
+  warning('Vapi generation needs "introspection" option in order to generate the .vapi file')
+endif
+
 if get_option('introspection')
   librest_extras_gir = gnome.generate_gir(librest_extras_lib,
     sources: librest_extras_sources + librest_extras_headers,

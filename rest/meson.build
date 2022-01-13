@@ -76,6 +76,10 @@ install_headers(librest_headers,
 rest_dep_sources = []
 
 # GObject Introspection
+if get_option('vapi') and not get_option('introspection')
+  warning('Vapi generation needs "introspection" option in order to generate the .vapi file')
+endif
+
 if get_option('introspection')
   librest_gir_extra_args = [
     '--accept-unprefixed',
