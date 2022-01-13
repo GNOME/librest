@@ -13,6 +13,11 @@ option('introspection',
   value: true,
   description: 'Generate GObject Introspection (.gir) files',
 )
+option('vapi',
+  type: 'boolean',
+  value: false,
+  description: 'Generate VAPI file for Vala',
+)
 option('examples',
   type: 'boolean',
   value: true,
