@@ -19,9 +19,12 @@ librest_sources = [
   'rest-main.c',
   'oauth-proxy.c',
   'oauth-proxy-call.c',
-  'oauth2-proxy.c',
-  'oauth2-proxy-call.c',
   'sha1.c',
+
+  'rest-oauth2-proxy.c',
+  'rest-oauth2-proxy-call.c',
+  'rest-pkce-code-challenge.c',
+  'rest-utils.c',
 
   librest_enums,
   librest_marshal,
@@ -30,8 +33,6 @@ librest_sources = [
 librest_headers = [
   'oauth-proxy-call.h',
   'oauth-proxy.h',
-  'oauth2-proxy-call.h',
-  'oauth2-proxy.h',
   'rest-param.h',
   'rest-params.h',
   'rest-proxy-auth.h',
@@ -39,11 +40,18 @@ librest_headers = [
   'rest-proxy.h',
   'rest-xml-node.h',
   'rest-xml-parser.h',
+
+  'rest-oauth2-proxy.h',
+  'rest-oauth2-proxy-call.h',
+  'rest-pkce-code-challenge.h',
+  'rest-utils.h',
+  'rest.h',
 ]
 
 librest_deps = [
   glib_dep,
   libsoup_dep,
+  libjson_glib_dep,
   libxml_dep,
 ]
 
@@ -65,6 +73,8 @@ install_headers(librest_headers,
   subdir: librest_pkg_string / 'rest',
 )
 
+rest_dep_sources = []
+
 # GObject Introspection
 if get_option('introspection')
   librest_gir_extra_args = [
@@ -77,13 +87,16 @@ if get_option('introspection')
   endforeach
 
   librest_gir = gnome.generate_gir(librest_lib,
-    sources: [ librest_headers, librest_enums[1] ],
-    namespace: 'Rest',
+    sources: librest_sources + librest_headers + librest_enums,
     nsversion: librest_api_version,
+    namespace: 'Rest',
+    symbol_prefix: 'rest',
+    identifier_prefix: 'Rest',
     includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version) ],
     extra_args: librest_gir_extra_args,
     install: true,
   )
+  rest_dep_sources += librest_gir
 
   if get_option('vapi')
     librest_vapi = gnome.generate_vapi(librest_pkg_string,
@@ -95,7 +108,10 @@ if get_option('introspection')
 endif
 
 librest_dep = declare_dependency(
+  sources: rest_dep_sources,
   link_with: librest_lib,
+  include_directories: include_directories('..'),
+  dependencies: librest_deps,
 )
 
 # Test suite

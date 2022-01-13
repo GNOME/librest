@@ -28,37 +28,7 @@
 G_BEGIN_DECLS
 
 #define OAUTH_TYPE_PROXY oauth_proxy_get_type()
-
-#define OAUTH_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), OAUTH_TYPE_PROXY, OAuthProxy))
-
-#define OAUTH_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), OAUTH_TYPE_PROXY, OAuthProxyClass))
-
-#define OAUTH_IS_PROXY(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), OAUTH_TYPE_PROXY))
-
-#define OAUTH_IS_PROXY_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), OAUTH_TYPE_PROXY))
-
-#define OAUTH_PROXY_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), OAUTH_TYPE_PROXY, OAuthProxyClass))
-
-/**
- * OAuthProxy:
- *
- * #OAuthProxy has no publicly available members.
- */
-typedef struct {
-  RestProxy parent;
-} OAuthProxy;
-
-typedef struct {
-  RestProxyClass parent_class;
-  /*< private >*/
-  /* padding for future expansion */
-  gpointer _padding_dummy[8];
-} OAuthProxyClass;
+G_DECLARE_FINAL_TYPE (OAuthProxy, oauth_proxy, OAUTH, PROXY, RestProxy)
 
 GType oauth_signature_method_get_type (void) G_GNUC_CONST;
 #define OAUTH_TYPE_SIGNATURE_METHOD (oauth_signature_method_get_type())
@@ -77,68 +47,63 @@ typedef enum {
   HMAC_SHA1
 } OAuthSignatureMethod;
 
-GType oauth_proxy_get_type (void);
-
-RestProxy* oauth_proxy_new (const char *consumer_key,
-                            const char *consumer_secret,
-                            const gchar *url_format,
-                            gboolean binding_required);
-
-RestProxy* oauth_proxy_new_with_token (const char *consumer_key,
-                                       const char *consumer_secret,
-                                       const char *token,
-                                       const char *token_secret,
-                                       const gchar *url_format,
-                                       gboolean binding_required);
-
-gboolean oauth_proxy_request_token (OAuthProxy *proxy,
-                                    const char *function,
-                                    const char *callback_uri,
-                                    GError    **error);
-
-void oauth_proxy_request_token_async (OAuthProxy          *proxy,
-                                      const char          *function,
-                                      const char          *callback_uri,
-                                      GCancellable        *cancellable,
-                                      GAsyncReadyCallback  callback,
-                                      gpointer             user_data);
-gboolean oauth_proxy_request_token_finish (OAuthProxy *proxy,
-                                           GAsyncResult *result,
-                                           GError **error);
-
-gboolean oauth_proxy_is_oauth10a (OAuthProxy *proxy);
-
-gboolean oauth_proxy_access_token (OAuthProxy *proxy,
-                                   const char *function,
-                                   const char *verifier,
-                                   GError    **error);
-
-void oauth_proxy_access_token_async (OAuthProxy          *proxy,
-                                     const char          *function,
-                                     const char          *verifier,
-                                     GCancellable        *cancellable,
-                                     GAsyncReadyCallback  callback,
-                                     gpointer             user_data);
-gboolean oauth_proxy_access_token_finish (OAuthProxy *proxy,
-                                          GAsyncResult *result,
-                                          GError **error);
-
-const char * oauth_proxy_get_token (OAuthProxy *proxy);
-
-void oauth_proxy_set_token (OAuthProxy *proxy, const char *token);
-
-const char * oauth_proxy_get_token_secret (OAuthProxy *proxy);
-
-void oauth_proxy_set_token_secret (OAuthProxy *proxy, const char *token_secret);
-const char * oauth_proxy_get_signature_host (OAuthProxy *proxy);
-
-void oauth_proxy_set_signature_host (OAuthProxy *proxy,
-                                     const char *signature_host);
-
-RestProxy *oauth_proxy_new_echo_proxy (OAuthProxy  *proxy,
-                                       const char  *service_url,
-                                       const gchar *url_format,
-                                       gboolean     binding_required);
+RestProxy            *oauth_proxy_new                  (const char           *consumer_key,
+                                                        const char           *consumer_secret,
+                                                        const gchar          *url_format,
+                                                        gboolean              binding_required);
+RestProxy            *oauth_proxy_new_with_token       (const char           *consumer_key,
+                                                        const char           *consumer_secret,
+                                                        const char           *token,
+                                                        const char           *token_secret,
+                                                        const gchar          *url_format,
+                                                        gboolean              binding_required);
+gboolean              oauth_proxy_request_token        (OAuthProxy           *proxy,
+                                                        const char           *function,
+                                                        const char           *callback_uri,
+                                                        GError              **error);
+void                  oauth_proxy_request_token_async  (OAuthProxy           *proxy,
+                                                        const char           *function,
+                                                        const char           *callback_uri,
+                                                        GCancellable         *cancellable,
+                                                        GAsyncReadyCallback   callback,
+                                                        gpointer              user_data);
+gboolean              oauth_proxy_request_token_finish (OAuthProxy           *proxy,
+                                                        GAsyncResult         *result,
+                                                        GError              **error);
+gboolean              oauth_proxy_is_oauth10a          (OAuthProxy           *proxy);
+void                  oauth_proxy_set_oauth10a         (OAuthProxy           *proxy,
+                                                        gboolean              oauth10a);
+gboolean              oauth_proxy_access_token         (OAuthProxy           *proxy,
+                                                        const char           *function,
+                                                        const char           *verifier,
+                                                        GError              **error);
+void                  oauth_proxy_access_token_async   (OAuthProxy           *proxy,
+                                                        const char           *function,
+                                                        const char           *verifier,
+                                                        GCancellable         *cancellable,
+                                                        GAsyncReadyCallback   callback,
+                                                        gpointer              user_data);
+gboolean              oauth_proxy_access_token_finish  (OAuthProxy           *proxy,
+                                                        GAsyncResult         *result,
+                                                        GError              **error);
+const char           *oauth_proxy_get_consumer_key     (OAuthProxy           *proxy);
+const char           *oauth_proxy_get_consumer_secret  (OAuthProxy           *proxy);
+const char           *oauth_proxy_get_token            (OAuthProxy           *proxy);
+void                  oauth_proxy_set_token            (OAuthProxy           *proxy,
+                                                        const char           *token);
+const char           *oauth_proxy_get_token_secret     (OAuthProxy           *proxy);
+void                  oauth_proxy_set_token_secret     (OAuthProxy           *proxy,
+                                                        const char           *token_secret);
+const char           *oauth_proxy_get_signature_host   (OAuthProxy           *proxy);
+void                  oauth_proxy_set_signature_host   (OAuthProxy           *proxy,
+                                                        const char           *signature_host);
+RestProxy            *oauth_proxy_new_echo_proxy       (OAuthProxy           *proxy,
+                                                        const char           *service_url,
+                                                        const gchar          *url_format,
+                                                        gboolean              binding_required);
+gboolean              oauth_proxy_is_echo              (OAuthProxy           *proxy);
+const char           *oauth_proxy_get_service_url      (OAuthProxy           *proxy);
+OAuthSignatureMethod  oauth_proxy_get_sign_method      (OAuthProxy           *proxy);
 
 G_END_DECLS
 

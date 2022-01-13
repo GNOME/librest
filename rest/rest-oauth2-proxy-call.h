@@ -1,10 +1,6 @@
-/*
- * librest - RESTful web services access
- * Copyright (c) 2008, 2009, Intel Corporation.
+/* rest-oauth2-proxy-call.h
  *
- * Authors: Rob Bradford <rob@linux.intel.com>
- *          Ross Burton <ross@linux.intel.com>
- *          Jonathon Jongsma <jonathon.jongsma@collabora.co.uk>
+ * Copyright 2021 Günther Wagner <info@gunibert.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -18,32 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
  */
 
-#ifndef _OAUTH2_PROXY_CALL
-#define _OAUTH2_PROXY_CALL
+#pragma once
 
-#include <rest/rest-proxy-call.h>
+#include <rest.h>
 
 G_BEGIN_DECLS
 
-#define OAUTH2_TYPE_PROXY_CALL oauth2_proxy_call_get_type()
-G_DECLARE_DERIVABLE_TYPE (OAuth2ProxyCall, oauth2_proxy_call, OAUTH2, PROXY_CALL, RestProxyCall)
+#define REST_TYPE_OAUTH2_PROXY_CALL (rest_oauth2_proxy_call_get_type())
 
-/**
- * OAuth2ProxyCall:
- *
- * #OAuth2ProxyCall has no publicly available members.
- */
+G_DECLARE_DERIVABLE_TYPE (RestOAuth2ProxyCall, rest_oauth2_proxy_call, REST, OAUTH2_PROXY_CALL, RestProxyCall)
 
-struct _OAuth2ProxyCallClass {
+struct _RestOAuth2ProxyCallClass {
   RestProxyCallClass parent_class;
-  /*< private >*/
-  /* padding for future expansion */
-  gpointer _padding_dummy[8];
 };
 
 G_END_DECLS
-
-#endif /* _OAUTH2_PROXY_CALL */

@@ -29,9 +29,13 @@
 
 #include "rest/rest-private.h"
 #include "youtube-proxy.h"
-#include "youtube-proxy-private.h"
 
-G_DEFINE_TYPE (YoutubeProxy, youtube_proxy, REST_TYPE_PROXY)
+typedef struct {
+  char *developer_key;
+  char *user_auth;
+} YoutubeProxyPrivate;
+
+G_DEFINE_TYPE_WITH_PRIVATE (YoutubeProxy, youtube_proxy, REST_TYPE_PROXY)
 
 #define UPLOAD_URL \
   "http://uploads.gdata.youtube.com/feeds/api/users/default/uploads"
@@ -40,7 +44,10 @@ enum {
   PROP_0,
   PROP_DEVELOPER_KEY,
   PROP_USER_AUTH,
+  N_PROPS,
 };
+
+static GParamSpec *properties [N_PROPS];
 
 GQuark
 youtube_proxy_error_quark (void)
@@ -49,10 +56,13 @@ youtube_proxy_error_quark (void)
 }
 
 static void
-youtube_proxy_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+youtube_proxy_get_property (GObject    *object,
+                            guint       property_id,
+                            GValue     *value,
+                            GParamSpec *pspec)
 {
-  YoutubeProxyPrivate *priv = YOUTUBE_PROXY_GET_PRIVATE (object);
+  YoutubeProxy *self = YOUTUBE_PROXY (object);
+  YoutubeProxyPrivate *priv = youtube_proxy_get_instance_private (self);
 
   switch (property_id) {
   case PROP_DEVELOPER_KEY:
@@ -67,10 +77,13 @@ youtube_proxy_get_property (GObject *object, guint property_id,
 }
 
 static void
-youtube_proxy_set_property (GObject *object, guint property_id,
-                           const GValue *value, GParamSpec *pspec)
+youtube_proxy_set_property (GObject      *object,
+                            guint         property_id,
+                            const GValue *value,
+                            GParamSpec   *pspec)
 {
-  YoutubeProxyPrivate *priv = YOUTUBE_PROXY_GET_PRIVATE (object);
+  YoutubeProxy *self = YOUTUBE_PROXY (object);
+  YoutubeProxyPrivate *priv = youtube_proxy_get_instance_private (self);
 
   switch (property_id) {
   case PROP_DEVELOPER_KEY:
@@ -89,7 +102,8 @@ youtube_proxy_set_property (GObject *object, guint property_id,
 static void
 youtube_proxy_finalize (GObject *object)
 {
-  YoutubeProxyPrivate *priv = YOUTUBE_PROXY_GET_PRIVATE (object);
+  YoutubeProxy *self = YOUTUBE_PROXY (object);
+  YoutubeProxyPrivate *priv = youtube_proxy_get_instance_private (self);
 
   g_free (priv->developer_key);
   g_free (priv->user_auth);
@@ -101,36 +115,34 @@ static void
 youtube_proxy_class_init (YoutubeProxyClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  GParamSpec *pspec;
-
-  g_type_class_add_private (klass, sizeof (YoutubeProxyPrivate));
 
   object_class->get_property = youtube_proxy_get_property;
   object_class->set_property = youtube_proxy_set_property;
   object_class->finalize = youtube_proxy_finalize;
 
-  pspec = g_param_spec_string ("developer-key",  "developer-key",
-                               "The developer API key", NULL,
-                               G_PARAM_READWRITE|
-                               G_PARAM_CONSTRUCT_ONLY|
-                               G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class,
-                                   PROP_DEVELOPER_KEY,
-                                   pspec);
+  properties [PROP_DEVELOPER_KEY] =
+    g_param_spec_string ("developer-key",
+                         "developer-key",
+                         "The developer API key",
+                         NULL,
+                         (G_PARAM_READWRITE |
+                          G_PARAM_CONSTRUCT_ONLY |
+                          G_PARAM_STATIC_STRINGS));
 
-  pspec = g_param_spec_string ("user-auth",  "user-auth",
-                               "The ClientLogin token", NULL,
-                               G_PARAM_READWRITE|
-                               G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class,
-                                   PROP_USER_AUTH,
-                                   pspec);
+  properties [PROP_USER_AUTH] =
+    g_param_spec_string ("user-auth",
+                         "user-auth",
+                         "The ClientLogin token",
+                         NULL,
+                         (G_PARAM_READWRITE |
+                          G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_properties (object_class, N_PROPS, properties);
 }
 
 static void
 youtube_proxy_init (YoutubeProxy *self)
 {
-  self->priv = YOUTUBE_PROXY_GET_PRIVATE (self);
 }
 
 RestProxy *
@@ -151,16 +163,17 @@ youtube_proxy_new_with_auth (const char *developer_key,
 }
 
 void
-youtube_proxy_set_user_auth (YoutubeProxy *proxy,
+youtube_proxy_set_user_auth (YoutubeProxy *self,
                              const gchar  *user_auth)
 {
-  YoutubeProxyPrivate *priv = proxy->priv;
+  YoutubeProxyPrivate *priv = youtube_proxy_get_instance_private (self);
 
   priv->user_auth = g_strdup (user_auth);
 }
 
 static gchar *
-_construct_upload_atom_xml (GHashTable *fields, gboolean incomplete)
+_construct_upload_atom_xml (GHashTable *fields,
+                            gboolean    incomplete)
 {
   GHashTableIter iter;
   gpointer key, value;
@@ -215,7 +228,7 @@ _set_upload_headers (YoutubeProxy *self,
                      SoupMessageHeaders *headers,
                      const gchar *filename)
 {
-  YoutubeProxyPrivate *priv = self->priv;
+  YoutubeProxyPrivate *priv = youtube_proxy_get_instance_private (self);
   gchar *user_auth_header;
   gchar *devkey_header;
   gchar *basename;

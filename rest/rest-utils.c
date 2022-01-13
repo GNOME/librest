@@ -1,9 +1,6 @@
-/*
- * librest - RESTful web services access
- * Copyright (c) 2010 Intel Corporation.
+/* rest-utils.c
  *
- * Authors: Rob Bradford <rob@linux.intel.com>
- *          Ross Burton <ross@linux.intel.com>
+ * Copyright 2021 Günther Wagner <info@gunibert.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -17,17 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
  */
 
-#include "lastfm-proxy.h"
+#include "rest-utils.h"
 
-#define LASTFM_PROXY_GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), LASTFM_TYPE_PROXY, LastfmProxyPrivate))
+/**
+ * random_string:
+ * @length: the length of the random string
+ *
+ * Creates a random string from a given alphabeth with length @length
+ *
+ * Returns: (transfer full): a random string
+ */
+gchar *
+random_string (guint length)
+{
+  g_autoptr(GRand) rand = g_rand_new ();
+  gchar *buffer = g_slice_alloc0 (sizeof (gchar) * length + 1);
+  gchar alphabeth[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
 
-struct _LastfmProxyPrivate {
-  char *api_key;
-  char *secret;
-  char *session_key;
-};
+  for (guint i = 0; i < length; i++)
+    {
+      buffer[i] = alphabeth[g_rand_int (rand) % (sizeof (alphabeth) - 1)];
+    }
+  buffer[length] = '\0';
+
+  return buffer;
+}
 

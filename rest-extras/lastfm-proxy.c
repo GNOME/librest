@@ -26,17 +26,25 @@
 #include <rest/rest-proxy.h>
 #include <libsoup/soup.h>
 #include "lastfm-proxy.h"
-#include "lastfm-proxy-private.h"
 #include "lastfm-proxy-call.h"
 
-G_DEFINE_TYPE (LastfmProxy, lastfm_proxy, REST_TYPE_PROXY)
+typedef struct {
+  char *api_key;
+  char *secret;
+  char *session_key;
+} LastfmProxyPrivate;
+
+G_DEFINE_TYPE_WITH_PRIVATE (LastfmProxy, lastfm_proxy, REST_TYPE_PROXY)
 
 enum {
   PROP_0,
   PROP_API_KEY,
   PROP_SECRET,
   PROP_SESSION_KEY,
+  N_PROPS,
 };
+
+static GParamSpec *properties [N_PROPS];
 
 GQuark
 lastfm_proxy_error_quark (void)
@@ -57,10 +65,13 @@ _new_call (RestProxy *proxy)
 }
 
 static void
-lastfm_proxy_get_property (GObject *object, guint property_id,
-                           GValue *value, GParamSpec *pspec)
+lastfm_proxy_get_property (GObject    *object,
+                           guint       property_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
-  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (object);
+  LastfmProxy *self = LASTFM_PROXY (object);
+  LastfmProxyPrivate *priv = lastfm_proxy_get_instance_private (self);
 
   switch (property_id) {
   case PROP_API_KEY:
@@ -81,7 +92,8 @@ static void
 lastfm_proxy_set_property (GObject *object, guint property_id,
                            const GValue *value, GParamSpec *pspec)
 {
-  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (object);
+  LastfmProxy *self = LASTFM_PROXY (object);
+  LastfmProxyPrivate *priv = lastfm_proxy_get_instance_private (self);
 
   switch (property_id) {
   case PROP_API_KEY:
@@ -107,7 +119,8 @@ lastfm_proxy_set_property (GObject *object, guint property_id,
 static void
 lastfm_proxy_finalize (GObject *object)
 {
-  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (object);
+  LastfmProxy *self = LASTFM_PROXY (object);
+  LastfmProxyPrivate *priv = lastfm_proxy_get_instance_private (self);
 
   g_free (priv->api_key);
   g_free (priv->secret);
@@ -116,18 +129,11 @@ lastfm_proxy_finalize (GObject *object)
   G_OBJECT_CLASS (lastfm_proxy_parent_class)->finalize (object);
 }
 
-#ifndef G_PARAM_STATIC_STRINGS
-#define G_PARAM_STATIC_STRINGS (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
-#endif
-
 static void
 lastfm_proxy_class_init (LastfmProxyClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   RestProxyClass *proxy_class = REST_PROXY_CLASS (klass);
-  GParamSpec *pspec;
-
-  g_type_class_add_private (klass, sizeof (LastfmProxyPrivate));
 
   object_class->get_property = lastfm_proxy_get_property;
   object_class->set_property = lastfm_proxy_set_property;
@@ -135,32 +141,38 @@ lastfm_proxy_class_init (LastfmProxyClass *klass)
 
   proxy_class->new_call = _new_call;
 
-  pspec = g_param_spec_string ("api-key", "api-key",
-                               "The API key", NULL,
-                               G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class,
-                                   PROP_API_KEY,
-                                   pspec);
+  properties [PROP_API_KEY] =
+    g_param_spec_string ("api-key",
+                         "api-key",
+                         "The API key",
+                         NULL,
+                         (G_PARAM_READWRITE |
+                          G_PARAM_CONSTRUCT_ONLY |
+                          G_PARAM_STATIC_STRINGS));
 
-  pspec = g_param_spec_string ("secret", "secret",
-                               "The API key secret", NULL,
-                               G_PARAM_READWRITE|G_PARAM_CONSTRUCT_ONLY|G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class,
-                                   PROP_SECRET,
-                                   pspec);
+  properties [PROP_SECRET] =
+    g_param_spec_string ("secret",
+                         "secret",
+                         "The API key secret",
+                         NULL,
+                         (G_PARAM_READWRITE |
+                          G_PARAM_CONSTRUCT_ONLY |
+                          G_PARAM_STATIC_STRINGS));
 
-  pspec = g_param_spec_string ("session-key", "session-key",
-                               "The session key", NULL,
-                               G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class,
-                                   PROP_SESSION_KEY,
-                                   pspec);
+  properties [PROP_SESSION_KEY] =
+    g_param_spec_string ("session-key",
+                         "session-key",
+                         "The session key",
+                         NULL,
+                         (G_PARAM_READWRITE |
+                          G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_properties (object_class, N_PROPS, properties);
 }
 
 static void
 lastfm_proxy_init (LastfmProxy *self)
 {
-  self->priv = LASTFM_PROXY_GET_PRIVATE (self);
 }
 
 RestProxy *
@@ -196,9 +208,12 @@ lastfm_proxy_new_with_session (const char *api_key,
  * freed.
  */
 const char *
-lastfm_proxy_get_api_key (LastfmProxy *proxy)
+lastfm_proxy_get_api_key (LastfmProxy *self)
 {
-  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (proxy);
+  LastfmProxyPrivate *priv = lastfm_proxy_get_instance_private (self);
+
+  g_return_val_if_fail (LASTFM_IS_PROXY (self), NULL);
+
   return priv->api_key;
 }
 
@@ -212,9 +227,12 @@ lastfm_proxy_get_api_key (LastfmProxy *proxy)
  * freed.
  */
 const char *
-lastfm_proxy_get_secret (LastfmProxy *proxy)
+lastfm_proxy_get_secret (LastfmProxy *self)
 {
-  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (proxy);
+  LastfmProxyPrivate *priv = lastfm_proxy_get_instance_private (self);
+
+  g_return_val_if_fail (LASTFM_IS_PROXY (self), NULL);
+
   return priv->secret;
 }
 
@@ -228,9 +246,12 @@ lastfm_proxy_get_secret (LastfmProxy *proxy)
  * by #LastfmProxy and should not be freed.
  */
 const char *
-lastfm_proxy_get_session_key (LastfmProxy *proxy)
+lastfm_proxy_get_session_key (LastfmProxy *self)
 {
-  LastfmProxyPrivate *priv = LASTFM_PROXY_GET_PRIVATE (proxy);
+  LastfmProxyPrivate *priv = lastfm_proxy_get_instance_private (self);
+
+  g_return_val_if_fail (LASTFM_IS_PROXY (self), NULL);
+
   return priv->session_key;
 }
 
@@ -242,12 +263,14 @@ lastfm_proxy_get_session_key (LastfmProxy *proxy)
  * Set the session key.
  */
 void
-lastfm_proxy_set_session_key (LastfmProxy *proxy, const char *session_key)
+lastfm_proxy_set_session_key (LastfmProxy *self,
+                              const char  *session_key)
 {
   LastfmProxyPrivate *priv;
 
-  g_return_if_fail (LASTFM_IS_PROXY (proxy));
-  priv = LASTFM_PROXY_GET_PRIVATE (proxy);
+  g_return_if_fail (LASTFM_IS_PROXY (self));
+
+  priv = lastfm_proxy_get_instance_private (self);
 
   if (priv->session_key)
     g_free (priv->session_key);
@@ -256,17 +279,18 @@ lastfm_proxy_set_session_key (LastfmProxy *proxy, const char *session_key)
 }
 
 char *
-lastfm_proxy_sign (LastfmProxy *proxy, GHashTable *params)
+lastfm_proxy_sign (LastfmProxy *self,
+                   GHashTable  *params)
 {
   LastfmProxyPrivate *priv;
   GString *s;
   GList *keys;
   char *md5;
 
-  g_return_val_if_fail (LASTFM_IS_PROXY (proxy), NULL);
+  g_return_val_if_fail (LASTFM_IS_PROXY (self), NULL);
   g_return_val_if_fail (params, NULL);
 
-  priv = LASTFM_PROXY_GET_PRIVATE (proxy);
+  priv = lastfm_proxy_get_instance_private (self);
 
   s = g_string_new (NULL);
 
@@ -295,13 +319,18 @@ lastfm_proxy_sign (LastfmProxy *proxy, GHashTable *params)
 }
 
 char *
-lastfm_proxy_build_login_url (LastfmProxy *proxy, const char *token)
+lastfm_proxy_build_login_url (LastfmProxy *self,
+                              const char  *token)
 {
-  g_return_val_if_fail (LASTFM_IS_PROXY (proxy), NULL);
+  LastfmProxyPrivate *priv;
+
+  g_return_val_if_fail (LASTFM_IS_PROXY (self), NULL);
   g_return_val_if_fail (token, NULL);
 
+  priv = lastfm_proxy_get_instance_private (self);
+
   return g_strdup_printf ("http://www.last.fm/api/auth/?api_key=%s&token=%s",
-                          proxy->priv->api_key,
+                          priv->api_key,
                           token);
 }
 
@@ -316,7 +345,8 @@ lastfm_proxy_build_login_url (LastfmProxy *proxy, const char *token)
  * Returns: %TRUE if this response is successful, %FALSE otherwise.
  */
 gboolean
-lastfm_proxy_is_successful (RestXmlNode *root, GError **error)
+lastfm_proxy_is_successful (RestXmlNode  *root,
+                            GError      **error)
 {
   RestXmlNode *node;
 

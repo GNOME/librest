@@ -49,9 +49,12 @@ if get_option('introspection')
   librest_extras_gir = gnome.generate_gir(librest_extras_lib,
     sources: librest_extras_sources + librest_extras_headers,
     namespace: 'RestExtras',
+    symbol_prefix: 'rest_extras',
+    identifier_prefix: 'RestExtras',
     nsversion: librest_api_version,
     includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version), librest_gir[0] ],
     extra_args: [ '--accept-unprefixed' ],
+    dependencies: librest_extras_deps,
     install: true,
   )
   

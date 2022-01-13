@@ -31,8 +31,6 @@
 #include "rest-private.h"
 
 
-#define GET_PRIVATE(o) rest_proxy_get_instance_private(REST_PROXY(o))
-
 typedef struct _RestProxyPrivate RestProxyPrivate;
 
 struct _RestProxyPrivate {
@@ -74,16 +72,14 @@ enum {
 static guint signals[LAST_SIGNAL] = { 0 };
 
 
-static gboolean _rest_proxy_simple_run_valist (RestProxy *proxy, 
-                                               char     **payload, 
-                                               goffset   *len,
-                                               GError   **error,
-                                               va_list    params);
-
-static RestProxyCall *_rest_proxy_new_call (RestProxy *proxy);
-
-static gboolean _rest_proxy_bind_valist (RestProxy *proxy,
-                                         va_list    params);
+static gboolean       _rest_proxy_simple_run_valist (RestProxy  *proxy,
+                                                     char      **payload,
+                                                     goffset    *len,
+                                                     GError    **error,
+                                                     va_list     params);
+static RestProxyCall *_rest_proxy_new_call          (RestProxy  *proxy);
+static gboolean       _rest_proxy_bind_valist       (RestProxy  *proxy,
+                                                     va_list     params);
 
 GQuark
 rest_proxy_error_quark (void)
@@ -97,7 +93,8 @@ rest_proxy_get_property (GObject   *object,
                          GValue     *value,
                          GParamSpec *pspec)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (object);
+  RestProxy *self = REST_PROXY (object);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
 
   switch (property_id) {
     case PROP_URL_FORMAT:
@@ -145,7 +142,8 @@ rest_proxy_set_property (GObject      *object,
                          const GValue *value,
                          GParamSpec   *pspec)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (object);
+  RestProxy *self = REST_PROXY (object);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
 
   switch (property_id) {
     case PROP_URL_FORMAT:
@@ -199,7 +197,8 @@ rest_proxy_set_property (GObject      *object,
 static void
 rest_proxy_dispose (GObject *object)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (object);
+  RestProxy *self = REST_PROXY (object);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
 
   g_clear_object (&priv->session);
 
@@ -226,7 +225,7 @@ authenticate (RestProxy   *self,
               gboolean     retrying,
               SoupSession *session)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (self);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
   RestProxyAuth *rest_auth;
   gboolean try_auth;
 
@@ -241,7 +240,8 @@ authenticate (RestProxy   *self,
 static void
 rest_proxy_constructed (GObject *object)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (object);
+  RestProxy *self = REST_PROXY (object);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
 
   if (!priv->disable_cookies) {
     SoupSessionFeature *cookie_jar =
@@ -270,7 +270,8 @@ rest_proxy_constructed (GObject *object)
 static void
 rest_proxy_finalize (GObject *object)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (object);
+  RestProxy *self = REST_PROXY (object);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
 
   g_free (priv->url);
   g_free (priv->url_format);
@@ -440,14 +441,17 @@ transform_tls_database_to_ssl_ca_file (GBinding     *binding,
 static void
 rest_proxy_init (RestProxy *self)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (self);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
+#ifdef REST_SYSTEM_CA_FILE
   GTlsDatabase *tls_database;
+#endif
 
 #ifndef WITH_SOUP_2
   priv->ssl_strict = TRUE;
 #endif
 
   priv->session = soup_session_new ();
+  soup_session_remove_feature_by_type (priv->session, SOUP_TYPE_AUTH_MANAGER);
 
 #ifdef REST_SYSTEM_CA_FILE
   /* with ssl-strict (defaults TRUE) setting ssl-ca-file forces all
@@ -532,7 +536,7 @@ static gboolean
 _rest_proxy_bind_valist (RestProxy *proxy,
                          va_list    params)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
 
   g_return_val_if_fail (proxy != NULL, FALSE);
   g_return_val_if_fail (priv->url_format != NULL, FALSE);
@@ -583,7 +587,7 @@ rest_proxy_set_user_agent (RestProxy  *proxy,
 const gchar *
 rest_proxy_get_user_agent (RestProxy *proxy)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
 
@@ -613,9 +617,10 @@ rest_proxy_get_user_agent (RestProxy *proxy)
  * Since: 0.7.92
  */
 void
-rest_proxy_add_soup_feature (RestProxy *proxy, SoupSessionFeature *feature)
+rest_proxy_add_soup_feature (RestProxy          *proxy,
+                             SoupSessionFeature *feature)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
 
   g_return_if_fail (REST_IS_PROXY(proxy));
   g_return_if_fail (feature != NULL);
@@ -659,7 +664,7 @@ rest_proxy_new_call (RestProxy *proxy)
 gboolean
 _rest_proxy_get_binding_required (RestProxy *proxy)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), FALSE);
 
@@ -669,14 +674,14 @@ _rest_proxy_get_binding_required (RestProxy *proxy)
 const gchar *
 _rest_proxy_get_bound_url (RestProxy *proxy)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
 
   if (!priv->url && !priv->binding_required)
-  {
-    priv->url = g_strdup (priv->url_format);
-  }
+    {
+      priv->url = g_strdup (priv->url_format);
+    }
 
   return priv->url;
 }
@@ -763,7 +768,7 @@ message_finished_cb (SoupSession *session,
   GError *error = NULL;
 
   body = g_bytes_new (message->response_body->data,
-                      message->response_body->length + 1);
+                      message->response_body->length);
   data->callback (message, body, error, data->user_data);
   g_free (data);
 }
@@ -791,7 +796,7 @@ _rest_proxy_queue_message (RestProxy                  *proxy,
                            RestMessageFinishedCallback callback,
                            gpointer                    user_data)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
   RestMessageQueueData *data;
 
   g_return_if_fail (REST_IS_PROXY (proxy));
@@ -841,7 +846,7 @@ _rest_proxy_send_message_async (RestProxy          *proxy,
                                 GAsyncReadyCallback callback,
                                 gpointer            user_data)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
   GTask *task;
 
   task = g_task_new (proxy, cancellable, callback, user_data);
@@ -868,7 +873,7 @@ _rest_proxy_cancel_message (RestProxy   *proxy,
                             SoupMessage *message)
 {
 #ifdef WITH_SOUP_2
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
 
   g_return_if_fail (REST_IS_PROXY (proxy));
   g_return_if_fail (SOUP_IS_MESSAGE (message));
@@ -885,7 +890,7 @@ _rest_proxy_send_message (RestProxy    *proxy,
                           GCancellable *cancellable,
                           GError      **error)
 {
-  RestProxyPrivate *priv = GET_PRIVATE (proxy);
+  RestProxyPrivate *priv = rest_proxy_get_instance_private (proxy);
   GBytes *body;
 
   g_return_val_if_fail (REST_IS_PROXY (proxy), NULL);
@@ -894,7 +899,7 @@ _rest_proxy_send_message (RestProxy    *proxy,
 #ifdef WITH_SOUP_2
   soup_session_send_message (priv->session, message);
   body = g_bytes_new (message->response_body->data,
-                      message->response_body->length + 1);
+                      message->response_body->length);
 #else
   body = soup_session_send_and_read (priv->session,
                                      message,

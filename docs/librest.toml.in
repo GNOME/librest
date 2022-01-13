@@ -6,7 +6,7 @@ repository_url = "https://gitlab.gnome.org/GNOME/librest.git"
 authors = "Günther Wagner"
 license = "LGPL-2.1-or-later"
 description = "REST client library"
-dependencies = [ "GObject-2.0", "Gio-2.0", "Soup-2.4" ]
+dependencies = [ "GObject-2.0", "Gio-2.0", "Soup-@SOUP_VERSION@" ]
 devhelp = true
 search_index = true
 
@@ -20,10 +20,10 @@ search_index = true
   description = "GObject interfaces and objects"
   docs_url = "https://developer.gnome.org/gio/stable"
 
-  [dependencies."Soup-2.4"]
+  [dependencies."Soup-@SOUP_VERSION@"]
   name = "Soup"
   description = "HTTP library"
-  docs_url = "https://developer.gnome.org/libsoup/stable"
+  docs_url = "https://libsoup.org/libsoup-@SOUP_VERSION@/index.html"
 
 [theme]
 name = "basic"

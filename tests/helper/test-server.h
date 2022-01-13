@@ -1,10 +1,7 @@
-/*
- * librest - RESTful web services access
- * Copyright (c) 2008, 2009, Intel Corporation.
+/* test-server.h
  *
- * Authors: Rob Bradford <rob@linux.intel.com>
- *          Ross Burton <ross@linux.intel.com>
- * 
+ * Copyright 2021 Günther Wagner <info@gunibert.de>
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
  * version 2.1, as published by the Free Software Foundation.
@@ -17,17 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
  */
 
-#include "flickr-proxy.h"
+#pragma once
 
-#define FLICKR_PROXY_GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), FLICKR_TYPE_PROXY, FlickrProxyPrivate))
+#include <glib.h>
+#include <libsoup/soup.h>
 
-struct _FlickrProxyPrivate {
-  char *api_key;
-  char *shared_secret;
-  char *token;
-};
+G_BEGIN_DECLS
 
+SoupServer *test_server_new           (void);
+void        test_server_run_in_thread (SoupServer *server);
+gchar      *test_server_get_uri       (SoupServer *server,
+                                       const char *scheme,
+                                       const char *host);
+
+G_END_DECLS
