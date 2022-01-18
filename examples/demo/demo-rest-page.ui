@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="DemoRestPage" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="margin-start">6</property>
+    <property name="margin-end">6</property>
+    <property name="margin-top">6</property>
+    <property name="margin-bottom">6</property>
+    <property name="spacing">6</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="hexpand">true</property>
+        <child>
+          <object class="GtkDropDown" id="httpmethod">
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="host">
+            <property name="hexpand">true</property>
+            <property name="placeholder-text">REST Host e. g. https://www.gitlab.com/api/v4/</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="function">
+            <property name="placeholder-text">REST Function</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Send</property>
+            <signal name="clicked" handler="on_send_clicked" swapped="no" object="DemoRestPage"/>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+        </child>
+        <style>
+          <class name="linked"/>
+        </style>
+      </object>
+    </child>
+    <child>
+      <object class="GtkNotebook" id="notebook">
+        <child>
+          <object class="GtkScrolledWindow" id="body">
+            <property name="vexpand">true</property>
+            <child>
+              <object class="GtkSourceView" id="sourceview">
+                <property name="monospace">true</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

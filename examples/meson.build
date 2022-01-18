@@ -24,3 +24,5 @@ foreach name : example_names
     include_directories: config_h_inc,
   )
 endforeach
+
+subdir('demo')

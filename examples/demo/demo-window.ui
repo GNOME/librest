@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="DemoWindow" parent="AdwApplicationWindow">
+    <property name="title">Librest Demo</property>
+    <property name="default-width">900</property>
+    <property name="default-height">600</property>
+    <style>
+      <class name="devel"/>
+    </style>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkHeaderBar" id="headerbar">
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="AdwTabBar">
+                <property name="view">tabview</property>
+                <property name="autohide">false</property>
+                <property name="end-action-widget">
+                  <object class="GtkButton">
+                    <signal name="clicked" handler="on_add_tab_clicked" object="DemoWindow" swapped="no"/>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="icon-name">list-add-symbolic</property>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="flat"/>
+                      <class name="end-action-widget"/>
+                    </style>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwTabView" id="tabview">
+            <property name="vexpand">true</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

@@ -119,6 +119,7 @@ summary({
     'Vapi': get_option('vapi'),
     'Documentation': get_option('gtk_doc'),
     'Tests': get_option('tests'),
+    'Examples': get_option('examples'),
     'Soup 2': get_option('soup2'),
   },
   section: 'Build',
