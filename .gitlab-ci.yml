@@ -15,7 +15,7 @@ build-librest:
       glib2-devel gobject-introspection-devel libxml2-devel meson ninja-build
       libsoup-devel vala json-glib-devel git python3-jinja2 python3-toml python3-typogrify python3-pygments
   script:
-    - meson _build
+    - meson _build -Dexamples=false
     - ninja -C _build
     - bash +x ./.gitlab-ci/run-tests.sh
   artifacts:
