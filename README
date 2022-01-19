@@ -43,6 +43,30 @@ siblings for the nodes of the same type that share the same parent. This makes
 it easy for instance to get a list of all the "photo" nodes in a document from
 the root.
 
+Demo application
+~~~~~~~~~~~~~~~~~~~
+
+A small Postman clone is provided in `examples/demo` to test the requests librest
+is making. Flatpak is the recommended way of building and installing it:
+
+```
+# Add Flathub and the gnome-nightly repo
+flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --user --if-not-exists gnome-nightly https://nightly.gnome.org/gnome-nightly.flatpakrepo
+
+# Install the gnome-nightly Sdk and Platform runtime
+flatpak install --user gnome-nightly org.gnome.Sdk org.gnome.Platform
+```
+
+**Inside** the `examples/demo` folder run:
+```
+flatpak-builder --user --install app org.gnome.Librest.json
+```
+Run the application
+```
+flatpak run org.gnome.RestDemo
+```
+
 [1] - http://en.wikipedia.org/wiki/Representational_State_Transfer
 [2] - http://live.gnome.org/LibSoup
 [3] - http://xmlsoft.org/
