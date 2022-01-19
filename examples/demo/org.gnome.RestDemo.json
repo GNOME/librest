@@ -30,7 +30,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "file:///var/home/gunibert/Projekte/librest"
+                    "url" : "https://gitlab.gnome.org/GNOME/librest.git"
                 }
             ],
             "config-opts" : [
