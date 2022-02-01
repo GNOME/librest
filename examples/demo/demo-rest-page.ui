@@ -203,10 +203,10 @@
                     <property name="child">
                       <object class="GtkGrid">
                         <property name="column-spacing">8</property>
-                        <property name="column-homogeneous">true</property>
                         <property name="row-spacing">6</property>
                         <child>
                           <object class="GtkLabel">
+                            <property name="hexpand">true</property>
                             <property name="label">Client Identifier:</property>
                             <property name="xalign">1.0</property>
                             <layout>
@@ -217,8 +217,19 @@
                         </child>
                         <child>
                           <object class="GtkEntry" id="oauth1_client_identifier">
+                            <property name="hexpand">true</property>
                             <layout>
                               <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="icon-name">dialog-question-symbolic</property>
+                            <property name="tooltip-text">Typically the consumer key and secret can be obtained from the oauth provider.</property>
+                            <layout>
+                              <property name="column">2</property>
                               <property name="row">0</property>
                             </layout>
                           </object>
@@ -264,12 +275,12 @@
                     <property name="child">
                       <object class="GtkGrid">
                         <property name="column-spacing">8</property>
-                        <property name="column-homogeneous">true</property>
                         <property name="row-spacing">6</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="label">Client Identifier:</property>
                             <property name="xalign">1.0</property>
+                            <property name="hexpand">true</property>
                             <layout>
                               <property name="column">0</property>
                               <property name="row">0</property>
@@ -278,8 +289,19 @@
                         </child>
                         <child>
                           <object class="GtkEntry" id="oauth2_client_identifier">
+                            <property name="hexpand">true</property>
                             <layout>
                               <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="icon-name">dialog-question-symbolic</property>
+                            <property name="tooltip-text">Typically the identifier and secret can be obtained from the oauth provider.</property>
+                            <layout>
+                              <property name="column">2</property>
                               <property name="row">0</property>
                             </layout>
                           </object>
