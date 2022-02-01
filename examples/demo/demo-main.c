@@ -19,6 +19,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <glib/gi18n.h>
 #include <adwaita.h>
 #include <gtksourceview/gtksource.h>
 #include "demo-window.h"
@@ -37,6 +38,38 @@ on_activate (GApplication *app, gpointer user_data)
   gtk_window_present (active_window);
 }
 
+static void
+show_about (GSimpleAction *action,
+            GVariant      *state,
+            gpointer       user_data)
+{
+  const char *authors[] = {
+    "Günther Wagner",
+    NULL
+  };
+
+  const char *artists[] = {
+    "Günther Wagner",
+    NULL
+  };
+
+  GtkApplication *app = GTK_APPLICATION (user_data);
+  GtkWindow *window = gtk_application_get_active_window (app);
+
+  gtk_show_about_dialog (window,
+                         "program-name", _("Librest Demo"),
+                         "title", _("About Librest Demo"),
+                         /* "logo-icon-name", "org.gnome.RestDemo", */
+                         "copyright", "Copyright © 2022 Günther Wagner",
+                         "comments", _("Tour of the features in Librest"),
+                         "website", "https://gitlab.gnome.org/GNOME/librest",
+                         "license-type", GTK_LICENSE_LGPL_2_1,
+                         "authors", authors,
+                         "artists", artists,
+                         "translator-credits", _("translator-credits"),
+                         NULL);
+}
+
 gint
 main (gint   argc,
       gchar *argv[])
@@ -47,7 +80,14 @@ main (gint   argc,
   g_set_prgname ("librest-demo");
   g_set_application_name ("librest-demo");
 
-  GtkApplication *app = gtk_application_new ("org.gnome.RestDemo", G_APPLICATION_FLAGS_NONE);
+  static GActionEntry app_entries[] = {
+    { "about", show_about, NULL, NULL, NULL },
+  };
+
+  AdwApplication *app = adw_application_new ("org.gnome.RestDemo", G_APPLICATION_FLAGS_NONE);
+  g_action_map_add_action_entries (G_ACTION_MAP (app),
+                                   app_entries, G_N_ELEMENTS (app_entries),
+                                   app);
   g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL);
 
   return g_application_run (G_APPLICATION (app), argc, argv);

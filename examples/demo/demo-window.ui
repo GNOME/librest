@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_About Librest Demo</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
   <template class="DemoWindow" parent="AdwApplicationWindow">
     <property name="title">Librest Demo</property>
     <property name="default-width">900</property>
@@ -13,6 +21,12 @@
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkHeaderBar" id="headerbar">
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="menu-model">primary_menu</property>
+                <property name="icon-name">open-menu-symbolic</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
