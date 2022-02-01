@@ -1,3 +1,8 @@
+Overview of changes for 0.91
+============================
+* removed RestAuth object
+* added an demo application to showcase librest
+
 Overview of changes for 0.9
 ===========================
 * new oauth2 proxy to accomplish pkce workflow with api endpoints
