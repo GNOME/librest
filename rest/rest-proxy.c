@@ -64,14 +64,6 @@ enum
   PROP_SSL_CA_FILE
 };
 
-enum {
-  AUTHENTICATE,
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL] = { 0 };
-
-
 static gboolean       _rest_proxy_simple_run_valist (RestProxy  *proxy,
                                                      char      **payload,
                                                      goffset    *len,
@@ -205,19 +197,10 @@ rest_proxy_dispose (GObject *object)
   G_OBJECT_CLASS (rest_proxy_parent_class)->dispose (object);
 }
 
-static gboolean
-default_authenticate_cb (RestProxy *self,
-                         G_GNUC_UNUSED RestProxyAuth *auth,
-                         gboolean retrying)
-{
-  /* We only want to try the credentials once, otherwise we get in an
-   * infinite loop with failed credentials, retrying the same invalid
-   * ones again and again
-   */
-  return !retrying;
-}
-
 #ifdef WITH_SOUP_2
+/* Note: authentication on Session level got removed from libsoup3. This is
+ * contained in the #RestCall now
+ */
 static void
 authenticate (RestProxy   *self,
               SoupMessage *msg,
@@ -226,14 +209,13 @@ authenticate (RestProxy   *self,
               SoupSession *session)
 {
   RestProxyPrivate *priv = rest_proxy_get_instance_private (self);
-  RestProxyAuth *rest_auth;
-  gboolean try_auth;
 
-  rest_auth = rest_proxy_auth_new (self, session, msg, soup_auth);
-  g_signal_emit(self, signals[AUTHENTICATE], 0, rest_auth, retrying, &try_auth);
-  if (try_auth && !rest_proxy_auth_is_paused (rest_auth))
-    soup_auth_authenticate (soup_auth, priv->username, priv->password);
-  g_object_unref (G_OBJECT (rest_auth));
+  g_assert (REST_IS_PROXY (self));
+
+  if (retrying)
+    return;
+
+  soup_auth_authenticate (soup_auth, priv->username, priv->password);
 }
 #endif
 
@@ -373,42 +355,6 @@ rest_proxy_class_init (RestProxyClass *klass)
   g_object_class_install_property (object_class,
                                    PROP_SSL_CA_FILE,
                                    pspec);
-
-  /**
-   * RestProxy::authenticate:
-   * @proxy: the proxy
-   * @auth: authentication state
-   * @retrying: %TRUE if this is the second (or later) attempt
-   *
-   * Emitted when the proxy requires authentication. If
-   * credentials are available, set the 'username' and 'password'
-   * properties on @proxy and return %TRUE from the callback.
-   * This will cause the signal emission to stop, and librest will
-   * try to connect with these credentials
-   * If these credentials fail, the signal will be
-   * emitted again, with @retrying set to %TRUE, which will
-   * continue until %FALSE is returned from the callback.
-   *
-   * If you call rest_proxy_auth_pause() on @auth before
-   * returning, then you can the authentication credentials on
-   * the #RestProxy object asynchronously. You have to make sure
-   * that @auth does not get destroyed with g_object_ref().
-   * You can then unpause the authentication with
-   * rest_proxy_auth_unpause() when everything is ready for it
-   * to continue.
-   **/
-  signals[AUTHENTICATE] =
-      g_signal_new ("authenticate",
-                    G_OBJECT_CLASS_TYPE (object_class),
-                    G_SIGNAL_RUN_LAST,
-                    G_STRUCT_OFFSET (RestProxyClass, authenticate),
-                    g_signal_accumulator_true_handled, NULL,
-                    g_cclosure_user_marshal_BOOLEAN__OBJECT_BOOLEAN,
-                    G_TYPE_BOOLEAN, 2,
-                    REST_TYPE_PROXY_AUTH,
-                    G_TYPE_BOOLEAN);
-
-  proxy_class->authenticate = default_authenticate_cb;
 }
 
 static gboolean
@@ -451,7 +397,6 @@ rest_proxy_init (RestProxy *self)
 #endif
 
   priv->session = soup_session_new ();
-  soup_session_remove_feature_by_type (priv->session, SOUP_TYPE_AUTH_MANAGER);
 
 #ifdef REST_SYSTEM_CA_FILE
   /* with ssl-strict (defaults TRUE) setting ssl-ca-file forces all

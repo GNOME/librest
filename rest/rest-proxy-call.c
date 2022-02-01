@@ -762,22 +762,16 @@ authenticate (RestProxyCall *call,
               SoupMessage   *message)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  RestProxyAuth *rest_auth;
-  gboolean try_auth;
+  g_autofree char *username;
+  g_autofree char *password;
 
-  rest_auth = rest_proxy_auth_new (priv->proxy, NULL, message, soup_auth);
-  g_signal_emit_by_name (priv->proxy, "authenticate", rest_auth, retrying, &try_auth);
-  if (try_auth && !rest_proxy_auth_is_paused (rest_auth)) {
-    char *username, *password;
+  if (retrying)
+    return FALSE;
 
-    g_object_get (priv->proxy, "username", &username, "password", &password, NULL);
-    soup_auth_authenticate (soup_auth, username, password);
-    g_free (username);
-    g_free (password);
-  }
-  g_object_unref (rest_auth);
+  g_object_get (priv->proxy, "username", &username, "password", &password, NULL);
+  soup_auth_authenticate (soup_auth, username, password);
 
-  return try_auth;
+  return TRUE;
 }
 
 static gboolean

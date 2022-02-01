@@ -1,6 +1,6 @@
 /* rest.h
  *
- * Copyright 2021 Günther Wagner <info@gunibert.de>
+ * Copyright 2021-2022 Günther Wagner <info@gunibert.de>
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -27,6 +27,8 @@ G_BEGIN_DECLS
 #define REST_INSIDE
 # include "rest-proxy.h"
 # include "rest-proxy-call.h"
+# include "oauth-proxy.h"
+# include "oauth-proxy-call.h"
 # include "rest-oauth2-proxy.h"
 # include "rest-utils.h"
 # include "rest-pkce-code-challenge.h"
