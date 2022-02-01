@@ -891,13 +891,19 @@ prepare_message (RestProxyCall *call, GError **error_out)
     hash = rest_params_as_string_hash_table (priv->params);
 
 #ifdef WITH_SOUP_2
-    message = soup_form_request_new_from_hash (priv->method,
-                                               priv->url,
-                                               hash);
+    if (g_hash_table_size (hash) == 0)
+      message = soup_message_new (priv->method, priv->url);
+    else
+      message = soup_form_request_new_from_hash (priv->method,
+                                                 priv->url,
+                                                 hash);
 #else
-    message = soup_message_new_from_encoded_form (priv->method,
-                                                  priv->url,
-                                                  soup_form_encode_hash (hash));
+    if (g_hash_table_size (hash) == 0)
+      message = soup_message_new (priv->method, priv->url);
+    else
+      message = soup_message_new_from_encoded_form (priv->method,
+                                                    priv->url,
+                                                    soup_form_encode_hash (hash));
 #endif
 
     g_hash_table_unref (hash);
