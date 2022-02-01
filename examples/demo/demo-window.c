@@ -38,14 +38,6 @@ demo_window_new (GtkApplication *app)
 }
 
 static void
-demo_window_finalize (GObject *object)
-{
-  DemoWindow *self = (DemoWindow *)object;
-
-  G_OBJECT_CLASS (demo_window_parent_class)->finalize (object);
-}
-
-static void
 on_add_tab_clicked (GtkButton *btn,
                     gpointer   user_data)
 {
@@ -66,10 +58,8 @@ on_add_tab_clicked (GtkButton *btn,
 static void
 demo_window_class_init (DemoWindowClass *klass)
 {
-  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->finalize = demo_window_finalize;
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/RestDemo/demo-window.ui");
   gtk_widget_class_bind_template_child (widget_class, DemoWindow, tabview);
   gtk_widget_class_bind_template_callback (widget_class, on_add_tab_clicked);

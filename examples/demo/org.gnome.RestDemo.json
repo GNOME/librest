@@ -24,6 +24,17 @@
     ],
     "modules" : [
         {
+            "name" : "libsoup",
+            "builddir" : true,
+            "buildsystem" : "meson",
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/libsoup.git"
+                }
+            ]
+        },
+        {
             "name" : "librest-demo",
             "builddir" : true,
             "buildsystem" : "meson",
@@ -34,7 +45,8 @@
                 }
             ],
             "config-opts" : [
-                "-Dgtk_doc=false"
+                "-Dgtk_doc=false",
+                "-Dsoup2=false"
             ]
         }
     ],

@@ -23,6 +23,7 @@
 #include <adwaita.h>
 #include <gtksourceview/gtksource.h>
 #include "demo-window.h"
+#include "demo-table.h"
 
 static void
 on_activate (GApplication *app, gpointer user_data)
@@ -76,6 +77,7 @@ main (gint   argc,
 {
   adw_init ();
   gtk_source_init ();
+  g_type_ensure (DEMO_TYPE_TABLE);
 
   g_set_prgname ("librest-demo");
   g_set_application_name ("librest-demo");

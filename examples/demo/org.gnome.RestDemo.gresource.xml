@@ -3,5 +3,7 @@
   <gresource prefix="/org/gnome/RestDemo">
     <file>demo-window.ui</file>
     <file>demo-rest-page.ui</file>
+    <file>demo-table-row.ui</file>
+    <file>style.css</file>
   </gresource>
 </gresources>

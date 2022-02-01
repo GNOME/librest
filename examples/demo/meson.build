@@ -2,6 +2,8 @@ demo_sources = [
   'demo-main.c',
   'demo-window.c',
   'demo-rest-page.c',
+  'demo-table.c',
+  'demo-table-row.c',
 ]
 
 demo_deps = [

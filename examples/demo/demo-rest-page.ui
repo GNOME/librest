@@ -53,6 +53,339 @@
             </child>
           </object>
         </child>
+        <child>
+          <object class="GtkScrolledWindow" id="params">
+            <child>
+              <object class="DemoTable" id="paramslb">
+                <property name="title">New Param...</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="authentication">
+            <property name="orientation">horizontal</property>
+            <property name="margin-start">6</property>
+            <property name="margin-end">6</property>
+            <property name="margin-top">6</property>
+            <property name="margin-bottom">6</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkDropDown" id="authmethods">
+                <property name="valign">start</property>
+                <property name="width-request">100</property>
+                <signal name="notify::selected-item" handler="on_auth_method_activated" swapped="no" object="DemoRestPage"/>
+                <property name="model">
+                  <object class="GtkStringList" id="auth_method_options">
+                    <items>
+                      <item>No Auth</item>
+                      <item>Basic</item>
+                      <item>Digest</item>
+                      <item>OAuth1</item>
+                      <item>OAuth2</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStack" id="authentication_stack">
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">no_auth</property>
+                    <property name="child">
+                      <object class="GtkBox"/>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">basic</property>
+                    <property name="child">
+                      <object class="GtkGrid">
+                        <property name="column-spacing">8</property>
+                        <property name="column-homogeneous">true</property>
+                        <property name="row-spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Username:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="basic_username">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Password:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="basic_password">
+                            <property name="visibility">false</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">digest</property>
+                    <property name="child">
+                      <object class="GtkGrid">
+                        <property name="column-spacing">8</property>
+                        <property name="column-homogeneous">true</property>
+                        <property name="row-spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Username:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="digest_username">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Password:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="digest_password">
+                            <property name="visibility">false</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">oauth1</property>
+                    <property name="child">
+                      <object class="GtkGrid">
+                        <property name="column-spacing">8</property>
+                        <property name="column-homogeneous">true</property>
+                        <property name="row-spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Client Identifier:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="oauth1_client_identifier">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Client Secret:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="oauth1_client_secret">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="oauth1_get_access_token">
+                            <property name="label">Get access token...</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">2</property>
+                            </layout>
+                            <signal name="clicked" handler="on_oauth1_get_access_token_clicked" swapped="no" object="DemoRestPage"/>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">oauth2</property>
+                    <property name="child">
+                      <object class="GtkGrid">
+                        <property name="column-spacing">8</property>
+                        <property name="column-homogeneous">true</property>
+                        <property name="row-spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Client Identifier:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="oauth2_client_identifier">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Client Secret:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="oauth2_client_secret">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Authorization URL:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="oauth2_auth_url">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Token URL:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">3</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="oauth2_token_url">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">3</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Redirect URL:</property>
+                            <property name="xalign">1.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">4</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="oauth2_redirect_url">
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">4</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="oauth2_get_access_token">
+                            <property name="label">Get access token...</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">5</property>
+                            </layout>
+                            <signal name="clicked" handler="on_oauth2_get_access_token_clicked" swapped="no" object="DemoRestPage"/>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="headers">
+            <child>
+              <object class="DemoTable" id="headerslb">
+                <property name="title">New Header...</property>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </template>
