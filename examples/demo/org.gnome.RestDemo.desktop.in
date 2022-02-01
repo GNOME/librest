@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Librest Demo
+Exec=librest-demo
+Keywords=librest;
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true
