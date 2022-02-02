@@ -59,7 +59,7 @@ RestParam  *rest_params_get                  (RestParams      *params,
 void        rest_params_remove               (RestParams      *params,
                                               const char      *name);
 gboolean    rest_params_are_strings          (RestParams      *params);
-GHashTable *rest_params_as_string_hash_table (RestParams      *params);
+GHashTable *rest_params_as_string_hash_table (RestParams      *self);
 void        rest_params_iter_init            (RestParamsIter  *iter,
                                               RestParams      *params);
 gboolean    rest_params_iter_next            (RestParamsIter  *iter,
