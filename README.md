@@ -1,9 +1,8 @@
-librest
-=======
+# librest
 
 This library has been designed to make it easier to access web services that
 claim to be "RESTful". A reasonable definition of what this means can be found
-on Wikipedia [1]. However a reasonable description is that a RESTful service
+on [Wikipedia][1]. However a reasonable description is that a RESTful service
 should have urls that represent remote objects which methods can then be
 called on.
 
@@ -14,14 +13,13 @@ that is just simpler to use compared to other types of APIs they may support
 attempting to support.
 
 It comprises of two parts: the first aims to make it easier to make requests
-by providing a wrapper around libsoup [2], the second aids with XML parsing by
-wrapping libxml2 [3].
+by providing a wrapper around [libsoup][2], the second aids with XML parsing by
+wrapping [libxml2][3].
 
 
 Nightly documentation: <https://gnome.pages.gitlab.gnome.org/librest/>
 
-Making requests
-~~~~~~~~~~~~~~~
+## Making requests
 
 When a proxy is created for a url you are able to present a format string.
 This format string is intended to represent the type of path for a remote
@@ -33,21 +31,19 @@ main loop whilst waiting for an answer.) This has the advantage of allowing us
 to support complex behaviour that depends on the parameters, for instance
 signing a request: a requirement for many web services.
 
-Handling the result
-~~~~~~~~~~~~~~~~~~~
+## Handling the result
 
 Standard XML parsers require a significant amount of work to parse a piece of
 XML. In terms of a SAX parser this involves setting up the functions before
 hand, in terms of a DOM parser this means dealing with complexity of a DOM
 tree. The XML parsing components of librest are designed to try and behave a
-bit like the BeautifulSoup parser [4]. It does this by parsing the XML into an
+bit like the [BeautifulSoup parser][4]. It does this by parsing the XML into an
 easily walkable tree were nodes have children for their descendents and
 siblings for the nodes of the same type that share the same parent. This makes
 it easy for instance to get a list of all the "photo" nodes in a document from
 the root.
 
-Demo application
-~~~~~~~~~~~~~~~~~~~
+## Demo application
 
 A small Postman clone is provided in `examples/demo` to test the requests librest
 is making. Flatpak is the recommended way of building and installing it:
@@ -70,7 +66,7 @@ Run the application
 flatpak run org.gnome.RestDemo
 ```
 
-[1] - http://en.wikipedia.org/wiki/Representational_State_Transfer
-[2] - http://live.gnome.org/LibSoup
-[3] - http://xmlsoft.org/
-[4] - http://www.crummy.com/software/BeautifulSoup/
+[1]: http://en.wikipedia.org/wiki/Representational_State_Transfer
+[2]: http://live.gnome.org/LibSoup
+[3]: http://xmlsoft.org/
+[4]: http://www.crummy.com/software/BeautifulSoup/
