@@ -13,6 +13,7 @@ librest_sources = [
   'rest-params.c',
   'rest-proxy.c',
   'rest-proxy-call.c',
+  'rest-proxy-auth.c',
   'rest-xml-node.c',
   'rest-xml-parser.c',
   'rest-main.c',
@@ -36,6 +37,7 @@ librest_headers = [
   'rest-params.h',
   'rest-proxy-call.h',
   'rest-proxy.h',
+  'rest-proxy-auth.h',
   'rest-xml-node.h',
   'rest-xml-parser.h',
 
