@@ -111,7 +111,7 @@ rest_oauth2_proxy_new_call (RestProxy *proxy)
 {
   RestOAuth2Proxy *self = (RestOAuth2Proxy *)proxy;
   RestProxyCall *call;
-  g_autofree gchar *auth;
+  g_autofree gchar *auth = NULL;
 
   g_return_val_if_fail (REST_IS_OAUTH2_PROXY (self), NULL);
 
@@ -352,7 +352,7 @@ rest_oauth2_proxy_build_authorization_url (RestOAuth2Proxy  *self,
   g_autoptr(GHashTable) params = NULL;
   g_autoptr(GUri) auth = NULL;
   g_autoptr(GUri) authorization_url = NULL;
-  g_autofree gchar *params_string;
+  g_autofree gchar *params_string = NULL;
 
   g_return_val_if_fail (REST_IS_OAUTH2_PROXY (self), NULL);
 

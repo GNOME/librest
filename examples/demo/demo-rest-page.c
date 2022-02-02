@@ -495,7 +495,11 @@ on_send_clicked (GtkButton *btn,
         break;
       }
     }
+#if WITH_SOUP_2
+  SoupLogger *logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
+#else
   SoupLogger *logger = soup_logger_new (SOUP_LOGGER_LOG_BODY);
+#endif
   rest_proxy_add_soup_feature (proxy, SOUP_SESSION_FEATURE (logger));
 
   RestProxyCall *call = rest_proxy_new_call (proxy);
