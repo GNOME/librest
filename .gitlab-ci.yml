@@ -6,6 +6,7 @@ variables:
   MANIFEST_PATH: 'examples/demo/org.gnome.RestDemo.json'
   FLATPAK_MODULE: 'librest-demo'
   FLATPAK_BUILD_DIR: build
+  LAST_ABI_BREAK: "85bd00adfa6e06d3426ce7c9007e68e62f51be14"
 
 image: fedora:36
 
@@ -23,11 +24,12 @@ build-librest:
     - dnf -y install --nogpgcheck redhat-rpm-config
       glib2-devel gobject-introspection-devel libxml2-devel meson ninja-build
       libsoup-devel vala json-glib-devel git python3-jinja2 python3-toml python3-typogrify python3-pygments
-      libadwaita-devel gtksourceview5-devel
+      libadwaita-devel gtksourceview5-devel git libabigail
   script:
     - meson _build -Dexamples=true
     - ninja -C _build
     - bash +x ./.gitlab-ci/run-tests.sh
+    - ./.ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
   artifacts:
     reports:
       junit: "_build/${CI_JOB_NAME}-report.xml"
