@@ -102,6 +102,8 @@ rest_proxy_auth_new (RestProxy *proxy,
  *
  * If @auth is already paused, this function does not
  * do anything.
+ *
+ * Deprecated: 0.9: This object get removed from [class@Rest.Proxy]
  */
 void
 rest_proxy_auth_pause (RestProxyAuth *auth)
@@ -122,6 +124,8 @@ rest_proxy_auth_pause (RestProxyAuth *auth)
  * @auth: a paused #RestProxyAuth
  *
  * Unpauses a paused #RestProxyAuth instance.
+ *
+ * Deprecated: 0.9: This object get removed from [class@Rest.Proxy]
  */
 void
 rest_proxy_auth_unpause (RestProxyAuth *auth)
@@ -152,6 +156,8 @@ rest_proxy_auth_unpause (RestProxyAuth *auth)
  * by cancelling the associated #SoupMessage.
  * It results in returning #GError REST_PROXY_ERROR_CANCELLED
  * to the function that requested the authentication.
+ *
+ * Deprecated: 0.9: This object get removed from [class@Rest.Proxy]
  */
 void
 rest_proxy_auth_cancel (RestProxyAuth *auth)

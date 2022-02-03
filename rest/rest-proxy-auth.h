@@ -64,8 +64,11 @@ typedef struct {
 
 GType rest_proxy_auth_get_type (void);
 
+G_DEPRECATED
 void rest_proxy_auth_pause (RestProxyAuth *auth);
+G_DEPRECATED
 void rest_proxy_auth_unpause (RestProxyAuth *auth);
+G_DEPRECATED
 void rest_proxy_auth_cancel (RestProxyAuth *auth);
 
 G_END_DECLS
