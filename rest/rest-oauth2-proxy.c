@@ -425,6 +425,7 @@ rest_oauth2_proxy_fetch_access_token_async (RestOAuth2Proxy     *self,
   params = g_hash_table_new (g_str_hash, g_str_equal);
 
   g_hash_table_insert (params, "client_id", priv->client_id);
+  g_hash_table_insert (params, "client_secret", priv->client_secret);
   g_hash_table_insert (params, "grant_type", "authorization_code");
   g_hash_table_insert (params, "code", (gchar *)authorization_code);
   g_hash_table_insert (params, "redirect_uri", priv->redirect_uri);
