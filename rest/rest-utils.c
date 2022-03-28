@@ -1,6 +1,6 @@
 /* rest-utils.c
  *
- * Copyright 2021 Günther Wagner <info@gunibert.de>
+ * Copyright 2021-2022 Günther Wagner <info@gunibert.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -30,7 +30,7 @@ gchar *
 random_string (guint length)
 {
   g_autoptr(GRand) rand = g_rand_new ();
-  gchar *buffer = g_slice_alloc0 (sizeof (gchar) * length + 1);
+  gchar *buffer = g_malloc0 (sizeof (gchar) * length + 1);
   gchar alphabeth[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
 
   for (guint i = 0; i < length; i++)
