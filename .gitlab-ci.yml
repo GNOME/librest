@@ -29,7 +29,8 @@ build-librest:
     - meson _build -Dexamples=true
     - ninja -C _build
     - bash +x ./.gitlab-ci/run-tests.sh
-    - ./.gitlab-ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+    - curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
+    - check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
   artifacts:
     reports:
       junit: "_build/${CI_JOB_NAME}-report.xml"
