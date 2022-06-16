@@ -118,6 +118,8 @@ librest_dep = declare_dependency(
   dependencies: librest_deps,
 )
 
+meson.override_dependency('rest-1.0', librest_dep)
+
 # Test suite
 test_runner_c_args = [
   '-DBUILD_TESTS',
