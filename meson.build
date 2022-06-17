@@ -93,6 +93,7 @@ pkgconfig.generate(librest_lib,
   requires: [ glib_dep, libsoup_dep, libxml_dep, libjson_glib_dep ],
   variables: [
     'apiversion=@0@'.format(librest_api_version),
+    'soupapiversion=@0@'.format(libsoup_api_version),
   ],
 )
 
@@ -104,6 +105,7 @@ pkgconfig.generate(librest_extras_lib,
   requires: [ glib_dep, libsoup_dep, libxml_dep],
   variables: [
     'apiversion=@0@'.format(librest_api_version),
+    'soupapiversion=@0@'.format(libsoup_api_version),
   ],
 )
 
