@@ -1,6 +1,6 @@
 /* test-server.c
  *
- * Copyright 2021 Günther Wagner <info@gunibert.de>
+ * Copyright 2021-2022 Günther Wagner <info@gunibert.de>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -85,7 +85,7 @@ run_server_thread (gpointer user_data)
 	g_object_set_data (G_OBJECT (server), "GMainLoop", loop);
 
 	// TODO: error handling
-	soup_server_listen_local (server, 0, 0, &error);
+	soup_server_listen_local (server, 0, SOUP_SERVER_LISTEN_IPV4_ONLY, &error);
   if (error != NULL)
     g_error ("%s", error->message);
 

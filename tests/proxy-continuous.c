@@ -155,7 +155,7 @@ continuous ()
 
 
   server = soup_server_new (NULL, NULL);
-  soup_server_listen_local (server, 0, 0, &error);
+  soup_server_listen_local (server, 0, SOUP_SERVER_LISTEN_IPV4_ONLY, &error);
   g_assert_no_error (error);
 
   soup_server_add_handler (server, NULL, server_callback, NULL, NULL);

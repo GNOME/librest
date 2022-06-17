@@ -30,7 +30,7 @@ option('gtk_doc',
 )
 option('soup2',
   type: 'boolean',
-  value: true,
+  value: false,
   description: 'Whether to build with libsoup2',
 )
 option('tests',
