@@ -1,7 +1,7 @@
 project('rest', 'c',
-  version: '0.9.0',
+  version: '0.9.1',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.53',
+  meson_version: '>= 0.56',
 )
 
 # Versioning
