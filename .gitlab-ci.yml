@@ -6,7 +6,7 @@ variables:
   MANIFEST_PATH: 'examples/demo/org.gnome.RestDemo.json'
   FLATPAK_MODULE: 'librest-demo'
   FLATPAK_BUILD_DIR: build
-  LAST_ABI_BREAK: "ff21917e75422a30019b0dbc933ea898717932b7"
+  LAST_ABI_BREAK: "a36606b6633e4244740793ab3a17d392b1cf6035"
 
 image: fedora:36
 
@@ -88,7 +88,7 @@ reference:
       libsoup3-devel
       gtk-doc
       json-glib-devel
-    MESON_VERSION: "0.55.3"
+    MESON_VERSION: "0.56"
     MESON_EXTRA_FLAGS: "-Dintrospection=true -Dexamples=false"
     DOCS_FLAGS: -Dgtk_doc=true
     DOCS_PATH: docs/librest-1.0
