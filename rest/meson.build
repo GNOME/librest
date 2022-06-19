@@ -17,8 +17,6 @@ librest_sources = [
   'rest-xml-node.c',
   'rest-xml-parser.c',
   'rest-main.c',
-  'oauth-proxy.c',
-  'oauth-proxy-call.c',
   'sha1.c',
 
   'rest-oauth2-proxy.c',
@@ -31,8 +29,6 @@ librest_sources = [
 ]
 
 librest_headers = [
-  'oauth-proxy-call.h',
-  'oauth-proxy.h',
   'rest-param.h',
   'rest-params.h',
   'rest-proxy-call.h',
@@ -96,6 +92,7 @@ if get_option('introspection')
     namespace: 'Rest',
     symbol_prefix: 'rest',
     identifier_prefix: 'Rest',
+    export_packages: librest_pkg_string,
     includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version) ],
     extra_args: librest_gir_extra_args,
     install: true,
@@ -119,19 +116,3 @@ librest_dep = declare_dependency(
 )
 
 meson.override_dependency('rest-1.0', librest_dep)
-
-# Test suite
-test_runner_c_args = [
-  '-DBUILD_TESTS',
-]
-
-test_runner_bin = executable('test-runner',
-  [ 'test-runner.c', librest_sources ],
-  dependencies: librest_deps,
-  c_args: test_runner_c_args,
-  include_directories: config_h_inc,
-)
-
-test('test-runner', test_runner_bin,
-  suite: 'rest',
-)

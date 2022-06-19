@@ -69,3 +69,4 @@ tests/proxy
 tests/proxy-continuous
 tests/threaded
 tests/xml
+rust
