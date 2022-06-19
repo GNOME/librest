@@ -27,8 +27,6 @@ G_BEGIN_DECLS
 #define REST_INSIDE
 # include "rest-proxy.h"
 # include "rest-proxy-call.h"
-# include "oauth-proxy.h"
-# include "oauth-proxy-call.h"
 # include "rest-oauth2-proxy.h"
 # include "rest-utils.h"
 # include "rest-pkce-code-challenge.h"

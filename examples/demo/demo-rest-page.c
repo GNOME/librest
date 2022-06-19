@@ -52,12 +52,6 @@ struct _DemoRestPage
   GtkWidget *digest_username;
   GtkWidget *digest_password;
 
-  /* oauth 1 auth */
-  GtkWidget *oauth1_client_identifier;
-  GtkWidget *oauth1_client_secret;
-  GtkWidget *oauth1_get_access_token;
-  RestProxy *oauth1_proxy;
-
   /* oauth 2 auth */
   GtkWidget *oauth2_client_identifier;
   GtkWidget *oauth2_client_secret;
@@ -73,7 +67,6 @@ typedef enum {
   AUTHMODE_NO,
   AUTHMODE_BASIC,
   AUTHMODE_DIGEST,
-  AUTHMODE_OAUTH1,
   AUTHMODE_OAUTH2
 } AuthMode;
 
@@ -90,7 +83,6 @@ demo_rest_page_finalize (GObject *object)
 {
   DemoRestPage *self = (DemoRestPage *)object;
 
-  g_clear_object (&self->oauth1_proxy);
   g_clear_object (&self->oauth2_proxy);
   g_clear_pointer (&self->pkce, rest_pkce_code_challenge_free);
 
@@ -111,8 +103,6 @@ get_current_auth_mode (DemoRestPage *self)
     return AUTHMODE_BASIC;
   else if (g_strcmp0 (stack_name, "digest") == 0)
     return AUTHMODE_DIGEST;
-  else if (g_strcmp0 (stack_name, "oauth1") == 0)
-    return AUTHMODE_OAUTH1;
   else if (g_strcmp0 (stack_name, "oauth2") == 0)
     return AUTHMODE_OAUTH2;
 
@@ -135,9 +125,7 @@ set_oauth_btn_active (DemoRestPage *self,
     {
       gtk_button_set_label (btn, "Get access token...");
       gtk_widget_set_css_classes (GTK_WIDGET (btn), (const char*[]){ "suggested-action", NULL });
-      if (proxy == self->oauth1_proxy)
-        g_clear_object (&self->oauth1_proxy);
-      else if (proxy == self->oauth2_proxy)
+      if (proxy == self->oauth2_proxy)
         g_clear_object (&self->oauth2_proxy);
     }
 }
@@ -196,23 +184,6 @@ set_text_response (DemoRestPage  *self,
 }
 
 static void
-demo_rest_page_fetched_oauth1_access_token (GObject      *object,
-                                            GAsyncResult *result,
-                                            gpointer      user_data)
-{
-  DemoRestPage *self = (DemoRestPage *)user_data;
-  RestProxy *proxy = (RestProxy *)object;
-  g_autoptr(GError) error = NULL;
-
-  g_assert (G_IS_OBJECT (object));
-  g_assert (G_IS_ASYNC_RESULT (result));
-
-  oauth_proxy_access_token_finish (OAUTH_PROXY (proxy), result, &error);
-  if (error)
-    set_oauth_btn_active (self, GTK_BUTTON (self->oauth1_get_access_token), proxy, FALSE);
-}
-
-static void
 demo_rest_page_fetched_oauth2_access_token (GObject      *object,
                                             GAsyncResult *result,
                                             gpointer      user_data)
@@ -228,35 +199,6 @@ demo_rest_page_fetched_oauth2_access_token (GObject      *object,
   if (error)
     {
       set_oauth_btn_active (self, GTK_BUTTON (self->oauth2_get_access_token), proxy, FALSE);
-    }
-}
-
-static void
-oauth1_dialog_response (GtkDialog    *dialog,
-                        gint          response_id,
-                        DemoRestPage *self)
-{
-  switch (response_id)
-    {
-    case GTK_RESPONSE_OK:
-      {
-        const gchar *verifier = NULL;
-        GtkWidget *content_area = gtk_dialog_get_content_area (dialog);
-        GtkWidget *box = gtk_widget_get_first_child (content_area);
-        GtkWidget *entry = gtk_widget_get_last_child (box);
-
-        verifier = gtk_editable_get_text (GTK_EDITABLE (entry));
-        oauth_proxy_access_token_async (OAUTH_PROXY (self->oauth1_proxy),
-                                        "access_token",
-                                        verifier,
-                                        NULL,
-                                        demo_rest_page_fetched_oauth1_access_token,
-                                        self);
-        break;
-      }
-    case GTK_RESPONSE_CANCEL:
-      set_oauth_btn_active (self, GTK_BUTTON (self->oauth1_get_access_token), self->oauth1_proxy, FALSE);
-      break;
     }
 }
 
@@ -287,48 +229,6 @@ oauth2_dialog_response (GtkDialog    *dialog,
       set_oauth_btn_active (self, GTK_BUTTON (self->oauth2_get_access_token), self->oauth2_proxy, FALSE);
       break;
     }
-}
-
-static GtkWidget *
-demo_rest_page_create_oauth1_dialog (DemoRestPage *self,
-                                     RestProxy    *proxy)
-{
-  GtkWidget *dialog = NULL;
-  GtkWidget *content_area;
-  GtkWidget *box, *lbl, *token_lbl, *verifier_entry;
-  g_autofree char *token_str = NULL;
-
-  dialog = gtk_dialog_new_with_buttons ("Get Verifier...",
-                                        GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (self))),
-                                        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_USE_HEADER_BAR,
-                                        "Ok",
-                                        GTK_RESPONSE_OK,
-                                        "Cancel",
-                                        GTK_RESPONSE_CANCEL,
-                                        NULL);
-
-  content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-  gtk_widget_set_margin_top (content_area, 6);
-  gtk_widget_set_margin_start (content_area, 6);
-  gtk_widget_set_margin_bottom (content_area, 6);
-  gtk_widget_set_margin_end (content_area, 6);
-
-  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-  lbl = gtk_label_new ("Open a browser and authorize this application...");
-  gtk_box_append (GTK_BOX (box), lbl);
-  token_str = g_strdup_printf ("Use this token: %s", oauth_proxy_get_token (OAUTH_PROXY (proxy)));
-  token_lbl = gtk_label_new (token_str);
-  gtk_label_set_selectable (GTK_LABEL (token_lbl), TRUE);
-  gtk_box_append (GTK_BOX (box), token_lbl);
-  verifier_entry = gtk_entry_new ();
-  gtk_box_append (GTK_BOX (box), verifier_entry);
-
-  gtk_box_append (GTK_BOX (content_area), box);
-
-  g_signal_connect (dialog, "response", G_CALLBACK (oauth1_dialog_response), self);
-  g_signal_connect_swapped (dialog, "response", G_CALLBACK (gtk_window_destroy), dialog);
-
-  return dialog;
 }
 
 static GtkWidget *
@@ -375,57 +275,6 @@ demo_rest_page_create_oauth2_dialog (DemoRestPage *self,
   g_signal_connect_swapped (dialog, "response", G_CALLBACK (gtk_window_destroy), dialog);
 
   return dialog;
-}
-
-static void
-demo_rest_page_fetched_oauth1_request_token (GObject      *object,
-                                             GAsyncResult *result,
-                                             gpointer      user_data)
-{
-  DemoRestPage *self = (DemoRestPage *)user_data;
-  RestProxy *proxy = (RestProxy *)object;
-  GtkWidget *dialog = NULL;
-  g_autoptr(GError) error = NULL;
-
-  g_assert (G_IS_OBJECT (object));
-  g_assert (G_IS_ASYNC_RESULT (result));
-
-  oauth_proxy_request_token_finish (OAUTH_PROXY (proxy), result, &error);
-  if (error)
-    {
-      set_oauth_btn_active (self, GTK_BUTTON (self->oauth1_get_access_token), proxy, FALSE);
-      return;
-    }
-
-  /* here we show a dialog requesting the user to a browser for authentication */
-  dialog = demo_rest_page_create_oauth1_dialog (self, proxy);
-
-  gtk_widget_show (dialog);
-}
-
-static void
-on_oauth1_get_access_token_clicked (GtkButton *btn,
-                                    gpointer   user_data)
-{
-  DemoRestPage *self = (DemoRestPage *)user_data;
-  const char *url = NULL;
-  const char *consumer_key = NULL, *consumer_secret = NULL;
-  const char *function = NULL;
-
-  if (self->oauth1_proxy != NULL)
-    {
-      set_oauth_btn_active (self, btn, self->oauth1_proxy, FALSE);
-      return;
-    }
-
-  url = gtk_editable_get_text (GTK_EDITABLE (self->host));
-  consumer_key = gtk_editable_get_text (GTK_EDITABLE (self->oauth1_client_identifier));
-  consumer_secret = gtk_editable_get_text (GTK_EDITABLE (self->oauth1_client_secret));
-  function = gtk_editable_get_text (GTK_EDITABLE (self->function));
-
-  self->oauth1_proxy = oauth_proxy_new (consumer_key, consumer_secret, url, FALSE);
-  oauth_proxy_request_token_async (OAUTH_PROXY (self->oauth1_proxy), function, "https://www.gnome.org", NULL, demo_rest_page_fetched_oauth1_request_token, self);
-  set_oauth_btn_active (self, btn, self->oauth1_proxy, TRUE);
 }
 
 static void
@@ -533,13 +382,6 @@ on_send_clicked (GtkButton *btn,
         proxy = rest_proxy_new_with_authentication (url, FALSE, username, password);
         break;
       }
-    case AUTHMODE_OAUTH1:
-      {
-        g_object_set (self->oauth1_proxy, "url-format", url, NULL);
-        proxy = self->oauth1_proxy;
-
-        break;
-      }
     case AUTHMODE_OAUTH2:
       {
         proxy = rest_proxy_new (url, FALSE);
@@ -620,10 +462,6 @@ demo_rest_page_class_init (DemoRestPageClass *klass)
   /* digest auth */
   gtk_widget_class_bind_template_child (widget_class, DemoRestPage, digest_username);
   gtk_widget_class_bind_template_child (widget_class, DemoRestPage, digest_password);
-  /* oauth 1 auth */
-  gtk_widget_class_bind_template_child (widget_class, DemoRestPage, oauth1_client_identifier);
-  gtk_widget_class_bind_template_child (widget_class, DemoRestPage, oauth1_client_secret);
-  gtk_widget_class_bind_template_child (widget_class, DemoRestPage, oauth1_get_access_token);
   /* oauth 2 auth */
   gtk_widget_class_bind_template_child (widget_class, DemoRestPage, oauth2_client_identifier);
   gtk_widget_class_bind_template_child (widget_class, DemoRestPage, oauth2_client_secret);
@@ -635,7 +473,6 @@ demo_rest_page_class_init (DemoRestPageClass *klass)
   /* callbacks */
   gtk_widget_class_bind_template_callback (widget_class, on_send_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_auth_method_activated);
-  gtk_widget_class_bind_template_callback (widget_class, on_oauth1_get_access_token_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_oauth2_get_access_token_clicked);
 }
 

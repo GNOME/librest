@@ -81,7 +81,6 @@
                       <item>No Auth</item>
                       <item>Basic</item>
                       <item>Digest</item>
-                      <item>OAuth1</item>
                       <item>OAuth2</item>
                     </items>
                   </object>
@@ -191,78 +190,6 @@
                               <property name="column">1</property>
                               <property name="row">1</property>
                             </layout>
-                          </object>
-                        </child>
-                      </object>
-                    </property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkStackPage">
-                    <property name="name">oauth1</property>
-                    <property name="child">
-                      <object class="GtkGrid">
-                        <property name="column-spacing">8</property>
-                        <property name="row-spacing">6</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="hexpand">true</property>
-                            <property name="label">Client Identifier:</property>
-                            <property name="xalign">1.0</property>
-                            <layout>
-                              <property name="column">0</property>
-                              <property name="row">0</property>
-                            </layout>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="oauth1_client_identifier">
-                            <property name="hexpand">true</property>
-                            <layout>
-                              <property name="column">1</property>
-                              <property name="row">0</property>
-                            </layout>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="icon-name">dialog-question-symbolic</property>
-                            <property name="tooltip-text">Typically the consumer key and secret can be obtained from the oauth provider.</property>
-                            <layout>
-                              <property name="column">2</property>
-                              <property name="row">0</property>
-                            </layout>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="label">Client Secret:</property>
-                            <property name="xalign">1.0</property>
-                            <layout>
-                              <property name="column">0</property>
-                              <property name="row">1</property>
-                            </layout>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="oauth1_client_secret">
-                            <layout>
-                              <property name="column">1</property>
-                              <property name="row">1</property>
-                            </layout>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="oauth1_get_access_token">
-                            <property name="label">Get access token...</property>
-                            <layout>
-                              <property name="column">1</property>
-                              <property name="row">2</property>
-                            </layout>
-                            <signal name="clicked" handler="on_oauth1_get_access_token_clicked" swapped="no" object="DemoRestPage"/>
-                            <style>
-                              <class name="suggested-action"/>
-                            </style>
                           </object>
                         </child>
                       </object>

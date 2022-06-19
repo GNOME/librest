@@ -6,7 +6,7 @@ variables:
   MANIFEST_PATH: 'examples/demo/org.gnome.RestDemo.json'
   FLATPAK_MODULE: 'librest-demo'
   FLATPAK_BUILD_DIR: build
-  LAST_ABI_BREAK: "85bd00adfa6e06d3426ce7c9007e68e62f51be14"
+  LAST_ABI_BREAK: "ff21917e75422a30019b0dbc933ea898717932b7"
 
 image: fedora:36
 

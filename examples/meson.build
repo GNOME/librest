@@ -2,11 +2,8 @@ example_names = [
   'test-raw',
   'test-xml',
   'dump-xml',
-  'post-twitter',
-  'post-twitter-media',
   'get-flickr-favorites',
   'lastfm-shout',
-  'continuous-twitter',
   'gitlab-oauth2-example',
 ]
 
