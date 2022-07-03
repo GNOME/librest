@@ -32,3 +32,8 @@ show_class_hierarchy = true
 
 [source-location]
 base_url = "https://gitlab.gnome.org/GNOME/librest/-/blob/master/"
+
+[extra]
+content_files = [
+  "migration.md"
+]
