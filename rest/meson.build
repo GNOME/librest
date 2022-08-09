@@ -92,6 +92,7 @@ if get_option('introspection')
     namespace: 'Rest',
     symbol_prefix: 'rest',
     identifier_prefix: 'Rest',
+    header: 'rest/rest.h',
     export_packages: librest_pkg_string,
     includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version) ],
     extra_args: librest_gir_extra_args,
