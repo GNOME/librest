@@ -17,6 +17,7 @@
  */
 
 #include "rest-oauth2-proxy-call.h"
+#include "rest-oauth2-proxy.h"
 
 G_DEFINE_TYPE (RestOAuth2ProxyCall, rest_oauth2_proxy_call, REST_TYPE_PROXY_CALL)
 

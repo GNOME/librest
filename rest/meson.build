@@ -79,12 +79,7 @@ endif
 if get_option('introspection')
   librest_gir_extra_args = [
     '--accept-unprefixed',
-    '--c-include=rest/rest-enum-types.h',
   ]
-
-  foreach header : librest_headers
-    librest_gir_extra_args += '--c-include=rest/@0@'.format(header)
-  endforeach
 
   librest_gir = gnome.generate_gir(librest_lib,
     sources: librest_sources + librest_headers + librest_enums,
