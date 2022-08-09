@@ -99,6 +99,7 @@ if get_option('introspection')
     librest_vapi = gnome.generate_vapi(librest_pkg_string,
       sources: librest_gir [0],
       packages: [ 'glib-2.0', 'libsoup-@0@'.format(libsoup_api_version) ],
+      metadata_dirs : meson.current_source_dir(),
       install: true,
     )
   endif
