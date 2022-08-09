@@ -37,10 +37,10 @@ struct _RestOAuth2ProxyClass
   gpointer padding[8];
 };
 
-enum {
+typedef enum {
   REST_OAUTH2_ERROR_NO_REFRESH_TOKEN,
   REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED,
-};
+} RestOAuth2Error;
 
 #define REST_OAUTH2_ERROR rest_oauth2_error_quark ()
 GQuark rest_oauth2_error_quark ();
