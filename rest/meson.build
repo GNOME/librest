@@ -79,12 +79,7 @@ endif
 if get_option('introspection')
   librest_gir_extra_args = [
     '--accept-unprefixed',
-    '--c-include=rest/rest-enum-types.h',
   ]
-
-  foreach header : librest_headers
-    librest_gir_extra_args += '--c-include=rest/@0@'.format(header)
-  endforeach
 
   librest_gir = gnome.generate_gir(librest_lib,
     sources: librest_sources + librest_headers + librest_enums,
@@ -92,6 +87,7 @@ if get_option('introspection')
     namespace: 'Rest',
     symbol_prefix: 'rest',
     identifier_prefix: 'Rest',
+    header: 'rest/rest.h',
     export_packages: librest_pkg_string,
     includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version) ],
     extra_args: librest_gir_extra_args,
@@ -103,6 +99,7 @@ if get_option('introspection')
     librest_vapi = gnome.generate_vapi(librest_pkg_string,
       sources: librest_gir [0],
       packages: [ 'glib-2.0', 'libsoup-@0@'.format(libsoup_api_version) ],
+      metadata_dirs : meson.current_source_dir(),
       install: true,
     )
   endif

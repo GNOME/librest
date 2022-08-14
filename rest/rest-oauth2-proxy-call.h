@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include <rest/rest.h>
+#include <glib-object.h>
+#include <rest/rest-proxy-call.h>
 
 G_BEGIN_DECLS
 

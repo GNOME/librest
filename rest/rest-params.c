@@ -281,12 +281,14 @@ rest_params_iter_init (RestParamsIter *iter,
 /**
  * rest_params_iter_next:
  * @iter: an initialized #RestParamsIter
- * @name: (out) (optional): a location to store the name, or %NULL
- * @param: (out) (optional): a location to store the #RestParam, or %NULL
+ * @name: (out) (optional) (nullable) (transfer none): a location to store the name,
+ * or %NULL
+ * @param: (out) (optional) (nullable) (transfer none): a location to store the
+ * #RestParam, or %NULL
  *
  * Advances @iter and retrieves the name and/or parameter that are now pointed
- * at as a result of this advancement.  If FALSE is returned, @name and @param
- * are not set and the iterator becomes invalid.
+ * at as a result of this advancement.  If %FALSE is returned, @name and @param
+ * are set to %NULL and the iterator becomes invalid.
  *
  * Returns: %FALSE if the end of the #RestParams has been reached, %TRUE otherwise.
  **/
@@ -302,10 +304,20 @@ rest_params_iter_next (RestParamsIter  *iter,
   iter->position++;
   cur = g_list_nth (iter->params->params, iter->position);
 
-  if (cur == NULL) return FALSE;
+  if (cur == NULL)
+    {
+      if (param)
+        *param = NULL;
+      if (name)
+        *name = NULL;
+      return FALSE;
+    }
 
-  *param = cur->data;
-  *name = rest_param_get_name (*param);
+  if (param)
+    *param = cur->data;
+  if (name)
+    *name = rest_param_get_name (*param);
+
   return TRUE;
 }
 

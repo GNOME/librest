@@ -1,0 +1,31 @@
+OAuth2Proxy cprefix="oauth2_proxy_"
+OAuth2ProxyCall cprefix="oauth2_proxy_call_"
+Proxy
+	.new_call skip=false
+	.bind skip=false
+ProxyCall
+	.get_params skip=false
+	.get_response_headers skip=false
+	.add_headers skip=false
+	.add_params skip=false
+	.continuous skip=false
+	.upload skip=false
+	.cancel skip=false
+XmlNode
+	.ref skip=false
+	.unref skip=false
+
+ProxyCallAsyncCallback
+	.error nullable=true
+	.weak_object nullable=true
+	.userdata closure=3
+ProxyCallContinuousCallback
+	.error nullable=true
+	.weak_object nullable=true
+	.userdata closure=5
+ProxyCallUploadCallback
+	.error nullable=true
+	.weak_object nullable=true
+	.userdata closure=5
+
+*.ref unowned

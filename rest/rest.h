@@ -25,11 +25,18 @@
 G_BEGIN_DECLS
 
 #define REST_INSIDE
-# include "rest-proxy.h"
-# include "rest-proxy-call.h"
-# include "rest-oauth2-proxy.h"
-# include "rest-utils.h"
-# include "rest-pkce-code-challenge.h"
+# include <rest/rest-oauth2-proxy.h>
+# include <rest/rest-oauth2-proxy-call.h>
+# include <rest/rest-param.h>
+# include <rest/rest-params.h>
+# include <rest/rest-pkce-code-challenge.h>
+# include <rest/rest-pkce-code-challenge.h>
+# include <rest/rest-proxy.h>
+# include <rest/rest-proxy-auth.h>
+# include <rest/rest-proxy-call.h>
+# include <rest/rest-utils.h>
+# include <rest/rest-xml-node.h>
+# include <rest/rest-xml-parser.h>
 #undef REST_INSIDE
 
 G_END_DECLS
