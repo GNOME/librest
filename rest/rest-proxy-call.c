@@ -1428,6 +1428,11 @@ rest_proxy_call_sync (RestProxyCall *call,
     return FALSE;
 
   payload = _rest_proxy_send_message (priv->proxy, message, priv->cancellable, error_out);
+  if (!payload)
+  {
+    g_object_unref (message);
+    return FALSE;
+  }
 
   ret = finish_call (call, message, payload, error_out);
 
