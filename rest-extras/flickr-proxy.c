@@ -251,8 +251,8 @@ flickr_proxy_get_shared_secret (FlickrProxy *self)
  *
  * Get the current token.
  *
- * Returns: the token, or %NULL if there is no token yet.  This string is owned
- * by #FlickrProxy and should not be freed.
+ * Returns: (nullable): the token, or %NULL if there is no token yet.
+ * This string is owned by #FlickrProxy and should not be freed.
  */
 const char *
 flickr_proxy_get_token (FlickrProxy *self)
@@ -289,6 +289,15 @@ flickr_proxy_set_token (FlickrProxy *self,
     }
 }
 
+/**
+ * flickr_proxy_sign:
+ * @proxy: an #FlickrProxy
+ * @params: (element-type utf8 utf8): the request parameters
+ *
+ * Get the md5 checksum of the request.
+ *
+ * Returns: The md5 checksum of the request
+ */
 char *
 flickr_proxy_sign (FlickrProxy *self,
                    GHashTable  *params)
