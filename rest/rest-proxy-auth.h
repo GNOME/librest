@@ -23,6 +23,7 @@
 #define _REST_PROXY_AUTH
 
 #include <glib-object.h>
+#include <rest/rest-exports.h>
 
 G_BEGIN_DECLS
 
@@ -64,11 +65,11 @@ typedef struct {
 
 GType rest_proxy_auth_get_type (void);
 
-G_DEPRECATED
+REST_DEPRECATED
 void rest_proxy_auth_pause (RestProxyAuth *auth);
-G_DEPRECATED
+REST_DEPRECATED
 void rest_proxy_auth_unpause (RestProxyAuth *auth);
-G_DEPRECATED
+REST_DEPRECATED
 void rest_proxy_auth_cancel (RestProxyAuth *auth);
 
 G_END_DECLS
