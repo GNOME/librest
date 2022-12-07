@@ -4,8 +4,11 @@ example_names = [
   'dump-xml',
   'get-flickr-favorites',
   'lastfm-shout',
-  'gitlab-oauth2-example',
 ]
+
+if host_machine.system() != 'windows'
+  example_names += 'gitlab-oauth2-example'
+endif
 
 example_deps = [
   glib_dep,
