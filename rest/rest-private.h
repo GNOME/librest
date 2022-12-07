@@ -56,11 +56,13 @@ void _rest_setup_debugging (void);
 
 gboolean _rest_proxy_get_binding_required (RestProxy *proxy);
 const gchar *_rest_proxy_get_bound_url (RestProxy *proxy);
+REST_EXPORT
 void _rest_proxy_queue_message (RestProxy   *proxy,
                                 SoupMessage *message,
                                 GCancellable *cancellable,
                                 RestMessageFinishedCallback callback,
                                 gpointer user_data);
+REST_EXPORT
 void _rest_proxy_cancel_message (RestProxy   *proxy,
                                  SoupMessage *message);
 GBytes *_rest_proxy_send_message (RestProxy    *proxy,
