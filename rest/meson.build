@@ -41,6 +41,7 @@ librest_headers = [
   'rest-oauth2-proxy-call.h',
   'rest-pkce-code-challenge.h',
   'rest-utils.h',
+  'rest-exports.h',
   'rest.h',
 ]
 
