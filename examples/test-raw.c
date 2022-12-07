@@ -21,7 +21,12 @@
  */
 
 #include <rest/rest-proxy.h>
+
+#ifdef G_OS_WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 static void
 proxy_call_async_cb (GObject      *source_object,
