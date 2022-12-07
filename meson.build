@@ -7,8 +7,17 @@ project('rest', 'c',
 cc = meson.get_compiler('c')
 check_cc_args = []
 
+library_export_cflags = []
 if cc.get_id() == 'msvc'
   check_cc_args += ['-Zc:preprocessor'] # Use the more C99-compliant preprocessor
+
+  if get_option('default_library') == 'both'
+    error('Visual Studio and Visual Studio-like builds currently do' + \
+	      'not support building both static and shared libraries')
+  elif get_option('default_library') == 'shared'
+    # Define REST_EXPORT appropriately for exporting symbols via __declspec(dllexport)
+    library_export_cflags += '-DREST_EXPORT=__declspec(dllexport)'
+  endif
 endif
 
 add_project_arguments(cc.get_supported_arguments(check_cc_args), language: ['c'])

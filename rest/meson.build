@@ -61,7 +61,7 @@ librest_c_args = [
 librest_lib = library('rest-@0@'.format(librest_api_version),
   librest_sources,
   dependencies: librest_deps,
-  c_args: librest_c_args,
+  c_args: librest_c_args + library_export_cflags,
   include_directories: config_h_inc,
   version: librest_module_version,
   soversion: librest_soversion,

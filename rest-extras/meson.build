@@ -30,7 +30,7 @@ librest_extras_c_args = [
 librest_extras_lib = library(librest_extras_pkg_string,
   librest_extras_sources,
   dependencies: librest_extras_deps,
-  c_args: librest_extras_c_args,
+  c_args: librest_extras_c_args + library_export_cflags,
   include_directories: config_h_inc,
   version: librest_module_version,
   soversion: librest_soversion,
