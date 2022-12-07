@@ -27,7 +27,7 @@
 #include <libsoup/soup.h>
 #include <rest/rest-proxy.h>
 
-const int N_THREADS = 10;
+#define N_THREADS 10
 
 static volatile int threads_done = 0;
 static const gboolean verbose = FALSE;
