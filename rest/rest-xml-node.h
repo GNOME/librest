@@ -24,6 +24,7 @@
 #pragma once
 
 #include <glib-object.h>
+#include <rest/rest-exports.h>
 
 G_BEGIN_DECLS
 
@@ -53,20 +54,29 @@ struct _RestXmlNode {
   RestXmlNode *next;
 };
 
+REST_EXPORT
 GType rest_xml_node_get_type (void);
 
+REST_EXPORT
 RestXmlNode *rest_xml_node_ref         (RestXmlNode *node);
+REST_EXPORT
 void         rest_xml_node_unref       (RestXmlNode *node);
+REST_EXPORT
 const gchar *rest_xml_node_get_attr    (RestXmlNode *node,
                                         const gchar *attr_name);
+REST_EXPORT
 RestXmlNode *rest_xml_node_find        (RestXmlNode *start,
                                         const gchar *tag);
+REST_EXPORT
 RestXmlNode *rest_xml_node_add_child   (RestXmlNode *parent,
                                         const char  *tag);
+REST_EXPORT
 char        *rest_xml_node_print       (RestXmlNode *node);
+REST_EXPORT
 void         rest_xml_node_add_attr    (RestXmlNode *node,
                                         const char  *attribute,
                                         const char  *value);
+REST_EXPORT
 void         rest_xml_node_set_content (RestXmlNode *node,
                                         const char  *value);
 

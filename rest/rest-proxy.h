@@ -25,12 +25,14 @@
 
 #include <glib-object.h>
 #include <libsoup/soup-session-feature.h>
+#include <rest/rest-exports.h>
 #include <rest/rest-proxy-auth.h>
 #include <rest/rest-proxy-call.h>
 
 G_BEGIN_DECLS
 
 #define REST_TYPE_PROXY rest_proxy_get_type()
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (RestProxy, rest_proxy, REST, PROXY, GObject)
 
 /**
@@ -158,29 +160,40 @@ typedef enum {
   REST_PROXY_ERROR_HTTP_HTTP_VERSION_NOT_SUPPORTED      = 505,
 } RestProxyError;
 
+REST_EXPORT
 GQuark rest_proxy_error_quark (void);
 
+REST_EXPORT
 RestProxy     *rest_proxy_new                     (const gchar         *url_format,
                                                    gboolean             binding_required);
+REST_EXPORT
 RestProxy     *rest_proxy_new_with_authentication (const gchar         *url_format,
                                                    gboolean             binding_required,
                                                    const gchar         *username,
                                                    const gchar         *password);
+REST_EXPORT
 gboolean       rest_proxy_bind                    (RestProxy           *proxy,
                                                    ...);
+REST_EXPORT
 gboolean       rest_proxy_bind_valist             (RestProxy           *proxy,
                                                    va_list              params);
+REST_EXPORT
 void           rest_proxy_set_user_agent          (RestProxy           *proxy,
                                                    const char          *user_agent);
+REST_EXPORT
 const gchar   *rest_proxy_get_user_agent          (RestProxy           *proxy);
+REST_EXPORT
 void           rest_proxy_add_soup_feature        (RestProxy           *proxy,
                                                    SoupSessionFeature  *feature);
+REST_EXPORT
 RestProxyCall *rest_proxy_new_call                (RestProxy           *proxy);
+REST_EXPORT
 gboolean       rest_proxy_simple_run              (RestProxy           *proxy,
                                                    gchar              **payload,
                                                    goffset             *len,
                                                    GError             **error,
                                                    ...) G_GNUC_NULL_TERMINATED;
+REST_EXPORT
 gboolean       rest_proxy_simple_run_valist       (RestProxy           *proxy,
                                                    gchar              **payload,
                                                    goffset             *len,

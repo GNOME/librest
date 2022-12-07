@@ -27,6 +27,7 @@
 #define _REST_PARAM
 
 #include <glib-object.h>
+#include <rest/rest-exports.h>
 
 G_BEGIN_DECLS
 
@@ -49,12 +50,15 @@ typedef enum {
 
 typedef struct _RestParam RestParam;
 
+REST_EXPORT
 GType rest_param_get_type (void) G_GNUC_CONST;
 
+REST_EXPORT
 RestParam *rest_param_new_string (const char    *name,
                                   RestMemoryUse  use,
                                   const char    *string);
 
+REST_EXPORT
 RestParam *rest_param_new_full (const char     *name,
                                 RestMemoryUse   use,
                                 gconstpointer   data,
@@ -62,6 +66,7 @@ RestParam *rest_param_new_full (const char     *name,
                                 const char     *content_type,
                                 const char     *filename);
 
+REST_EXPORT
 RestParam *rest_param_new_with_owner (const char     *name,
                                       gconstpointer   data,
                                       gsize           length,
@@ -71,15 +76,23 @@ RestParam *rest_param_new_with_owner (const char     *name,
                                       GDestroyNotify  owner_dnotify);
 
 
+REST_EXPORT
 gboolean rest_param_is_string (RestParam *param);
 
+REST_EXPORT
 const char *rest_param_get_name (RestParam *param);
+REST_EXPORT
 const char *rest_param_get_content_type (RestParam *param);
+REST_EXPORT
 const char *rest_param_get_file_name (RestParam *param);
+REST_EXPORT
 gconstpointer rest_param_get_content (RestParam *param);
+REST_EXPORT
 gsize rest_param_get_content_length (RestParam *param);
 
+REST_EXPORT
 RestParam *rest_param_ref (RestParam *param);
+REST_EXPORT
 void rest_param_unref (RestParam *param);
 
 G_END_DECLS

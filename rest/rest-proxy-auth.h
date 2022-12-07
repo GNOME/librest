@@ -63,6 +63,7 @@ typedef struct {
   gpointer _padding_dummy[8];
 } RestProxyAuthClass;
 
+REST_EXPORT
 GType rest_proxy_auth_get_type (void);
 
 REST_DEPRECATED

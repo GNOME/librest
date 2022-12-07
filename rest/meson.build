@@ -1,5 +1,7 @@
 librest_enums = gnome.mkenums_simple('rest-enum-types',
   sources: [ 'rest-proxy.h', 'rest-proxy-call.h' ],
+  header_prefix: '#include <rest/rest-exports.h>',
+  decorator: 'REST_EXPORT',
   install_header: true,
   install_dir: get_option('includedir') / librest_pkg_string / 'rest',
 )

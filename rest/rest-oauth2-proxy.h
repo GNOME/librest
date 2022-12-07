@@ -18,12 +18,14 @@
 
 #pragma once
 
+#include <rest/rest-exports.h>
 #include <rest/rest-proxy.h>
 
 G_BEGIN_DECLS
 
 #define REST_TYPE_OAUTH2_PROXY (rest_oauth2_proxy_get_type())
 
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (RestOAuth2Proxy, rest_oauth2_proxy, REST, OAUTH2_PROXY, RestProxy)
 
 struct _RestOAuth2ProxyClass
@@ -43,58 +45,82 @@ typedef enum {
 } RestOAuth2Error;
 
 #define REST_OAUTH2_ERROR rest_oauth2_error_quark ()
+REST_EXPORT
 GQuark rest_oauth2_error_quark ();
 
+REST_EXPORT
 RestOAuth2Proxy *rest_oauth2_proxy_new                         (const gchar          *authurl,
                                                                 const gchar          *tokenurl,
                                                                 const gchar          *redirecturl,
                                                                 const gchar          *client_id,
                                                                 const gchar          *client_secret,
                                                                 const gchar          *baseurl);
+REST_EXPORT
 gchar           *rest_oauth2_proxy_build_authorization_url     (RestOAuth2Proxy      *self,
                                                                 const gchar          *code_challenge,
                                                                 const gchar          *scope,
                                                                 gchar               **state);
+REST_EXPORT
 void             rest_oauth2_proxy_fetch_access_token_async    (RestOAuth2Proxy      *self,
                                                                 const gchar          *authorization_code,
                                                                 const gchar          *code_verifier,
                                                                 GCancellable         *cancellable,
                                                                 GAsyncReadyCallback   callback,
                                                                 gpointer              user_data);
+REST_EXPORT
 gboolean         rest_oauth2_proxy_fetch_access_token_finish   (RestOAuth2Proxy      *self,
                                                                 GAsyncResult         *result,
                                                                 GError              **error);
+REST_EXPORT
 gboolean         rest_oauth2_proxy_refresh_access_token        (RestOAuth2Proxy      *self,
                                                                 GError              **error);
+REST_EXPORT
 void             rest_oauth2_proxy_refresh_access_token_async  (RestOAuth2Proxy      *self,
                                                                 GCancellable         *cancellable,
                                                                 GAsyncReadyCallback   callback,
                                                                 gpointer              user_data);
+REST_EXPORT
 gboolean         rest_oauth2_proxy_refresh_access_token_finish (RestOAuth2Proxy      *self,
                                                                 GAsyncResult         *result,
                                                                 GError              **error);
+REST_EXPORT
 const gchar     *rest_oauth2_proxy_get_auth_url                (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_auth_url                (RestOAuth2Proxy      *self,
                                                                 const gchar          *tokenurl);
+REST_EXPORT
 const gchar     *rest_oauth2_proxy_get_token_url               (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_token_url               (RestOAuth2Proxy      *self,
                                                                 const gchar          *tokenurl);
+REST_EXPORT
 const gchar     *rest_oauth2_proxy_get_redirect_uri            (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_redirect_uri            (RestOAuth2Proxy      *self,
                                                                 const gchar          *redirect_uri);
+REST_EXPORT
 const gchar     *rest_oauth2_proxy_get_client_id               (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_client_id               (RestOAuth2Proxy      *self,
                                                                 const gchar          *client_id);
+REST_EXPORT
 const gchar     *rest_oauth2_proxy_get_client_secret           (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_client_secret           (RestOAuth2Proxy      *self,
                                                                 const gchar          *client_secret);
+REST_EXPORT
 const gchar     *rest_oauth2_proxy_get_access_token            (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_access_token            (RestOAuth2Proxy      *self,
                                                                 const gchar          *access_token);
+REST_EXPORT
 const gchar     *rest_oauth2_proxy_get_refresh_token           (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_refresh_token           (RestOAuth2Proxy      *self,
                                                                 const gchar          *refresh_token);
+REST_EXPORT
 GDateTime       *rest_oauth2_proxy_get_expiration_date         (RestOAuth2Proxy      *self);
+REST_EXPORT
 void             rest_oauth2_proxy_set_expiration_date         (RestOAuth2Proxy      *self,
                                                                 GDateTime            *expiration_date);
 

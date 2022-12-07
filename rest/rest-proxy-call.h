@@ -25,11 +25,13 @@
 
 #include <glib-object.h>
 #include <gio/gio.h>
+#include <rest/rest-exports.h>
 #include <rest/rest-params.h>
 
 G_BEGIN_DECLS
 
 #define REST_TYPE_PROXY_CALL rest_proxy_call_get_type()
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (RestProxyCall, rest_proxy_call, REST, PROXY_CALL, GObject)
 
 /**
@@ -76,56 +78,73 @@ typedef enum {
   REST_PROXY_CALL_FAILED
 } RestProxyCallError;
 
+REST_EXPORT
 GQuark rest_proxy_call_error_quark (void);
 
 /* Functions for dealing with request */
+REST_EXPORT
 void rest_proxy_call_set_method (RestProxyCall *call,
                                  const gchar   *method);
 
+REST_EXPORT
 const char * rest_proxy_call_get_method (RestProxyCall *call);
 
+REST_EXPORT
 void rest_proxy_call_set_function (RestProxyCall *call,
                                    const gchar   *function);
 
+REST_EXPORT
 const char * rest_proxy_call_get_function (RestProxyCall *call);
 
+REST_EXPORT
 void rest_proxy_call_add_header (RestProxyCall *call,
                                  const gchar   *header,
                                  const gchar   *value);
 
+REST_EXPORT
 G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_headers (RestProxyCall *call,
                                   ...);
 
+REST_EXPORT
 void rest_proxy_call_add_headers_from_valist (RestProxyCall *call,
                                               va_list        headers);
 
+REST_EXPORT
 const gchar *rest_proxy_call_lookup_header (RestProxyCall *call,
                                             const gchar   *header);
 
+REST_EXPORT
 void rest_proxy_call_remove_header (RestProxyCall *call,
                                     const gchar   *header);
 
+REST_EXPORT
 void rest_proxy_call_add_param (RestProxyCall *call,
                                 const gchar   *name,
                                 const gchar   *value);
 
+REST_EXPORT
 void rest_proxy_call_add_param_full (RestProxyCall            *call,
                                      RestParam                *param);
 
+REST_EXPORT
 G_GNUC_NULL_TERMINATED
 void rest_proxy_call_add_params (RestProxyCall *call,
                                  ...);
 
+REST_EXPORT
 void rest_proxy_call_add_params_from_valist (RestProxyCall *call,
                                              va_list        params);
 
+REST_EXPORT
 RestParam *rest_proxy_call_lookup_param (RestProxyCall *call,
                                            const gchar *name);
 
+REST_EXPORT
 void rest_proxy_call_remove_param (RestProxyCall *call,
                                    const gchar   *name);
 
+REST_EXPORT
 RestParams *rest_proxy_call_get_params (RestProxyCall *call);
 
 typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
@@ -133,11 +152,13 @@ typedef void (*RestProxyCallAsyncCallback)(RestProxyCall *call,
                                            GObject       *weak_object,
                                            gpointer       userdata);
 
+REST_EXPORT
 void rest_proxy_call_invoke_async (RestProxyCall       *call,
                                    GCancellable        *cancellable,
                                    GAsyncReadyCallback  callback,
                                    gpointer             user_data);
 
+REST_EXPORT
 gboolean rest_proxy_call_invoke_finish (RestProxyCall *call,
                                         GAsyncResult  *result,
                                         GError       **error);
@@ -149,6 +170,7 @@ typedef void (*RestProxyCallContinuousCallback) (RestProxyCall *call,
                                                  GObject       *weak_object,
                                                  gpointer       userdata);
 
+REST_EXPORT
 gboolean rest_proxy_call_continuous (RestProxyCall                    *call,
                                      RestProxyCallContinuousCallback   callback,
                                      GObject                          *weak_object,
@@ -162,27 +184,37 @@ typedef void (*RestProxyCallUploadCallback) (RestProxyCall *call,
                                              GObject       *weak_object,
                                              gpointer       userdata);
 
+REST_EXPORT
 gboolean rest_proxy_call_upload (RestProxyCall                *call,
                                  RestProxyCallUploadCallback   callback,
                                  GObject                      *weak_object,
                                  gpointer                      userdata,
                                  GError                      **error);
 
+REST_EXPORT
 gboolean rest_proxy_call_cancel (RestProxyCall *call);
 
+REST_EXPORT
 gboolean rest_proxy_call_sync (RestProxyCall *call, GError **error_out);
 
 /* Functions for dealing with responses */
 
+REST_EXPORT
 const gchar *rest_proxy_call_lookup_response_header (RestProxyCall *call,
                                                      const gchar   *header);
 
+REST_EXPORT
 GHashTable *rest_proxy_call_get_response_headers (RestProxyCall *call);
 
+REST_EXPORT
 goffset rest_proxy_call_get_payload_length (RestProxyCall *call);
+REST_EXPORT
 const gchar *rest_proxy_call_get_payload (RestProxyCall *call);
+REST_EXPORT
 guint rest_proxy_call_get_status_code (RestProxyCall *call);
+REST_EXPORT
 const gchar *rest_proxy_call_get_status_message (RestProxyCall *call);
+REST_EXPORT
 gboolean rest_proxy_call_serialize_params (RestProxyCall *call,
                                            gchar        **content_type,
                                            gchar        **content,

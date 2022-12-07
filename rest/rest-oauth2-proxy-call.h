@@ -19,12 +19,14 @@
 #pragma once
 
 #include <glib-object.h>
+#include <rest/rest-exports.h>
 #include <rest/rest-proxy-call.h>
 
 G_BEGIN_DECLS
 
 #define REST_TYPE_OAUTH2_PROXY_CALL (rest_oauth2_proxy_call_get_type())
 
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (RestOAuth2ProxyCall, rest_oauth2_proxy_call, REST, OAUTH2_PROXY_CALL, RestProxyCall)
 
 struct _RestOAuth2ProxyCallClass {

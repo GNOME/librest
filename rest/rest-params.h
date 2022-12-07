@@ -47,21 +47,33 @@ struct _RestParamsIter
   gint position;
 };
 
+REST_EXPORT
 GType           rest_params_get_type (void) G_GNUC_CONST;
+REST_EXPORT
 RestParams *rest_params_new                  (void);
+REST_EXPORT
 RestParams *rest_params_copy                 (RestParams      *self);
+REST_EXPORT
 RestParams *rest_params_ref                  (RestParams      *self);
+REST_EXPORT
 void        rest_params_unref                (RestParams      *self);
+REST_EXPORT
 void        rest_params_add                  (RestParams      *params,
                                               RestParam       *param);
+REST_EXPORT
 RestParam  *rest_params_get                  (RestParams      *params,
                                               const char      *name);
+REST_EXPORT
 void        rest_params_remove               (RestParams      *params,
                                               const char      *name);
+REST_EXPORT
 gboolean    rest_params_are_strings          (RestParams      *params);
+REST_EXPORT
 GHashTable *rest_params_as_string_hash_table (RestParams      *self);
+REST_EXPORT
 void        rest_params_iter_init            (RestParamsIter  *iter,
                                               RestParams      *params);
+REST_EXPORT
 gboolean    rest_params_iter_next            (RestParamsIter  *iter,
                                               const char     **name,
                                               RestParam      **param);

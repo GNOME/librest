@@ -19,9 +19,11 @@
 #pragma once
 
 #include <glib.h>
+#include <rest/rest-exports.h>
 
 G_BEGIN_DECLS
 
+REST_EXPORT
 gchar *random_string (guint length);
 
 G_END_DECLS

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <glib-object.h>
+#include <rest/rest-exports.h>
 
 G_BEGIN_DECLS
 
@@ -32,11 +33,17 @@ G_BEGIN_DECLS
  */
 typedef struct _RestPkceCodeChallenge RestPkceCodeChallenge;
 
+REST_EXPORT
 GType                  rest_pkce_code_challenge_get_type      (void) G_GNUC_CONST;
+REST_EXPORT
 RestPkceCodeChallenge *rest_pkce_code_challenge_new_random    (void);
+REST_EXPORT
 RestPkceCodeChallenge *rest_pkce_code_challenge_copy          (RestPkceCodeChallenge *self);
+REST_EXPORT
 void                   rest_pkce_code_challenge_free          (RestPkceCodeChallenge *self);
+REST_EXPORT
 const gchar           *rest_pkce_code_challenge_get_challenge (RestPkceCodeChallenge *self);
+REST_EXPORT
 const gchar           *rest_pkce_code_challenge_get_verifier  (RestPkceCodeChallenge *self);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (RestPkceCodeChallenge, rest_pkce_code_challenge_free)
