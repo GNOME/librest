@@ -26,8 +26,9 @@ rest_oauth2_proxy_call_prepare (RestProxyCall  *call,
                                 GError        **error)
 {
   RestOAuth2Proxy *proxy = NULL;
-  g_autoptr(GDateTime) now = NULL;
+  GDateTime *now;
   GDateTime *expiration_date = NULL;
+  gboolean failed = FALSE;
 
   g_return_val_if_fail (REST_IS_OAUTH2_PROXY_CALL (call), FALSE);
 
@@ -37,16 +38,16 @@ rest_oauth2_proxy_call_prepare (RestProxyCall  *call,
   expiration_date = rest_oauth2_proxy_get_expiration_date (proxy);
 
   // access token expired -> refresh
-  if (g_date_time_compare (now, expiration_date) > 0)
-    {
-      g_set_error (error,
-                   REST_OAUTH2_ERROR,
-                   REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED,
-                   "Access token is expired");
-      return FALSE;
-    }
+  failed = (g_date_time_compare (now, expiration_date) > 0);
 
-  return TRUE;
+  if (failed)
+    g_set_error (error,
+                 REST_OAUTH2_ERROR,
+                 REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED,
+                 "Access token is expired");
+
+  g_date_time_unref (now);
+  return !failed;
 }
 
 static void

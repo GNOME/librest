@@ -29,7 +29,7 @@
 gchar *
 random_string (guint length)
 {
-  g_autoptr(GRand) rand = g_rand_new ();
+  GRand *rand = g_rand_new ();
   gchar *buffer = g_malloc0 (sizeof (gchar) * length + 1);
   gchar alphabeth[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
 
@@ -38,6 +38,7 @@ random_string (guint length)
       buffer[i] = alphabeth[g_rand_int (rand) % (sizeof (alphabeth) - 1)];
     }
   buffer[length] = '\0';
+  g_rand_free (rand);
 
   return buffer;
 }

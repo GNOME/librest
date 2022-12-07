@@ -60,8 +60,8 @@ rest_oauth2_proxy_parse_access_token (RestOAuth2Proxy *self,
                                       GBytes          *payload,
                                       GTask           *task)
 {
-  g_autoptr(JsonParser) parser = NULL;
-  g_autoptr(GError) error = NULL;
+  JsonParser *parser;
+  GError *error;
   JsonNode *root;
   JsonObject *root_object;
   const gchar *data;
@@ -76,12 +76,18 @@ rest_oauth2_proxy_parse_access_token (RestOAuth2Proxy *self,
   parser = json_parser_new ();
   json_parser_load_from_data (parser, data, size, &error);
   if (error != NULL)
+    g_task_return_error (task, error);
+  else
+    root = json_parser_get_root (parser);
+
+  g_object_unref (parser);
+
+  if (error != NULL)
     {
-      g_task_return_error (task, error);
+      g_clear_error (&error);
       return;
     }
 
-  root = json_parser_get_root (parser);
   root_object = json_node_get_object (root);
 
   if (json_object_has_member (root_object, "access_token"))
@@ -98,9 +104,10 @@ rest_oauth2_proxy_parse_access_token (RestOAuth2Proxy *self,
     }
   else if (json_object_has_member (root_object, "expires_in"))
     {
-      g_autoptr(GDateTime) now = g_date_time_new_now_utc ();
+      GDateTime *now = g_date_time_new_now_utc ();
       expires_in = json_object_get_int_member (root_object, "expires_in");
       rest_oauth2_proxy_set_expiration_date (self, g_date_time_add_seconds (now, expires_in));
+      g_date_time_unref (now);
     }
 
   g_task_return_boolean (task, TRUE);
@@ -111,7 +118,7 @@ rest_oauth2_proxy_new_call (RestProxy *proxy)
 {
   RestOAuth2Proxy *self = (RestOAuth2Proxy *)proxy;
   RestProxyCall *call;
-  g_autofree gchar *auth = NULL;
+  gchar *auth;
 
   g_return_val_if_fail (REST_IS_OAUTH2_PROXY (self), NULL);
 
@@ -119,6 +126,7 @@ rest_oauth2_proxy_new_call (RestProxy *proxy)
 
   call = g_object_new (REST_TYPE_OAUTH2_PROXY_CALL, "proxy", proxy, NULL);
   rest_proxy_call_add_header (call, "Authorization", auth);
+  g_free (auth);
 
   return call;
 }
@@ -349,10 +357,11 @@ rest_oauth2_proxy_build_authorization_url (RestOAuth2Proxy  *self,
                                            gchar           **state)
 {
   RestOAuth2ProxyPrivate *priv = rest_oauth2_proxy_get_instance_private (self);
-  g_autoptr(GHashTable) params = NULL;
-  g_autoptr(GUri) auth = NULL;
-  g_autoptr(GUri) authorization_url = NULL;
-  g_autofree gchar *params_string = NULL;
+  GHashTable *params;
+  GUri *auth;
+  GUri *authorization_url;
+  gchar *params_string;
+  gchar *result;
 
   g_return_val_if_fail (REST_IS_OAUTH2_PROXY (self), NULL);
 
@@ -380,7 +389,13 @@ rest_oauth2_proxy_build_authorization_url (RestOAuth2Proxy  *self,
                                    g_uri_get_path (auth),
                                    params_string,
                                    NULL);
-  return g_uri_to_string (authorization_url);
+  g_free (params_string);
+  g_hash_table_destroy (params);
+  result = g_uri_to_string (authorization_url);
+  g_uri_unref (authorization_url);
+  g_uri_unref (auth);
+
+  return result;
 }
 
 static void
@@ -389,7 +404,7 @@ rest_oauth2_proxy_fetch_access_token_cb (SoupMessage *msg,
                                          GError      *error,
                                          gpointer     user_data)
 {
-  g_autoptr(GTask) task = user_data;
+  GTask *task = user_data;
   RestOAuth2Proxy *self;
 
   g_assert (G_IS_TASK (task));
@@ -399,10 +414,11 @@ rest_oauth2_proxy_fetch_access_token_cb (SoupMessage *msg,
   if (error)
     {
       g_task_return_error (task, error);
+      g_object_unref (task);
       return;
     }
 
-  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, body, g_steal_pointer (&task));
+  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, body, task);
 }
 
 void
@@ -414,9 +430,9 @@ rest_oauth2_proxy_fetch_access_token_async (RestOAuth2Proxy     *self,
                                             gpointer             user_data)
 {
   RestOAuth2ProxyPrivate *priv = rest_oauth2_proxy_get_instance_private (self);
-  g_autoptr(SoupMessage) msg = NULL;
-  g_autoptr(GTask) task = NULL;
-  g_autoptr(GHashTable) params = NULL;
+  SoupMessage *msg;
+  GTask *task;
+  GHashTable *params;
 
   g_return_if_fail (REST_IS_OAUTH2_PROXY (self));
   g_return_if_fail (authorization_code != NULL);
@@ -438,13 +454,12 @@ rest_oauth2_proxy_fetch_access_token_async (RestOAuth2Proxy     *self,
 #endif
 
   _rest_proxy_queue_message (REST_PROXY (self),
-#if WITH_SOUP_2
-                             g_steal_pointer (&msg),
-#else
                              msg,
+                             cancellable, rest_oauth2_proxy_fetch_access_token_cb, task);
+  g_hash_table_destroy (params);
+#if !WITH_SOUP_2
+  g_object_unref (msg);
 #endif
-                             cancellable, rest_oauth2_proxy_fetch_access_token_cb, g_steal_pointer (&task));
-
 }
 
 /**
@@ -471,12 +486,11 @@ rest_oauth2_proxy_refresh_access_token (RestOAuth2Proxy *self,
                                         GError         **error)
 {
   RestOAuth2ProxyPrivate *priv = rest_oauth2_proxy_get_instance_private (self);
-  g_autoptr(SoupMessage) msg = NULL;
-  g_autoptr(GHashTable) params = NULL;
-  g_autoptr(GTask) task = NULL;
+  SoupMessage *msg;
+  GHashTable *params;
+  GTask *task;
   GBytes *payload;
-
-  task = g_task_new (self, NULL, NULL, NULL);
+  gboolean failed = FALSE;
 
   g_return_val_if_fail (REST_IS_OAUTH2_PROXY (self), FALSE);
 
@@ -487,6 +501,8 @@ rest_oauth2_proxy_refresh_access_token (RestOAuth2Proxy *self,
                             "No refresh token available");
       return FALSE;
     }
+
+  task = g_task_new (self, NULL, NULL, NULL);
 
   params = g_hash_table_new (g_str_hash, g_str_equal);
 
@@ -501,13 +517,17 @@ rest_oauth2_proxy_refresh_access_token (RestOAuth2Proxy *self,
   msg = soup_message_new_from_encoded_form (SOUP_METHOD_POST, priv->tokenurl, soup_form_encode_hash (params));
 #endif
   payload = _rest_proxy_send_message (REST_PROXY (self), msg, NULL, error);
-  if (error && *error)
-    {
-      return FALSE;
-    }
+  failed = (error && *error);
 
-  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, g_steal_pointer (&task));
-  return TRUE;
+  if (!failed)
+    REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, task);
+  else
+    g_object_unref (task);
+
+  g_hash_table_destroy (params);
+  g_object_unref (msg);
+
+  return !failed;
 }
 
 static void
@@ -516,7 +536,7 @@ rest_oauth2_proxy_refresh_access_token_cb (SoupMessage *msg,
                                            GError      *error,
                                            gpointer     user_data)
 {
-  g_autoptr(GTask) task = user_data;
+  GTask *task = user_data;
   RestOAuth2Proxy *self;
 
   g_assert (G_IS_TASK (task));
@@ -526,10 +546,11 @@ rest_oauth2_proxy_refresh_access_token_cb (SoupMessage *msg,
   if (error)
     {
       g_task_return_error (task, error);
+      g_object_unref (task);
       return;
     }
 
-  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, g_steal_pointer (&task));
+  REST_OAUTH2_PROXY_GET_CLASS (self)->parse_access_token (self, payload, task);
 }
 
 void
@@ -539,13 +560,13 @@ rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
                                               gpointer             user_data)
 {
   RestOAuth2ProxyPrivate *priv = rest_oauth2_proxy_get_instance_private (self);
-  g_autoptr(SoupMessage) msg = NULL;
-  g_autoptr(GHashTable) params = NULL;
-  g_autoptr(GTask) task = NULL;
-
-  task = g_task_new (self, cancellable, callback, user_data);
+  SoupMessage *msg;
+  GHashTable *params;
+  GTask *task;
 
   g_return_if_fail (REST_IS_OAUTH2_PROXY (self));
+
+  task = g_task_new (self, cancellable, callback, user_data);
 
   if (priv->refresh_token == NULL)
     {
@@ -553,6 +574,7 @@ rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
                                REST_OAUTH2_ERROR,
                                REST_OAUTH2_ERROR_NO_REFRESH_TOKEN,
                                "No refresh token available");
+      g_object_unref (task);
       return;
     }
 
@@ -569,14 +591,16 @@ rest_oauth2_proxy_refresh_access_token_async (RestOAuth2Proxy     *self,
   msg = soup_message_new_from_encoded_form (SOUP_METHOD_POST, priv->tokenurl, soup_form_encode_hash (params));
 #endif
   _rest_proxy_queue_message (REST_PROXY (self),
-#if WITH_SOUP_2
-                             g_steal_pointer (&msg),
-#else
                              msg,
-#endif
                              cancellable,
                              rest_oauth2_proxy_refresh_access_token_cb,
-                             g_steal_pointer (&task));
+                             task);
+
+#if !WITH_SOUP2
+  g_object_unref (msg);
+#endif
+
+  g_hash_table_destroy (params);
 }
 
 /**

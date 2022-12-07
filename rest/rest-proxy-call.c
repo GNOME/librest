@@ -762,14 +762,16 @@ authenticate (RestProxyCall *call,
               SoupMessage   *message)
 {
   RestProxyCallPrivate *priv = GET_PRIVATE (call);
-  g_autofree char *username;
-  g_autofree char *password;
+  char *username;
+  char *password;
 
   if (retrying)
     return FALSE;
 
   g_object_get (priv->proxy, "username", &username, "password", &password, NULL);
   soup_auth_authenticate (soup_auth, username, password);
+  g_free (password);
+  g_free (username);
 
   return TRUE;
 }
@@ -1007,23 +1009,20 @@ _call_message_call_completed_cb (SoupMessage *message,
                                  GError      *error,
                                  gpointer     user_data)
 {
-  g_autoptr(GTask) task = user_data;
+  GTask *task = user_data;
   RestProxyCall *call;
 
   call = REST_PROXY_CALL (g_task_get_source_object (task));
 
-  if (error)
-    {
-      g_task_return_error (task, error);
-      return;
-    }
-
-  finish_call (call, message, payload, &error);
+  if (!error)
+    finish_call (call, message, payload, &error);
 
   if (error != NULL)
     g_task_return_error (task, error);
   else
     g_task_return_boolean (task, TRUE);
+
+  g_object_unref (task);
 }
 
 /**
