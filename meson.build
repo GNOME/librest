@@ -4,6 +4,15 @@ project('rest', 'c',
   meson_version: '>= 0.56',
 )
 
+cc = meson.get_compiler('c')
+check_cc_args = []
+
+if cc.get_id() == 'msvc'
+  check_cc_args += ['-Zc:preprocessor'] # Use the more C99-compliant preprocessor
+endif
+
+add_project_arguments(cc.get_supported_arguments(check_cc_args), language: ['c'])
+
 # Versioning
 librest_module_version = '0.0.0'
 librest_soversion = '0'

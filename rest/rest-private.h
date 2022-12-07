@@ -47,9 +47,9 @@ extern guint rest_debug_flags;
 
 #define REST_DEBUG_ENABLED(category) (rest_debug_flags & REST_DEBUG_##category)
 
-#define REST_DEBUG(category,x,a...)             G_STMT_START {      \
+#define REST_DEBUG(category,x,...)              G_STMT_START {      \
     if (REST_DEBUG_ENABLED(category))                               \
-          { g_message ("[" #category "] " G_STRLOC ": " x, ##a); }  \
+          { g_message ("[" #category "] " G_STRLOC ": " x, ##__VA_ARGS__); }  \
                                                 } G_STMT_END
 
 void _rest_setup_debugging (void);
