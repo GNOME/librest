@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 
 #define YOUTUBE_TYPE_PROXY youtube_proxy_get_type()
 
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (YoutubeProxy, youtube_proxy, YOUTUBE, PROXY, RestProxy)
 
 struct _YoutubeProxyClass {
@@ -48,11 +49,15 @@ typedef void (*YoutubeProxyUploadCallback)(YoutubeProxy  *proxy,
                                            GObject       *weak_object,
                                            gpointer       user_data);
 
+REST_EXPORT
 RestProxy *youtube_proxy_new           (const gchar                 *developer_key);
+REST_EXPORT
 RestProxy *youtube_proxy_new_with_auth (const gchar                 *developer_key,
                                         const gchar                 *user_auth);
+REST_EXPORT
 void       youtube_proxy_set_user_auth (YoutubeProxy                *proxy,
                                         const gchar                 *user_auth);
+REST_EXPORT
 gboolean   youtube_proxy_upload_async  (YoutubeProxy                *self,
                                         const gchar                 *filename,
                                         GHashTable                  *fields,

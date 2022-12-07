@@ -27,6 +27,7 @@
 G_BEGIN_DECLS
 
 #define LASTFM_TYPE_PROXY_CALL lastfm_proxy_call_get_type()
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (LastfmProxyCall, lastfm_proxy_call, LASTFM, PROXY_CALL, RestProxyCall)
 
 /**

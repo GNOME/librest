@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 
 #define FLICKR_TYPE_PROXY_CALL (flickr_proxy_call_get_type())
 
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (FlickrProxyCall, flickr_proxy_call, FLICKR, PROXY_CALL, RestProxyCall)
 
 struct _FlickrProxyCallClass {

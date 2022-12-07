@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 
 #define LASTFM_TYPE_PROXY lastfm_proxy_get_type()
 
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (LastfmProxy, lastfm_proxy, LASTFM, PROXY, RestProxy)
 
 struct _LastfmProxyClass {
@@ -41,20 +42,29 @@ struct _LastfmProxyClass {
 
 #define LASTFM_PROXY_ERROR lastfm_proxy_error_quark()
 
+REST_EXPORT
 RestProxy  *lastfm_proxy_new              (const char   *api_key,
                                            const char   *secret);
+REST_EXPORT
 RestProxy  *lastfm_proxy_new_with_session (const char   *api_key,
                                            const char   *secret,
                                            const char   *session_key);
+REST_EXPORT
 const char *lastfm_proxy_get_api_key      (LastfmProxy  *proxy);
+REST_EXPORT
 const char *lastfm_proxy_get_secret       (LastfmProxy  *proxy);
+REST_EXPORT
 const char *lastfm_proxy_get_session_key  (LastfmProxy  *proxy);
+REST_EXPORT
 void        lastfm_proxy_set_session_key  (LastfmProxy  *proxy,
                                            const char   *session_key);
+REST_EXPORT
 char       *lastfm_proxy_sign             (LastfmProxy  *proxy,
                                            GHashTable   *params);
+REST_EXPORT
 char       *lastfm_proxy_build_login_url  (LastfmProxy  *proxy,
                                            const char   *token);
+REST_EXPORT
 gboolean    lastfm_proxy_is_successful    (RestXmlNode  *root,
                                            GError      **error);
 

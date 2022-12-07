@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 #define FLICKR_PROXY_ERROR flickr_proxy_error_quark()
 #define FLICKR_TYPE_PROXY flickr_proxy_get_type()
 
+REST_EXPORT
 G_DECLARE_DERIVABLE_TYPE (FlickrProxy, flickr_proxy, FLICKR, PROXY, RestProxy)
 
 struct _FlickrProxyClass {
@@ -42,24 +43,35 @@ struct _FlickrProxyClass {
 };
 
 
+REST_EXPORT
 RestProxy     *flickr_proxy_new                 (const char   *api_key,
                                                  const char   *shared_secret);
+REST_EXPORT
 RestProxy     *flickr_proxy_new_with_token      (const char   *api_key,
                                                  const char   *shared_secret,
                                                  const char   *token);
+REST_EXPORT
 const char    *flickr_proxy_get_api_key         (FlickrProxy  *proxy);
+REST_EXPORT
 const char    *flickr_proxy_get_shared_secret   (FlickrProxy  *proxy);
+REST_EXPORT
 const char    *flickr_proxy_get_token           (FlickrProxy  *proxy);
+REST_EXPORT
 void           flickr_proxy_set_token           (FlickrProxy  *proxy,
                                                  const char   *token);
+REST_EXPORT
 char          *flickr_proxy_sign                (FlickrProxy  *proxy,
                                                  GHashTable   *params);
+REST_EXPORT
 char          *flickr_proxy_build_login_url     (FlickrProxy  *proxy,
                                                  const char   *frob,
                                                  const char   *perms);
+REST_EXPORT
 gboolean       flickr_proxy_is_successful       (RestXmlNode  *root,
                                                  GError      **error);
+REST_EXPORT
 RestProxyCall *flickr_proxy_new_upload          (FlickrProxy  *proxy);
+REST_EXPORT
 RestProxyCall *flickr_proxy_new_upload_for_file (FlickrProxy  *proxy,
                                                  const char   *filename,
                                                  GError      **error);
