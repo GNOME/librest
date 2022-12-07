@@ -22,7 +22,6 @@
 
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
-#include <unistd.h>
 
 /* These debugging functions *leak* */
 static gchar *
