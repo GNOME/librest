@@ -89,20 +89,23 @@ server_callback (SoupServer        *server,
 static void
 test_authorization_url (gconstpointer url)
 {
-  g_autoptr(RestProxy) proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
-                                                                  "http://www.example.com/token",
-                                                                  "http://www.example.com",
-                                                                  "client-id",
-                                                                  "client-secret",
-                                                                  "http://www.example.com/api"));
-  g_autoptr(RestPkceCodeChallenge) pkce = rest_pkce_code_challenge_new_random ();
+  RestProxy *proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
+                                                        "http://www.example.com/token",
+                                                        "http://www.example.com",
+                                                        "client-id",
+                                                        "client-secret",
+                                                        "http://www.example.com/api"));
+  RestPkceCodeChallenge *pkce = rest_pkce_code_challenge_new_random ();
 
   gchar *authorization_url = rest_oauth2_proxy_build_authorization_url (REST_OAUTH2_PROXY (proxy),
                                              rest_pkce_code_challenge_get_challenge (pkce),
                                              NULL,
                                              NULL);
-  g_autofree gchar *expected = g_strdup_printf ("http://www.example.com/auth?code_challenge_method=S256&redirect_uri=http%%3A%%2F%%2Fwww.example.com&client_id=client-id&code_challenge=%s&response_type=code", rest_pkce_code_challenge_get_challenge (pkce));
+  gchar *expected = g_strdup_printf ("http://www.example.com/auth?code_challenge_method=S256&redirect_uri=http%%3A%%2F%%2Fwww.example.com&client_id=client-id&code_challenge=%s&response_type=code", rest_pkce_code_challenge_get_challenge (pkce));
   g_assert_cmpstr (authorization_url, ==, expected);
+  g_free (expected);
+  g_object_unref (proxy);
+  rest_pkce_code_challenge_free (pkce);
 }
 
 static void
@@ -110,7 +113,7 @@ test_fetch_access_token_finished (GObject      *object,
                                   GAsyncResult *result,
                                   gpointer      user_data)
 {
-  g_autoptr(GError) error = NULL;
+  GError *error;
   gboolean *finished = user_data;
 
   g_assert (G_IS_OBJECT (object));
@@ -118,6 +121,7 @@ test_fetch_access_token_finished (GObject      *object,
 
   rest_oauth2_proxy_fetch_access_token_finish (REST_OAUTH2_PROXY (object), result, &error);
   g_assert_no_error (error);
+  g_clear_error (&error);
 
   *finished = TRUE;
 }
@@ -126,18 +130,20 @@ static void
 test_fetch_access_token (gconstpointer url)
 {
   GMainContext *async_context = g_main_context_ref_thread_default ();
-  g_autoptr(GError) error = NULL;
+  GError *error;
 
-  g_autofree gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
-  g_autofree gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
+  gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
+  gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
 
   gboolean finished = FALSE;
-  g_autoptr(RestProxy) proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
-                                                                  tokenurl,
-                                                                  "http://www.example.com",
-                                                                  "client-id",
-                                                                  "client-secret",
-                                                                  baseurl));
+  RestProxy *proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
+                                                        tokenurl,
+                                                        "http://www.example.com",
+                                                        "client-id",
+                                                        "client-secret",
+                                                        baseurl));
+  g_free (baseurl);
+  g_free (tokenurl);
   rest_oauth2_proxy_fetch_access_token_async (REST_OAUTH2_PROXY (proxy),
                                               "1234567890",
                                               "code_verifier",
@@ -151,14 +157,18 @@ test_fetch_access_token (gconstpointer url)
   g_assert_cmpstr ("2YotnFZFEjr1zCsicMWpAA", ==, rest_oauth2_proxy_get_access_token (REST_OAUTH2_PROXY (proxy)));
   g_assert_cmpstr ("tGzv3JOkF0XG5Qx2TlKWIA", ==, rest_oauth2_proxy_get_refresh_token (REST_OAUTH2_PROXY (proxy)));
 
-  g_autoptr(RestProxyCall) call = rest_proxy_new_call (proxy);
+  RestProxyCall *call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_method (call, "GET");
   rest_proxy_call_set_function (call, "bearer");
   rest_proxy_call_sync (call, &error);
   g_assert_no_error (error);
-  g_autofree gchar *payload = g_strndup (rest_proxy_call_get_payload (call), rest_proxy_call_get_payload_length (call));
+  g_clear_error (&error);
+  gchar *payload = g_strndup (rest_proxy_call_get_payload (call), rest_proxy_call_get_payload_length (call));
   g_assert_cmpstr ("Bearer 2YotnFZFEjr1zCsicMWpAA", ==, payload);
+  g_free (payload);
 
+  g_object_unref (call);
+  g_object_unref (proxy);
   g_main_context_unref (async_context);
 }
 
@@ -167,7 +177,7 @@ test_refresh_access_token_finished_error (GObject      *object,
                                           GAsyncResult *result,
                                           gpointer      user_data)
 {
-  g_autoptr(GError) error = NULL;
+  GError *error;
   gboolean *finished = user_data;
 
   g_assert (G_IS_OBJECT (object));
@@ -175,6 +185,7 @@ test_refresh_access_token_finished_error (GObject      *object,
 
   rest_oauth2_proxy_refresh_access_token_finish (REST_OAUTH2_PROXY (object), result, &error);
   g_assert_error (error, REST_OAUTH2_ERROR, REST_OAUTH2_ERROR_NO_REFRESH_TOKEN);
+  g_clear_error (&error);
 
   *finished = TRUE;
 }
@@ -184,7 +195,7 @@ test_refresh_access_token_finished (GObject      *object,
                                     GAsyncResult *result,
                                     gpointer      user_data)
 {
-  g_autoptr(GError) error = NULL;
+  GError *error;
   gboolean *finished = user_data;
 
   g_assert (G_IS_OBJECT (object));
@@ -192,6 +203,7 @@ test_refresh_access_token_finished (GObject      *object,
 
   rest_oauth2_proxy_refresh_access_token_finish (REST_OAUTH2_PROXY (object), result, &error);
   g_assert_no_error (error);
+  g_clear_error (&error);
 
   *finished = TRUE;
 }
@@ -201,17 +213,18 @@ test_refresh_access_token (gconstpointer url)
 {
   GMainContext *async_context = g_main_context_ref_thread_default ();
 
-  g_autofree gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
-  g_autofree gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
+  gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
+  gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
 
   gboolean finished = FALSE;
-  g_autoptr(RestProxy) proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
-                                                                  tokenurl,
-                                                                  "http://www.example.com",
-                                                                  "client-id",
-                                                                  "client-secret",
-                                                                  baseurl));
-
+  RestProxy *proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
+                                                        tokenurl,
+                                                        "http://www.example.com",
+                                                        "client-id",
+                                                        "client-secret",
+                                                        baseurl));
+  g_free (baseurl);
+  g_free (tokenurl);
   // Test error if no refresh token is set (note assertion happens in callback)
   rest_oauth2_proxy_refresh_access_token_async (REST_OAUTH2_PROXY (proxy), NULL, test_refresh_access_token_finished_error, &finished);
 
@@ -232,26 +245,29 @@ test_refresh_access_token (gconstpointer url)
   g_assert_cmpstr ("2YotnFZFEjr1zCsicMWpAA", ==, rest_oauth2_proxy_get_access_token (REST_OAUTH2_PROXY (proxy)));
   g_assert_cmpstr ("tGzv3JOkF0XG5Qx2TlKWIA", ==, rest_oauth2_proxy_get_refresh_token (REST_OAUTH2_PROXY (proxy)));
 
+  g_object_unref (proxy);
   g_main_context_unref (async_context);
 }
 
 static void
 test_refresh_access_token_sync (gconstpointer url)
 {
-  g_autoptr(GError) error = NULL;
+  GError *error;
 
-  g_autofree gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
-  g_autofree gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
+  gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
+  gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
 
-  g_autoptr(RestProxy) proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
-                                                                  tokenurl,
-                                                                  "http://www.example.com",
-                                                                  "client-id",
-                                                                  "client-secret",
-                                                                  baseurl));
-
+  RestProxy *proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
+                                                        tokenurl,
+                                                        "http://www.example.com",
+                                                        "client-id",
+                                                        "client-secret",
+                                                        baseurl));
+  g_free (baseurl);
+  g_free (tokenurl);
   rest_oauth2_proxy_refresh_access_token (REST_OAUTH2_PROXY (proxy), &error);
   g_assert_error (error, REST_OAUTH2_ERROR, REST_OAUTH2_ERROR_NO_REFRESH_TOKEN);
+  g_clear_error (&error);
   error = NULL;
 
   rest_oauth2_proxy_set_refresh_token (REST_OAUTH2_PROXY (proxy), "refresh_token");
@@ -265,59 +281,70 @@ test_refresh_access_token_sync (gconstpointer url)
 
   g_assert_cmpstr ("2YotnFZFEjr1zCsicMWpAA", ==, rest_oauth2_proxy_get_access_token (REST_OAUTH2_PROXY (proxy)));
   g_assert_cmpstr ("tGzv3JOkF0XG5Qx2TlKWIA", ==, rest_oauth2_proxy_get_refresh_token (REST_OAUTH2_PROXY (proxy)));
+  g_clear_error (&error);
+  g_object_unref (proxy);
 }
 
 static void
 test_access_token_expired (gconstpointer url)
 {
-  g_autofree gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
-  g_autofree gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
-  g_autoptr(GError) error = NULL;
+  gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
+  gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
+  GError *error;
 
-  g_autoptr(RestProxy) proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
-                                                                  tokenurl,
-                                                                  "http://www.example.com",
-                                                                  "client-id",
-                                                                  "client-secret",
-                                                                  baseurl));
+  RestProxy *proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
+                                                        tokenurl,
+                                                        "http://www.example.com",
+                                                        "client-id",
+                                                        "client-secret",
+                                                        baseurl));
+  g_free (baseurl);
+  g_free (tokenurl);
   GDateTime *now = g_date_time_new_now_local ();
   rest_oauth2_proxy_set_expiration_date (REST_OAUTH2_PROXY (proxy), now);
 
-  g_autoptr(RestProxyCall) call = rest_proxy_new_call (proxy);
+  RestProxyCall *call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_method (call, "GET");
   rest_proxy_call_set_function (call, "/expired");
   rest_proxy_call_sync (call, &error);
   g_assert_error (error, REST_OAUTH2_ERROR, REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED);
+  g_clear_error (&error);
+  g_object_unref (call);
+  g_object_unref (proxy);
 }
 
 static void
 test_access_token_invalid (gconstpointer url)
 {
   GMainContext *async_context = g_main_context_ref_thread_default ();
-  g_autofree gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
-  g_autofree gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
-  g_autoptr(GError) error = NULL;
+  gchar *tokenurl = g_strdup_printf ("%stoken", (gchar *)url);
+  gchar *baseurl = g_strdup_printf ("%sapi", (gchar *)url);
+  GError *error;
   gboolean finished = FALSE;
 
-  g_autoptr(RestProxy) proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
-                                                                  tokenurl,
-                                                                  "http://www.example.com",
-                                                                  "client-id",
-                                                                  "client-secret",
-                                                                  baseurl));
+  RestProxy *proxy = REST_PROXY (rest_oauth2_proxy_new ("http://www.example.com/auth",
+                                                        tokenurl,
+                                                        "http://www.example.com",
+                                                        "client-id",
+                                                        "client-secret",
+                                                        baseurl));
+  g_free (baseurl);
+  g_free (tokenurl);
 
   rest_oauth2_proxy_fetch_access_token_async (REST_OAUTH2_PROXY (proxy), "1234567890", "code_verifier", NULL, test_fetch_access_token_finished, &finished);
   while (!finished) {
     g_main_context_iteration (async_context, TRUE);
   }
 
-  g_autoptr(RestProxyCall) call = rest_proxy_new_call (proxy);
+  RestProxyCall *call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_method (call, "GET");
   rest_proxy_call_set_function (call, "/invalid");
   rest_proxy_call_sync (call, &error);
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_BAD_REQUEST);
 
-
+  g_clear_error (&error);
+  g_object_unref (call);
+  g_object_unref (proxy);
   g_main_context_unref (async_context);
 }
 
@@ -326,7 +353,7 @@ main (gint   argc,
       gchar *argv[])
 {
   SoupServer *server;
-  g_autofree gchar *url;
+  gchar *url;
 
   g_test_init (&argc, &argv, NULL);
 
@@ -342,5 +369,6 @@ main (gint   argc,
   g_test_add_data_func ("/oauth2/access_token_expired", url, test_access_token_expired);
   g_test_add_data_func ("/oauth2/access_token_invalid", url, test_access_token_invalid);
 
+  g_free (url);
   return g_test_run ();
 }

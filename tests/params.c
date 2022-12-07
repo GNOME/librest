@@ -10,7 +10,7 @@ test_params (void)
   RestParam *param;
   const char *name;
   gint pos = 0;
-  g_autoptr(RestParams) params = NULL;
+  RestParams *params;
 
   struct {
     char *name;
@@ -50,12 +50,14 @@ test_params (void)
       g_assert_cmpstr (data[pos].value, ==, rest_param_get_content (param));
       pos++;
     }
+
+  rest_params_unref (params);
 }
 
 static void
 test_params_get (void)
 {
-  g_autoptr(RestParams) params;
+  RestParams *params;
   RestParam *p1;
 
   struct {
@@ -83,14 +85,16 @@ test_params_get (void)
 
   g_assert_cmpstr (rest_param_get_name (p1), ==, "name2");
   g_assert_cmpstr (rest_param_get_content (p1), ==, "value2");
+
+  rest_params_unref (params);
 }
 
 static void
 test_params_is_string (void)
 {
-  g_autoptr(GError) error = NULL;
-  g_autoptr(RestParams) params;
-  g_autofree char *file;
+  GError *error;
+  RestParams *params;
+  char *file;
   gsize length;
   gchar *contents;
   RestParam *p;
@@ -125,6 +129,10 @@ test_params_is_string (void)
   rest_params_add (params, p);
 
   g_assert_false (rest_params_are_strings (params));
+
+  g_clear_error (&error);
+  g_free (file);
+  rest_params_unref (params);
 }
 
 gint

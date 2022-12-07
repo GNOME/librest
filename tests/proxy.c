@@ -81,7 +81,7 @@ server_callback (SoupServer        *server,
     value = g_hash_table_lookup (query, "status");
     if (value) {
       status = atoi (value);
-      soup_message_set_status (msg, status ?: SOUP_STATUS_INTERNAL_SERVER_ERROR);
+      soup_message_set_status (msg, status ? status : SOUP_STATUS_INTERNAL_SERVER_ERROR);
     } else {
       soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
     }
@@ -145,7 +145,7 @@ server_callback (SoupServer        *server,
     value = g_hash_table_lookup (query, "status");
     if (value) {
       status = atoi (value);
-      soup_server_message_set_status (msg, status ?: SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL);
+      soup_server_message_set_status (msg, status ? status : SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL);
     } else {
       soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL);
     }
@@ -177,7 +177,7 @@ static void
 ping_test (gconstpointer data)
 {
   RestProxy *proxy = (RestProxy *)data;
-  g_autoptr(RestProxyCall) call;
+  RestProxyCall *call;
   GError *error = NULL;
 
   call = rest_proxy_new_call (proxy);
@@ -195,13 +195,14 @@ ping_test (gconstpointer data)
   rest_proxy_call_sync (call, &error);
   g_assert_error (error, REST_PROXY_ERROR, 404);
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_NOT_FOUND);
+  g_object_unref (call);
 }
 
 static void
 echo_test (gconstpointer data)
 {
   RestProxy *proxy = (RestProxy *)data;
-  g_autoptr(RestProxyCall) call;
+  RestProxyCall *call;
   GError *error = NULL;
 
   call = rest_proxy_new_call (proxy);
@@ -212,13 +213,14 @@ echo_test (gconstpointer data)
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
   g_assert_cmpint (rest_proxy_call_get_payload_length (call), ==, 6);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "echome");
+  g_object_unref (call);
 }
 
 static void
 reverse_test (gconstpointer data)
 {
   RestProxy *proxy = (RestProxy *)data;
-  g_autoptr(RestProxyCall) call;
+  RestProxyCall *call;
   GError *error = NULL;
 
   call = rest_proxy_new_call (proxy);
@@ -229,13 +231,14 @@ reverse_test (gconstpointer data)
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
   g_assert_cmpint (rest_proxy_call_get_payload_length (call), ==, 9);
   g_assert_cmpstr (rest_proxy_call_get_payload (call), ==, "emesrever");
+  g_object_unref (call);
 }
 
 static void
 status_ok_test (RestProxy *proxy, guint status)
 {
-  g_autoptr(RestProxyCall) call;
-  g_autofree gchar *status_str;
+  RestProxyCall *call;
+  gchar *status_str;
   GError *error = NULL;
 
   call = rest_proxy_new_call (proxy);
@@ -245,6 +248,8 @@ status_ok_test (RestProxy *proxy, guint status)
   rest_proxy_call_sync (call, &error);
   g_assert_no_error (error);
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, status);
+  g_free (status_str);
+  g_object_unref (call);
 }
 
 static void
@@ -258,9 +263,9 @@ status_test (gconstpointer data)
 static void
 status_error_test (RestProxy *proxy, guint status)
 {
-  g_autoptr(RestProxyCall) call;
-  g_autoptr(GError) error = NULL;
-  g_autofree gchar *status_str;
+  RestProxyCall *call;
+  GError *error;
+  gchar *status_str;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "status");
@@ -268,7 +273,10 @@ status_error_test (RestProxy *proxy, guint status)
   rest_proxy_call_add_param (call, "status", status_str);
   rest_proxy_call_sync (call, &error);
   g_assert_error (error, REST_PROXY_ERROR, status);
+  g_clear_error (&error);
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, status);
+  g_free (status_str);
+  g_object_unref (call);
 }
 
 static void
@@ -282,14 +290,16 @@ status_test_error (gconstpointer data)
 static void
 test_status_ok (RestProxy *proxy, const char *function)
 {
-  g_autoptr(RestProxyCall) call;
-  g_autoptr(GError) error = NULL;
+  RestProxyCall *call;
+  GError *error;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, function);
   rest_proxy_call_sync (call, &error);
   g_assert_no_error (error);
+  g_clear_error (&error);
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
+  g_object_unref (call);
 }
 
 static void
