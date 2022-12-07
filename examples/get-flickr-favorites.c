@@ -68,7 +68,7 @@ print_user_name (RestProxy *proxy)
   node = rest_xml_node_find (root, "user");
   g_print ("Logged in as %s\n",
            rest_xml_node_get_attr (node, "fullname")
-           ?: rest_xml_node_get_attr (node, "username"));
+           ? rest_xml_node_get_attr (node, "fullname") : rest_xml_node_get_attr (node, "username"));
   rest_xml_node_unref (root);
 }
 

@@ -168,7 +168,7 @@ static void
 set_text_response (DemoRestPage  *self,
                    RestProxyCall *call)
 {
-  g_autoptr(GHashTable) response_headers = NULL;
+  GHashTable *response_headers;
 
   const gchar *payload = rest_proxy_call_get_payload (call);
   goffset payload_length = rest_proxy_call_get_payload_length (call);
@@ -181,6 +181,7 @@ set_text_response (DemoRestPage  *self,
   GtkSourceLanguage *lang = gtk_source_language_manager_guess_language (manager, NULL, g_hash_table_lookup (response_headers, "Content-Type"));
   gtk_source_buffer_set_language (GTK_SOURCE_BUFFER (buffer), lang);
   gtk_notebook_set_current_page (GTK_NOTEBOOK (self->notebook), 0);
+  g_hash_table_destroy (response_headers);
 }
 
 static void
@@ -190,7 +191,7 @@ demo_rest_page_fetched_oauth2_access_token (GObject      *object,
 {
   DemoRestPage *self = (DemoRestPage *)user_data;
   RestProxy *proxy = (RestProxy *)object;
-  g_autoptr(GError) error = NULL;
+  GError *error;
 
   g_assert (G_IS_OBJECT (object));
   g_assert (G_IS_ASYNC_RESULT (result));
@@ -200,6 +201,8 @@ demo_rest_page_fetched_oauth2_access_token (GObject      *object,
     {
       set_oauth_btn_active (self, GTK_BUTTON (self->oauth2_get_access_token), proxy, FALSE);
     }
+
+  g_clear_error (&error);
 }
 
 static void
@@ -238,7 +241,7 @@ demo_rest_page_create_oauth2_dialog (DemoRestPage *self,
   GtkWidget *dialog = NULL;
   GtkWidget *content_area;
   GtkWidget *box, *lbl, *token_lbl, *verifier_entry;
-  g_autofree char *token_str = NULL;
+  char *token_str;
 
   dialog = gtk_dialog_new_with_buttons ("Get Code...",
                                         GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (self))),
@@ -274,6 +277,7 @@ demo_rest_page_create_oauth2_dialog (DemoRestPage *self,
   g_signal_connect (dialog, "response", G_CALLBACK (oauth2_dialog_response), self);
   g_signal_connect_swapped (dialog, "response", G_CALLBACK (gtk_window_destroy), dialog);
 
+  g_free (token_str);
   return dialog;
 }
 
@@ -316,7 +320,7 @@ call_returned (GObject      *object,
 {
   DemoRestPage *self = (DemoRestPage *)user_data;
   RestProxyCall *call = (RestProxyCall *)object;
-  g_autoptr(GError) error = NULL;
+  GError *error;
 
   g_assert (G_IS_OBJECT (object));
   g_assert (G_IS_ASYNC_RESULT (result));
@@ -331,6 +335,8 @@ call_returned (GObject      *object,
       else
         set_text_response (self, call);
     }
+
+  g_clear_error (&error);
 }
 
 static void
@@ -424,7 +430,7 @@ on_auth_method_activated (GtkDropDown *dropdown,
                           gpointer     user_data)
 {
   DemoRestPage *self = (DemoRestPage *)user_data;
-  g_autofree gchar *page_name = NULL;
+  gchar *page_name;
   GtkStringObject *obj = NULL;
 
   g_return_if_fail (DEMO_IS_REST_PAGE (self));
@@ -432,6 +438,7 @@ on_auth_method_activated (GtkDropDown *dropdown,
   obj = GTK_STRING_OBJECT (gtk_drop_down_get_selected_item (dropdown));
   page_name = g_utf8_strdown (gtk_string_object_get_string (obj), -1);
   gtk_stack_set_visible_child_name (GTK_STACK (self->authentication_stack), g_strdelimit (page_name, " ", '_'));
+  g_free (page_name);
 }
 
 static void
