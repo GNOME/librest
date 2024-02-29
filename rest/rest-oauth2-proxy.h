@@ -42,8 +42,8 @@ typedef enum {
   REST_OAUTH2_ERROR_ACCESS_TOKEN_EXPIRED,
 } RestOAuth2Error;
 
-#define REST_OAUTH2_ERROR rest_oauth2_error_quark ()
-GQuark rest_oauth2_error_quark ();
+#define REST_OAUTH2_ERROR (rest_oauth2_error_quark())
+GQuark rest_oauth2_error_quark (void);
 
 RestOAuth2Proxy *rest_oauth2_proxy_new                         (const gchar          *authurl,
                                                                 const gchar          *tokenurl,
