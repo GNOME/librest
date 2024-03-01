@@ -1,5 +1,6 @@
 if get_option('gtk_doc') and get_option('introspection')
   dependency('gi-docgen', version: '>= 2021.6',
+    native: true,
     fallback: ['gi-docgen', 'dummy_dep'],
   )
 
