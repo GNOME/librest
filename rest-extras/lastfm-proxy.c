@@ -242,8 +242,8 @@ lastfm_proxy_get_secret (LastfmProxy *self)
  *
  * Get the current session key.
  *
- * Returns: the session key, or %NULL if there is no session key yet.  This string is owned
- * by #LastfmProxy and should not be freed.
+ * Returns: (nullable): the session key, or %NULL if there is no session key yet.
+ * This string is owned by #LastfmProxy and should not be freed.
  */
 const char *
 lastfm_proxy_get_session_key (LastfmProxy *self)
@@ -278,6 +278,15 @@ lastfm_proxy_set_session_key (LastfmProxy *self,
   priv->session_key = g_strdup (session_key);
 }
 
+/**
+ * lastfm_proxy_sign:
+ * @proxy: an #LastfmProxy
+ * @params: (element-type utf8 utf8): the request parameters
+ *
+ * Get the md5 checksum of the request.
+ *
+ * Returns: The md5 checksum of the request
+ */
 char *
 lastfm_proxy_sign (LastfmProxy *self,
                    GHashTable  *params)

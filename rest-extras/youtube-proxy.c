@@ -392,10 +392,11 @@ _message_wrote_data_cb (SoupMessage               *msg,
  * youtube_proxy_upload_async:
  * @self: a #YoutubeProxy
  * @filename: filename
- * @fields: fields
+ * @fields: (element-type utf8 utf8): fields
  * @incomplete: incomplete
- * @callback: (scope async): callback to invoke upon completion
- * @weak_object: an object instance used to tie the life cycle of the proxy to 
+ * @callback: (scope call): callback to invoke upon completion
+ * @weak_object: (nullable): an object instance used to tie the life cycle of
+ * the proxy to 
  * @user_data: user data to pass to the callback
  * @error: a #GError pointer, or %NULL
  *
