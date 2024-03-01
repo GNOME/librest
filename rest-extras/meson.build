@@ -9,6 +9,7 @@ librest_extras_sources = [
 ]
 
 librest_extras_headers = [
+  'rest-extras.h',
   'flickr-proxy.h',
   'flickr-proxy-call.h',
   'lastfm-proxy.h',
@@ -55,6 +56,7 @@ if get_option('introspection')
     namespace: 'RestExtras',
     symbol_prefix: 'rest_extras',
     identifier_prefix: 'RestExtras',
+    header: 'rest-extras/rest-extras.h',
     nsversion: librest_api_version,
     includes: [ 'GObject-2.0', 'Gio-2.0', 'Soup-@0@'.format(libsoup_api_version), librest_gir[0] ],
     extra_args: [ '--accept-unprefixed' ],
