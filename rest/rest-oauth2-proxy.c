@@ -70,6 +70,11 @@ rest_oauth2_proxy_parse_access_token (RestOAuth2Proxy *self,
   gint created_at;
 
   g_return_if_fail (REST_IS_OAUTH2_PROXY (self));
+  if (!payload)
+    {
+      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED, "Empty payload");
+      return;
+    }
 
   data = g_bytes_get_data (payload, &size);
 
