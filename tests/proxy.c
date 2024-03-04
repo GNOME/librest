@@ -177,8 +177,8 @@ static void
 ping_test (gconstpointer data)
 {
   RestProxy *proxy = (RestProxy *)data;
-  g_autoptr(RestProxyCall) call;
-  GError *error = NULL;
+  g_autoptr(RestProxyCall) call = NULL;
+  g_autoptr(GError) error = NULL;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "ping");
@@ -188,7 +188,7 @@ ping_test (gconstpointer data)
   g_assert_cmpint (rest_proxy_call_get_status_code (call), ==, SOUP_STATUS_OK);
   g_assert_cmpint (rest_proxy_call_get_payload_length (call), ==, 0);
 
-  g_object_unref (call);
+  g_clear_object (&call);
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "ping");
   rest_proxy_call_set_method (call, "POST");
@@ -201,7 +201,7 @@ static void
 echo_test (gconstpointer data)
 {
   RestProxy *proxy = (RestProxy *)data;
-  g_autoptr(RestProxyCall) call;
+  g_autoptr(RestProxyCall) call = NULL;
   GError *error = NULL;
 
   call = rest_proxy_new_call (proxy);
@@ -218,8 +218,8 @@ static void
 reverse_test (gconstpointer data)
 {
   RestProxy *proxy = (RestProxy *)data;
-  g_autoptr(RestProxyCall) call;
-  GError *error = NULL;
+  g_autoptr(RestProxyCall) call = NULL;
+  g_autoptr(GError) error = NULL;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "reverse");
@@ -235,8 +235,8 @@ static void
 status_ok_test (RestProxy *proxy, guint status)
 {
   g_autoptr(RestProxyCall) call;
-  g_autofree gchar *status_str;
-  GError *error = NULL;
+  g_autoptr(GError) error = NULL;
+  g_autofree gchar *status_str = NULL;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "status");
@@ -258,7 +258,7 @@ status_test (gconstpointer data)
 static void
 status_error_test (RestProxy *proxy, guint status)
 {
-  g_autoptr(RestProxyCall) call;
+  g_autoptr(RestProxyCall) call = NULL;
   g_autoptr(GError) error = NULL;
   g_autofree gchar *status_str;
 
@@ -282,7 +282,7 @@ status_test_error (gconstpointer data)
 static void
 test_status_ok (RestProxy *proxy, const char *function)
 {
-  g_autoptr(RestProxyCall) call;
+  g_autoptr(RestProxyCall) call = NULL;
   g_autoptr(GError) error = NULL;
 
   call = rest_proxy_new_call (proxy);
