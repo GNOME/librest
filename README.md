@@ -66,7 +66,7 @@ Run the application
 flatpak run org.gnome.RestDemo
 ```
 
-[1]: http://en.wikipedia.org/wiki/Representational_State_Transfer
-[2]: http://live.gnome.org/LibSoup
-[3]: http://xmlsoft.org/
-[4]: http://www.crummy.com/software/BeautifulSoup/
+[1]: https://en.wikipedia.org/wiki/Representational_State_Transfer
+[2]: https://wiki.gnome.org/Projects/libsoup
+[3]: https://gitlab.gnome.org/GNOME/libxml2/-/wikis/
+[4]: https://www.crummy.com/software/BeautifulSoup/
