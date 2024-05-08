@@ -227,7 +227,7 @@ rest_xml_node_get_attr (RestXmlNode *node,
  *
  * Searches for the first child node of @start named @tag.
  *
- * Returns: the first child node, or %NULL if it doesn't exist.
+ * Returns: (transfer none): the first child node, or %NULL if it doesn't exist.
  */
 RestXmlNode *
 rest_xml_node_find (RestXmlNode *start,
