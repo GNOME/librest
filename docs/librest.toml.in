@@ -23,7 +23,7 @@ search_index = true
   [dependencies."Soup-@SOUP_VERSION@"]
   name = "Soup"
   description = "HTTP library"
-  docs_url = "https://libsoup.org/libsoup-@SOUP_VERSION@/index.html"
+  docs_url = "https://libsoup.gnome.org/libsoup-@SOUP_VERSION@/index.html"
 
 [theme]
 name = "basic"
