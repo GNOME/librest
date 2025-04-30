@@ -42,21 +42,18 @@ if get_option('ca_certificates')
 endif
 
 # Dependencies
-if get_option('soup2')
-  libsoup_name = 'libsoup-2.4'
-  libsoup_req_version = '>= 2.42'
+libsoup_dep = dependency('libsoup-3.0', version: '>= 2.99.2', required: get_option('soup2'))
+if libsoup_dep.found()
+  libsoup_api_version = '3.0'
+else
+  libsoup_dep = dependency('libsoup-2.4', version: '>= 2.42')
   libsoup_api_version = '2.4'
   add_project_arguments('-DWITH_SOUP_2', language: 'c')
-else
-  libsoup_name = 'libsoup-3.0'
-  libsoup_req_version = '>= 2.99.2'
-  libsoup_api_version = '3.0'
 endif
 
 
 glib_dep = dependency('glib-2.0', version: '>= 2.44')
 gobject_dep = dependency('gobject-2.0', version: '>= 2.44')
-libsoup_dep = dependency(libsoup_name, version: libsoup_req_version)
 libjson_glib_dep = dependency('json-glib-1.0')
 libxml_dep = dependency('libxml-2.0')
 
@@ -122,7 +119,7 @@ summary({
     'Documentation': get_option('gtk_doc'),
     'Tests': get_option('tests'),
     'Examples': get_option('examples'),
-    'Soup 2': get_option('soup2'),
+    'Soup 2': libsoup_api_version == '2.4',
   },
   section: 'Build',
   bool_yn: true,

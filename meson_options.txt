@@ -29,8 +29,8 @@ option('gtk_doc',
   description: 'Build the gtk-doc reference docs',
 )
 option('soup2',
-  type: 'boolean',
-  value: false,
+  type: 'feature',
+  value: 'enabled',
   description: 'Whether to build with libsoup2',
 )
 option('tests',
