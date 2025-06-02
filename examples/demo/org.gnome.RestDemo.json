@@ -47,7 +47,16 @@
             "config-opts" : [
                 "-Dgtk_doc=false",
                 "-Dsoup2=false"
-            ]
+            ],
+            "build-options": {
+                "test-args": [
+                    "--share=network",
+                    "--device=dri",
+                    "--share=ipc",
+                    "--socket=fallback-x11",
+                    "--socket=wayland"
+                ]
+            }
         }
     ],
     "build-options" : {
