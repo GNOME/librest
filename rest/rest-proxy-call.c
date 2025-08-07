@@ -1032,7 +1032,7 @@ _call_message_call_completed_cb (SoupMessage *message,
  * @cancellable: (nullable): an optional #GCancellable that can be used to
  *   cancel the call, or %NULL
  * @callback: (scope async): callback to call when the async call is finished
- * @user_data: (closure): user data for the callback
+ * @user_data: user data for the callback
  */
 void
 rest_proxy_call_invoke_async (RestProxyCall      *call,
@@ -1146,9 +1146,9 @@ _continuous_call_message_sent_cb (GObject      *source,
 /**
  * rest_proxy_call_continuous: (skip)
  * @call: The #RestProxyCall
- * @callback: a #RestProxyCallContinuousCallback to invoke when data is available
+ * @callback: (closure userdata): a #RestProxyCallContinuousCallback to invoke when data is available
  * @weak_object: The #GObject to weakly reference and tie the lifecycle to
- * @userdata: (closure): data to pass to @callback
+ * @userdata: data to pass to @callback
  * @error: (out) (allow-none): a #GError, or %NULL
  *
  * Asynchronously invoke @call but expect a continuous stream of content. This
