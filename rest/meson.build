@@ -70,6 +70,8 @@ librest_c_args = [
 
 librest_lib = library('rest-@0@'.format(librest_api_version),
   librest_sources,
+  librest_headers_public,
+  librest_headers_private,
   dependencies: librest_deps,
   c_args: librest_c_args,
   include_directories: [root_inc, include_directories('.')],
