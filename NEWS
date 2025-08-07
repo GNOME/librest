@@ -1,5 +1,13 @@
-Overview of changes for 0.91
-============================
+Overview of changes for 0.10.0
+=============================
+* Handle some potential problems in parsing oauth2 access tokens
+* Allow to use rest and rest-extras from a single header
+* Fix the declaration of the RestOAuth2Error quark function
+* Name the RestOAuth2Error enum
+* Fixes several annotation issues
+
+Overview of changes for 0.9.1
+=============================
 * removed RestAuth object
 * added an demo application to showcase librest
 * removed OAuth1 Proxy

@@ -1,5 +1,5 @@
 project('rest', 'c',
-  version: '0.9.1',
+  version: '0.10.0',
   license: 'LGPL2.1+',
   meson_version: '>= 0.56',
 )
