@@ -24,17 +24,6 @@
     ],
     "modules" : [
         {
-            "name" : "libsoup",
-            "builddir" : true,
-            "buildsystem" : "meson",
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/libsoup.git"
-                }
-            ]
-        },
-        {
             "name" : "librest-demo",
             "builddir" : true,
             "buildsystem" : "meson",
