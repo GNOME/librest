@@ -2,6 +2,7 @@
 namespace = "Rest"
 version = "@REST_VERSION@"
 browse_url = "https://gitlab.gnome.org/GNOME/librest/"
+docs_url = "https://gnome.pages.gitlab.gnome.org/librest/"
 repository_url = "https://gitlab.gnome.org/GNOME/librest.git"
 authors = "Günther Wagner"
 license = "LGPL-2.1-or-later"
