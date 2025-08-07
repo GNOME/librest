@@ -25,11 +25,11 @@
 G_BEGIN_DECLS
 
 #define REST_INSIDE
+# include <rest/rest-enum-types.h>
 # include <rest/rest-oauth2-proxy.h>
 # include <rest/rest-oauth2-proxy-call.h>
 # include <rest/rest-param.h>
 # include <rest/rest-params.h>
-# include <rest/rest-pkce-code-challenge.h>
 # include <rest/rest-pkce-code-challenge.h>
 # include <rest/rest-proxy.h>
 # include <rest/rest-proxy-auth.h>

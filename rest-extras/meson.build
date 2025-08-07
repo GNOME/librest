@@ -22,6 +22,7 @@ librest_extras_deps = [
   libsoup_dep,
   libxml_dep,
   librest_dep,
+  config_dep,
 ]
 
 librest_extras_c_args = [
@@ -32,7 +33,6 @@ librest_extras_lib = library(librest_extras_pkg_string,
   librest_extras_sources,
   dependencies: librest_extras_deps,
   c_args: librest_extras_c_args,
-  include_directories: config_h_inc,
   version: librest_module_version,
   soversion: librest_soversion,
   install: true,
@@ -82,7 +82,6 @@ test_runner_bin = executable('test-runner',
   [ 'test-runner.c', librest_extras_sources ],
   dependencies: librest_extras_deps,
   c_args: test_runner_c_args,
-  include_directories: config_h_inc,
 )
 
 test('test-runner', test_runner_bin,

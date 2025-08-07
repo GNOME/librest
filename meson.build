@@ -68,8 +68,12 @@ conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 if get_option('ca_certificates')
   conf.set_quoted('REST_SYSTEM_CA_FILE', ca_certificates_path)
 endif
-configure_file(output: 'config.h', configuration: conf)
-config_h_inc = include_directories('.')
+config_h = configure_file(output: 'config.h', configuration: conf)
+root_inc = include_directories('.')
+config_dep = declare_dependency(
+  sources: config_h,
+  include_directories: root_inc,
+)
 
 # Subdirectories
 subdir('rest')

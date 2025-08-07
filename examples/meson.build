@@ -12,13 +12,13 @@ example_deps = [
   libsoup_dep,
   librest_dep,
   librest_extras_dep,
+  config_dep,
 ]
 
 foreach name : example_names
   example = executable(name,
     '@0@.c'.format(name),
     dependencies: example_deps,
-    include_directories: config_h_inc,
   )
 endforeach
 

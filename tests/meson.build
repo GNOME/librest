@@ -19,6 +19,7 @@ test_deps = [
   libsoup_dep,
   librest_dep,
   librest_extras_dep,
+  config_dep,
 ]
 
 test_env = [
@@ -31,7 +32,6 @@ foreach suite, test_names : test_suites
     test_bin = executable(name,
       ['@0@.c'.format(name), 'helper/test-server.c'],
       dependencies: test_deps,
-      include_directories: config_h_inc,
     )
 
     test(name, test_bin,
