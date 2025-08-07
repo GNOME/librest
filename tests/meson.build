@@ -27,6 +27,17 @@ test_env = [
   'G_TEST_BUILDDIR=@0@'.format(meson.current_build_dir()),
 ]
 
+# Most tests require a D-Bus session, so try to wrap automatically with dbus-run-session
+dbus_run_session = find_program('dbus-run-session', required: false)
+if dbus_run_session.found()
+  add_test_setup('dbus',
+    exe_wrapper: dbus_run_session,
+    is_default: true,
+  )
+else
+  message('dbus-run-session not found. Please note that tests might fail if you don\'t set up a D-Bus session.')
+endif
+
 foreach suite, test_names : test_suites
   foreach name : test_names
     test_bin = executable(name,
