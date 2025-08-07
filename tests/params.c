@@ -55,7 +55,7 @@ test_params (void)
 static void
 test_params_get (void)
 {
-  g_autoptr(RestParams) params;
+  g_autoptr(RestParams) params = NULL;
   RestParam *p1;
 
   struct {
@@ -89,8 +89,8 @@ static void
 test_params_is_string (void)
 {
   g_autoptr(GError) error = NULL;
-  g_autoptr(RestParams) params;
-  g_autofree char *file;
+  g_autoptr(RestParams) params = NULL;
+  g_autofree char *file = NULL;
   gsize length;
   gchar *contents;
   RestParam *p;

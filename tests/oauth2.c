@@ -326,7 +326,7 @@ main (gint   argc,
       gchar *argv[])
 {
   SoupServer *server;
-  g_autofree gchar *url;
+  g_autofree gchar *url = NULL;
 
   g_test_init (&argc, &argv, NULL);
 

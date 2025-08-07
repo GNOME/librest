@@ -234,7 +234,7 @@ reverse_test (gconstpointer data)
 static void
 status_ok_test (RestProxy *proxy, guint status)
 {
-  g_autoptr(RestProxyCall) call;
+  g_autoptr(RestProxyCall) call = NULL;
   g_autoptr(GError) error = NULL;
   g_autofree gchar *status_str = NULL;
 
@@ -260,7 +260,7 @@ status_error_test (RestProxy *proxy, guint status)
 {
   g_autoptr(RestProxyCall) call = NULL;
   g_autoptr(GError) error = NULL;
-  g_autofree gchar *status_str;
+  g_autofree gchar *status_str = NULL;
 
   call = rest_proxy_new_call (proxy);
   rest_proxy_call_set_function (call, "status");
