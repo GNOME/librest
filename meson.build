@@ -1,4 +1,4 @@
-project('rest', 'c',
+project('librest', 'c',
   version: '0.10.1',
   license: 'LGPL2.1+',
   meson_version: '>= 0.56',
