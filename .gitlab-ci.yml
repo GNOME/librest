@@ -11,7 +11,7 @@ variables:
   FLATPAK_BUILD_DIR: build
   LAST_ABI_BREAK: "a36606b6633e4244740793ab3a17d392b1cf6035"
 
-image: fedora:36
+image: fedora:42
 
 stages:
   - build
