@@ -73,11 +73,14 @@ static RestProxyCall *_rest_proxy_new_call          (RestProxy  *proxy);
 static gboolean       _rest_proxy_bind_valist       (RestProxy  *proxy,
                                                      va_list     params);
 
-GQuark
-rest_proxy_error_quark (void)
-{
-  return g_quark_from_static_string ("rest-proxy-error-quark");
-}
+/**
+ * rest_proxy_error_quark:
+ *
+ * Registers an error quark for #RestProxy errors.
+ *
+ * Returns: the error quark
+ **/
+G_DEFINE_QUARK (rest-proxy-error-quark, rest_proxy_error)
 
 static void
 rest_proxy_get_property (GObject   *object,

@@ -53,11 +53,7 @@ enum {
 
 static GParamSpec *properties [N_PROPS];
 
-GQuark
-flickr_proxy_error_quark (void)
-{
-  return g_quark_from_static_string ("rest-flickr-proxy");
-}
+G_DEFINE_QUARK (rest-flickr-proxy-error-quark, flickr_proxy_error)
 
 static RestProxyCall *
 _new_call (RestProxy *self)

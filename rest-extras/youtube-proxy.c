@@ -49,11 +49,7 @@ enum {
 
 static GParamSpec *properties [N_PROPS];
 
-GQuark
-youtube_proxy_error_quark (void)
-{
-  return g_quark_from_static_string ("rest-youtube-proxy");
-}
+G_DEFINE_QUARK (rest-youtube-proxy-error-quark, youtube_proxy_error)
 
 static void
 youtube_proxy_get_property (GObject    *object,

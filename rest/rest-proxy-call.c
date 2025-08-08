@@ -97,11 +97,14 @@ enum
   PROP_PROXY
 };
 
-GQuark
-rest_proxy_call_error_quark (void)
-{
-  return g_quark_from_static_string ("rest-proxy-call-error-quark");
-}
+/**
+ * rest_proxy_call_error_quark:
+ *
+ * Registers an error quark for #RestProxyCall errors.
+ *
+ * Returns: the error quark
+ **/
+G_DEFINE_QUARK (rest-proxy-call-error-quark, rest_proxy_call_error)
 
 static void
 rest_proxy_call_get_property (GObject    *object,
