@@ -66,6 +66,7 @@ build-flatpak:
       - ${CI_PROJECT_NAME}-docs.tar
 
 distcheck:
+  image: registry.gitlab.gnome.org/gnome/librest/master:v1
   stage: build
   script:
     - git config --global --add safe.directory $CI_PROJECT_DIR
