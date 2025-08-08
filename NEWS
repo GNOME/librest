@@ -1,3 +1,8 @@
+Overview of changes for 0.10.1
+=============================
+* Allow to use the CI to publish the release
+* Use G_DEFINE_QUARK when possible
+
 Overview of changes for 0.10.0
 =============================
 * Handle some potential problems in parsing oauth2 access tokens
