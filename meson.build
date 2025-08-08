@@ -1,5 +1,5 @@
 project('librest', 'c',
-  version: '0.10.1',
+  version: '0.10.2',
   license: 'LGPL2.1+',
   meson_version: '>= 0.56',
 )

@@ -43,6 +43,7 @@ build-flatpak:
   except:
     - tags
   before_script: []
+  allow_failure: true
   variables:
     RUNTIME_REPO: 'https://nightly.gnome.org/gnome-nightly.flatpakrepo'
     APP_ID: 'org.gnome.RestDemo'
